@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk-10.0.2">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Przemek/Documents/nerd zone/workspaces/Biblioteki/java/jsoup/jsoup-1.11.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Przemek/Documents/nerd%20zone/workspaces/Biblioteki/java/jsoup/jsoup-1.11.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

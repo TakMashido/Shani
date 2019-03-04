@@ -1,0 +1,7 @@
+Add proxy support for wewb based modules
+Make project name a shortcut (Simple Heurestic n a Interpreter)
+
+Modules to add:
+storage module
+calculator module
+Weatcher module

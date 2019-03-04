@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<shani>
+    <version>v1</version>
+    <orders>
+        <order classname="shani.orders.MasterOrder">
+            <exit>exit</exit>
+            <save>save</save>
+            <autosave>autosavetime</autosave>
+        </order>
+        <order classname="shani.orders.TimerOrder">
+            <keyword>timer*zegar</keyword>
+            <suborder>
+                <keyword>odpal*start*włącz</keyword>
+                <method>start</method>
+            </suborder>
+            <suborder>
+                <keyword>stop*wyłącz*zatrzymaj</keyword>
+                <method>stop</method>
+            </suborder>
+            <suborder>
+                <keyword>wyświetl*show*pokaż*ile zliczył</keyword>
+                <method>show</method>
+            </suborder>
+            <suborder>
+                <keyword>reset*zeruj*wyzeruj</keyword>
+                <method>reset</method>
+            </suborder>
+            <target>
+                <keyword>0</keyword>
+                <time>287</time>
+            </target>
+        </order>
+        <order classname="shani.orders.MergeOrder">
+            <key>i</key>
+        </order>
+        <order classname="shani.orders.ExecuteOrder">
+            <keywords>odpal*włącz*otwórz*start</keywords>
+            <target>
+                <key>print</key>
+                <type>print</type>
+                <todo>dziala</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>wyswietl</key>
+                <type>print</type>
+                <todo>dziala2</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>gamingmode</key>
+                <type>call</type>
+                <todo>C:\Users\Przemek\Documents\Gry\game launchers\Gaming Mode.bat</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>sc2</key>
+                <type>startdir</type>
+                <todo>C:\Program Files (x86)\StarCraft II* StarCraft II.exe</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>anno</key>
+                <type>start</type>
+                <todo>uplay://launch/2990/0</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>prime95*prime95mode </key>
+                <type>print</type>
+                <todo>C:\Users\Przemek\Documents\Gry\game launchers\Prime95 Mode.bat</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>shani</key>
+                <type>print</type>
+                <todo>C:\Users\Przemek\Documents\nerd zone\SHANI</todo>
+                <merged/>
+            </target>
+            <target>
+                <key>workspace </key>
+                <merged/>
+                <type>dir</type>
+                <todo>C:\Users\Przemek\Documents\nerd zone\workspaces</todo>
+            </target>
+        </order>
+        <order classname="shani.orders.TranslateOrder">
+            <keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
+        </order>
+    </orders>
+    <storage>
+        <orders>
+            <ExecuteOrder>
+                <successfulMessage>Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia</successfulMessage>
+                <notKnowMessage>Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?</notKnowMessage>
+            </ExecuteOrder>
+            <MasterOrder>
+                <notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
+            </MasterOrder>
+            <MergeOrder>
+                <connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
+                <cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
+            </MergeOrder>
+            <TimerOrder>
+                <startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
+                <alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
+                <stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
+                <alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
+                <resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
+                <printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
+                <nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
+                <nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
+                <nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
+                <nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
+            </TimerOrder>
+            <TranslateOrder>
+                <maxLineSize>50</maxLineSize>
+                <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
+                <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
+            </TranslateOrder>
+        </orders>
+        <engine>
+            <helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
+            <notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
+            <errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+        </engine>
+    </storage>
+</shani>
