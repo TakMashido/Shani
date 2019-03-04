@@ -1,0 +1,3 @@
+By using this software you also accept this licenses and privacy policy of given project/websides:
+translatica.pl - word transltions provider for translation module,
+JSOP(https://github.com/jhy/jsoup/) - used for websraping data in tranlation module.

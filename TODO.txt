@@ -1,3 +1,4 @@
+Add license promt for servises storen in AdditionalLicenses.txt
 Add proxy support for wewb based modules
 Make project name a shortcut (Simple Heurestic n a Interpreter)
 
