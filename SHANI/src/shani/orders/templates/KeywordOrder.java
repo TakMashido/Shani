@@ -112,7 +112,7 @@ public abstract class KeywordOrder extends Order {
 		 * @param keyword Keyword for new Action.
 		 */
 		protected KeywordAction(ShaniString keyword) {
-			actionFile=Engine.doc.createElement("action");
+			actionFile=Engine.doc.createElement("target");
 			orderFile.appendChild(actionFile);
 			
 			Element e=Engine.doc.createElement("key");

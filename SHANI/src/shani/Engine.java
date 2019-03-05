@@ -59,6 +59,7 @@ public class Engine {
 	private static boolean initialized=false;
 	
 	public static void main(String[] args) {
+		new ShaniString();								//FIXME becouse of some strange reason in static init something go wrong and ShaniString matching don't work property(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
 		initialize(args);
 		start();
 	}
@@ -120,7 +121,7 @@ public class Engine {
 			e1.printStackTrace();
 		}
 		
-		if (Config.mainFile.exists())
+		if (Config.mainFile.exists()) {
 			try {
 				parseMainFile();
 			} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException | SecurityException | DOMException e) {
@@ -128,7 +129,7 @@ public class Engine {
 				e.printStackTrace();
 				return;
 			}
-		else {
+		} else {
 			System.out.println("Main config file doesn't exist. Create now y/n?");
 			if (in.next().equals("y")) {
 				try {
@@ -142,6 +143,7 @@ public class Engine {
 				}
 			} else {
 				System.out.println("Closing Shani");
+				System.exit(0);
 			}
 		}
 		

@@ -375,6 +375,15 @@ public class ShaniString {
 			}
 			return this;
 		}
+		/**Match given String.
+		 * Equivalent to apply(new ShaniString(data))
+		 * @param data String to be applied.
+		 * @return this
+		 */
+		public ShaniMatcher apply(String data) {
+			apply(new ShaniString(data));
+			return this;
+		}
 		private void processSet(int index, ShaniString comparable) {
 			class CompareResoult implements Comparator<CompareResoult>{
 				short cost;
@@ -518,30 +527,4 @@ public class ShaniString {
 			return Return;
 		}
 	}
-	
-//	public static void main(String[]args){
-//		Engine.debug=new PrintStream(new OutputStream() {
-//			public void write(int b) throws IOException {}
-//		});
-////		Engine.debug=System.out;
-////		char[] a="eclipse".toCharArray();
-////		char[] b="eagle".toCharArray();
-//		
-////		char[] a="shani".toCharArray();
-////		char[] b="shahni".toCharArray();
-//		
-////		char[] a="shani".toCharArray();
-////		char[] b="shaini".toCharArray();
-//		
-////		char[] a="tpt".toCharArray();
-////		char[] b="tor".toCharArray();
-//		
-//		ShaniString a=new ShaniString("odpal nic");
-//		ShaniMatcher b=a.getMatcher().apply(new ShaniString("odpal"));
-//		//ShaniString a=new ShaniString("odpal flackflag");
-//		//ShaniMatcher b=a.getMatcher().apply(new ShaniString("odpal")).apply(new ShaniString("black flaga"));
-//		System.out.println("final cost= "+b.getCost());
-//		System.out.println(b.getUnmatched());
-//		//System.out.println(charCompare(a, b));
-//	}
 }
