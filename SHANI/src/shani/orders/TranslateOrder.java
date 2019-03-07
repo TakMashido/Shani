@@ -1,4 +1,5 @@
 package shani.orders;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import shani.Engine;
 import shani.ShaniString;
 import shani.orders.templates.KeywordOrder;
 
@@ -32,8 +34,11 @@ public class TranslateOrder extends KeywordOrder{
 
 		@Override
 		public boolean execute() {
+			if(!(Engine.getLicenseConfirmation("JSOUP")&&Engine.getLicenseConfirmation("translatica.pl"))){
+				System.out.println(Engine.licensesNotConfirmedMessage);
+				return false;
+			}
 			var entries=getEntries(unmatched.toString());
-//			var entries=getEntries("queue");
 			
 			if(entries.size()>0) {
 				System.out.printf(translationSuccessMessage.toString(),unmatched.toString());

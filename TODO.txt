@@ -2,8 +2,13 @@ Add license promt for servises storen in AdditionalLicenses.txt
 Fix bugs caused by diffrend cmd and java character encoding
 Add proxy support for wewb based modules
 Make project name a shortcut (Simple Heurestic n a Interpreter)
+Add errors handler (Mostly for loading modules time. Will allow to better error reporting and menagment)
+Move respones keys from config file to main file.
 
 Modules to add:
 storage module
 calculator module
 Weatcher module
+
+Space of dreams:
+Add NLP layer beetwen user input and program to add beter sentense understanding, and another beetwen program out and user to make sentenses more natural(and propably add some random intmut value for it to increase it's randomness)

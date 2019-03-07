@@ -25,7 +25,7 @@ public class Config {
 		mainFile=new File(prop.getProperty("mainFile","Shani.dat"));									//If failed to load properties from file dedfault onw will be used
 		
 		positiveResponeKey=new ShaniString(prop.getProperty("positiveResponeKey","failed to load positiveResponeKey"));
-		negaticeResponeKey=new ShaniString(prop.getProperty("negaticeResponeKey","failed to load negaticeResponeKey"));
+		negativeResponeKey=new ShaniString(prop.getProperty("negativeResponeKey","failed to load negaticeResponeKey"));
 		
 		diffrendCharacterCost=(byte)getProperty(prop,"diffrendCharacterCost","50");
 		qwertyNeighbourCost=(byte)getProperty(prop,"qwertyNeighbourCost","30");
@@ -54,8 +54,8 @@ public class Config {
 	public static final File mainFile;
 	
 	public static final ShaniString positiveResponeKey;
-	public static final ShaniString negaticeResponeKey;
-
+	public static final ShaniString negativeResponeKey;
+	
 	public static final byte diffrendCharacterCost;
 	public static final byte qwertyNeighbourCost;
 	public static final byte nationalSimilarityCost;						//a,¹||c,æ...
@@ -70,7 +70,7 @@ public class Config {
 	public static final short sentenseCompareTreshold;
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
-	
+
 	/**Multilple value by parameter dependent in another one.
 	 * @author TakMashido
 	 */

@@ -45,6 +45,9 @@ public class Engine {
 	
 	private static ShaniString helloMessage;												//Have to be initialzed after loading doc.
 	private static ShaniString notUnderstandMessage;
+	private static ShaniString licenseConfirmationMessage;						//Sentence construction may be very not accurate.
+	
+	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
 	
 	public static final Scanner in=new Scanner(System.in);
@@ -59,7 +62,7 @@ public class Engine {
 	private static boolean initialized=false;
 	
 	public static void main(String[] args) {
-		new ShaniString();								//FIXME becouse of some strange reason in static init something go wrong and ShaniString matching don't work property(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
+		new ShaniString();								//FIXME becouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work property(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
 		initialize(args);
 		start();
 	}
@@ -76,7 +79,7 @@ public class Engine {
 			while(in.hasNextLine())argsList.add(in.next());
 			args=argsList.toArray(new String[0]);
 			argsDec=new ArgsDecoder(args);
-			System.out.println("New args set. Running shani from it.");
+			System.out.println("New args set. Running shani with it.");
 		}
 		
 		if(argsDec.containFlag("-d","--debug")) {		//debug
@@ -214,6 +217,8 @@ public class Engine {
 		helloMessage=ShaniString.loadString("engine.helloMessage");					
 		notUnderstandMessage=ShaniString.loadString("engine.notUnderstandMessage");
 		errorMessage=ShaniString.loadString("engine.errorMessage");                
+		licenseConfirmationMessage=ShaniString.loadString("engine.licenseConfirmationMessage");
+		licensesNotConfirmedMessage=ShaniString.loadString("engine.licensesNotConfirmedMessage");
 		
 		for (int i = 0; i < ordersNode.getLength(); i++) {
 			Node node = ordersNode.item(i);
@@ -331,6 +336,26 @@ public class Engine {
 	
 	public static ShaniString getLastCommand() {
 		return lastCommand.copy();
+	}
+	
+	public static boolean getLicenseConfirmation(String name) {
+		String nameToSearch=name.replace('.', '-');
+		boolean confirmed=Storage.getUserBoolean("acceptedLicences."+nameToSearch);
+		if(confirmed)return true;
+		
+		@SuppressWarnings("resource")
+		Scanner in=new Scanner(System.in);
+		System.out.printf(licenseConfirmationMessage.toString(),name);
+		System.out.println();
+		Boolean confirmed2=isInputPositive(new ShaniString(in.nextLine()));
+		if(confirmed2==null)return false;
+		if(confirmed2)Storage.writeUserData("acceptedLicences."+nameToSearch, true);
+		return confirmed2;
+	}
+	public static Boolean isInputPositive(ShaniString input) {
+		if(Config.positiveResponeKey.equals(input))return true;
+		if(Config.negativeResponeKey.equals(input))return false;
+		return null;
 	}
 	
 	/**
