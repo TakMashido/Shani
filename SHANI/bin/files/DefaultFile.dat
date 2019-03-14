@@ -2,6 +2,9 @@
 <shani>
     <orders>
         <version>v1</version>
+        <order classname="shani.orders.CalculateOrder">
+            <keywords>Policz*Ile wynosi*Podaj wynik równania</keywords>
+        </order>
         <order classname="shani.orders.MasterOrder">
             <exit>exit*żegnam*do widzenia*wyłącz się</exit>
             <autosave>autosavetime</autosave>
@@ -73,6 +76,10 @@
                 <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
                 <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
             </TranslateOrder>
+            <CalculateOrder>
+                <calculationResoultMessage>Wynik to %f.*%f*Po podliczeniu mamy %f.</calculationResoultMessage>
+                <calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
+            </CalculateOrder>
         </orders>
     </storage>
     <userdata>

@@ -87,6 +87,9 @@
         <order classname="shani.orders.TranslateOrder">
             <keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
         </order>
+        <order classname="shani.orders.CalculateOrder">
+            <keywords>Policz*Ile wynosi*Podaj wynik równania</keywords>
+        </order>
     </orders>
     <storage>
         <orders>
@@ -118,11 +121,19 @@
                 <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
                 <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
             </TranslateOrder>
+            <CalculateOrder>
+                <calculationResoultMessage>Wynik to %f.*%f*Po podliczeniu mamy %f.</calculationResoultMessage>
+                <calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
+            </CalculateOrder>
         </orders>
         <engine>
             <helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
             <notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
             <errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+            <licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
+            <licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
         </engine>
     </storage>
+    <userdata>
+    </userdata>
 </shani>

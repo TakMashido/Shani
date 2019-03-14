@@ -106,22 +106,45 @@ public class ShaniString {
 		}
 	}
 	
+	/**Creates new empty ShaniString*/
 	public ShaniString() {
 		this("");
 	}
+	/**Creates new ShaniString.
+	 * @param origin String containing ShaniString data. Will be cuttend on '*' occurences.
+	 */
 	public ShaniString(String origin) {
-		value=processString(origin);
+		this(origin,true);
 	}
+	/**Creates new ShaniString.
+	 * @param origin String containing ShaniString data.
+	 * @param cut If cut based on '*' location.
+	 */
+	public ShaniString(String origin,boolean cut) {
+		if(cut)value=processString(origin);
+		else value=new String[] {origin};
+	}
+	/**Creates new ShaniString.
+	 * @param origin Strings constaining data. All of them will be cutted on '*' occurences.
+	 */
 	public ShaniString(String... origin) {
 		ArrayList<String> buf=new ArrayList<String>();
 		for(String str:origin)processString(str,buf);
 		value=buf.toArray(new String[] {});
 	}
+	/**Load ShaniString from xml node. Any change done to this object will also be pushed to given node.
+	 * @param origin XML Node storing ShaniString data.
+	 */
 	public ShaniString(Node origin) {
 		assert origin!=null:"Origin node can't be null. Propably node is missing in shani main file.";
 		value=processString(origin.getTextContent());
 		this.origin=origin;
 	}
+	/**Load ShaniString from xml node. Any change done to this object will also be pushed to given node.
+	 * Also put origin data to created ShaniString and add it to Node.
+	 * @param originNode XML Node storing ShaniString data.
+	 * @param origin New data to push into created ShaniString.
+	 */
 	public ShaniString(Node originNode, String origin) {
 		this(originNode);
 		add(origin);
@@ -146,6 +169,9 @@ public class ShaniString {
 		return Storage.getString(path);
 	}
 	
+	/**Sets XML node for storing data. Also push data to given node.
+	 * @param node XML node which will be used as data storage.
+	 */
 	public void setNode(Node node) {
 		origin=node;
 		saveData();
@@ -156,8 +182,19 @@ public class ShaniString {
 		}
 	}
 	
+	/**Adds new entries.
+	 * @param word String containig new entries.
+	 */
 	public void add(String word) {
-		String[] wordArray=processString(word);
+		add(word,true);
+	}
+	/**Adds new entries.
+	 * @param word String containig new entries.
+	 * @param cut If cut based on '*' location.
+	 */
+	public void add(String word,boolean cut) {
+		String[] wordArray=cut?processString(word):new String[] {word};
+		
 		String[] newValue=new String[value.length+wordArray.length];
 		System.arraycopy(value, 0, newValue, 0, value.length);
 		System.arraycopy(wordArray, 0, newValue, value.length, wordArray.length);
@@ -174,6 +211,9 @@ public class ShaniString {
 			stemmedValue=newVal;
 		}
 	}
+	/**Adds new entries.
+	 * @param word ShaniString containig new entries
+	 */
 	public void add(ShaniString word) {
 		String[] newValue=new String[value.length+word.value.length];
 		System.arraycopy(value, 0, newValue, 0, value.length);
@@ -463,7 +503,7 @@ public class ShaniString {
 						buffer.append(data.stemmedValue[i][j]).append(' ');
 				}
 				if(buffer.length()>0)buffer.substring(0,buffer.length()-1);
-				Return.add(buffer.toString());
+				Return.add(buffer.toString(),false);
 			}
 			
 			return Return;
@@ -499,7 +539,7 @@ public class ShaniString {
 			short minCost=Short.MAX_VALUE;
 			for(int i=0;i<wordCost.length;i++) {
 				short cost=costBias[i];
-				for(int j=0;j<wordCost.length;j++)if(wordCost[i][j]<Config.wordCompareTreshold)cost+=wordCost[i][j];
+				for(int j=0;j<wordCost[i].length;j++)if(wordCost[i][j]<Config.wordCompareTreshold)cost+=wordCost[i][j];
 				if(cost<minCost)minCost=cost;
 			}
 			return minCost;

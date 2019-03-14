@@ -89,6 +89,11 @@ public abstract class KeywordOrder extends Order {
 	public abstract class UnmatchedAction extends Action {
 		protected ShaniString unmatched;
 		
+		public boolean connectAction(String action) {
+			System.err.println("Connecting actions to "+this.getClass().getName());
+			return false;
+		}
+		
 		private void setUnmatched(ShaniString newUnmatched) {
 			unmatched=newUnmatched;
 		}

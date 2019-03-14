@@ -177,7 +177,7 @@ public class Engine {
 		while (in.hasNextLine()) {
 			String str=in.nextLine().trim();
 			if(str.length()==0)continue;
-			ShaniString command=new ShaniString(str);
+			ShaniString command=new ShaniString(str,false);
 			if(command.equals(""))continue;
 			Executable exec=interprete(command);
 			
@@ -238,7 +238,8 @@ public class Engine {
 					order.init(e);
 					orders.add(order);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-					System.out.println("Failed to parse \""+e.getElementsByTagName("classname").item(0).getTextContent()+"\" order from main file.");
+					System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
+					ex.printStackTrace();
 				}
 			}
 		}
