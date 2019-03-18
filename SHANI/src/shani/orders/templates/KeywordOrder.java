@@ -48,7 +48,6 @@ public abstract class KeywordOrder extends Order {
 	public List<Executable> getExecutables(ShaniString command) {
 		ArrayList<Executable> Return=new ArrayList<Executable>();
 		
-		System.out.println(command.toFullString()+": "+keyword.toFullString());
 		ShaniMatcher matcher=command.getMatcher().apply(keyword);
 		
 		Engine.info.println('\n'+keyword.toFullString()+"-> "+command.toFullString()+":");

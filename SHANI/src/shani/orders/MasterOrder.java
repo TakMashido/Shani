@@ -14,6 +14,7 @@ import shani.orders.templates.Order;
 
 public class MasterOrder extends Order {
 	private static final ShaniString notGoodTimeMessage=ShaniString.loadString("orders.MasterOrder.notGoodTimeMessage");
+	private static final ShaniString closeMessage=ShaniString.loadString("orders.MasterOrder.closeMessage");
 	
 	private enum ActionType{exit,save,autosaveTime};
 	
@@ -53,6 +54,7 @@ public class MasterOrder extends Order {
 	}
 	private void exit() {
 		Engine.debug.println("exit\n");
+		System.out.println(closeMessage);
 		System.exit(0);
 	}
 	

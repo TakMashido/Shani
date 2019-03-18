@@ -92,6 +92,13 @@
         </order>
     </orders>
     <storage>
+        <engine>
+            <helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
+            <notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
+            <errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+            <licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
+            <licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
+        </engine>
         <orders>
             <ExecuteOrder>
                 <successfulMessage>Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia</successfulMessage>
@@ -99,6 +106,7 @@
             </ExecuteOrder>
             <MasterOrder>
                 <notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
+                <closeMessage>Do widzienia*Do zobaczenia*Cześć</closeMessage>
             </MasterOrder>
             <MergeOrder>
                 <connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
@@ -117,7 +125,7 @@
                 <nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
             </TimerOrder>
             <TranslateOrder>
-                <maxLineSize>50</maxLineSize>
+                <maxLineSize>70</maxLineSize>
                 <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
                 <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
             </TranslateOrder>
@@ -126,13 +134,6 @@
                 <calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
             </CalculateOrder>
         </orders>
-        <engine>
-            <helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
-            <notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
-            <errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
-            <licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
-            <licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
-        </engine>
     </storage>
     <userdata>
     </userdata>
