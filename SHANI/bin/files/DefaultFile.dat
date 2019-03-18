@@ -3,7 +3,7 @@
     <orders>
         <version>v1</version>
         <order classname="shani.orders.CalculateOrder">
-            <keywords>Policz*Ile wynosi*Podaj wynik równania</keywords>
+            <keywords>policz*ile wynosi*ile jest*podaj wynik równania</keywords>
         </order>
         <order classname="shani.orders.MasterOrder">
             <exit>exit*żegnam*do widzenia*wyłącz się</exit>

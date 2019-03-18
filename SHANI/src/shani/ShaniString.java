@@ -321,8 +321,10 @@ public class ShaniString {
 		int length=Math.min(a.length,b.length);
 		Return=Config.characterCompareCostMultiplier.multiple(Return, length);
 		
-		if(Return<Config.wordCompareTreshold*2)
-			Engine.info.println(new String(a)+"-> "+new String(b)+": "+Return);
+		if(Return<Config.wordCompareTreshold*2) {
+			if(Engine.info!=null)					//Can be null if not Shani not started in normal way during debuging.
+				Engine.info.println(new String(a)+"-> "+new String(b)+": "+Return);
+		}
 		
 		return Return;
 	}
@@ -566,5 +568,14 @@ public class ShaniString {
 			Return.costBias=costBias.clone();
 			return Return;
 		}
+	}
+	
+	public static void main(String[]args) {
+		Engine.initialize(args);
+		var s1=new ShaniString("ile wynosi 2*2",false);
+		var s2=new ShaniString("Ile wynosi");
+		
+		var m=s1.getMatcher().apply(s2);
+		System.out.println(m.isEqual()+" "+m.isSemiEqual()+" "+m.getCost()+"\n"+m.getUnmatched().toFullString());
 	}
 }

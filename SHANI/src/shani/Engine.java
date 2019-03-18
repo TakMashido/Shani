@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -175,7 +176,7 @@ public class Engine {
 		System.out.println(helloMessage);
 		
 		while (in.hasNextLine()) {
-			String str=in.nextLine().trim();
+			String str=in.nextLine().trim().toLowerCase();
 			if(str.length()==0)continue;
 			ShaniString command=new ShaniString(str,false);
 			if(command.equals(""))continue;
@@ -316,11 +317,12 @@ public class Engine {
 	public static Executable getExecutable(ShaniString command) {
 		Executable Return=null;
 		short minCost=Config.sentenseCompareTreshold;
+		
 		for (Order order : orders) {
 			List<Executable> execs=order.getExecutables(command);
 			if(execs==null)continue;
 			for(Executable exec:execs) {
-				//System.out.println(exec.action.getClass().toString()+" "+exec.cost);
+//				System.out.println(exec.action.getClass().toString()+" "+exec.cost);
 				if(exec.cost<minCost) {
 					minCost=exec.cost;
 					Return=exec;

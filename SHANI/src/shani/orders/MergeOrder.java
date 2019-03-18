@@ -12,7 +12,7 @@ import shani.orders.templates.Order;
 
 public class MergeOrder extends Order{
 	private static ShaniString connectSuccessfulMessage=ShaniString.loadString("orders.MergeOrder.connectSuccessfulMessage");
-	private static ShaniString cantConnectMessage=new ShaniString("orders.MergeOrder.connectSuccessfulMessage");
+	private static ShaniString cantConnectMessage=ShaniString.loadString("orders.MergeOrder.connectSuccessfulMessage");
 	
 	private ShaniString connectKey;
 	

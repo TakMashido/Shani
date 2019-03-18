@@ -48,6 +48,7 @@ public abstract class KeywordOrder extends Order {
 	public List<Executable> getExecutables(ShaniString command) {
 		ArrayList<Executable> Return=new ArrayList<Executable>();
 		
+		System.out.println(command.toFullString()+": "+keyword.toFullString());
 		ShaniMatcher matcher=command.getMatcher().apply(keyword);
 		
 		Engine.info.println('\n'+keyword.toFullString()+"-> "+command.toFullString()+":");
@@ -63,9 +64,10 @@ public abstract class KeywordOrder extends Order {
 		Engine.info.println();
 		
 		if(Return.size()==0&&matcher.isSemiEqual()) {
-			var add=getUnmatchedAction();
+			ShaniString unmatched=matcher.getUnmatched();
+			var add=getUnmatchedAction(unmatched);
 			if(add!=null) {
-				add.setUnmatched(matcher.getUnmatched());
+				add.setUnmatched(unmatched);
 				Return.add(add.getExecutable(Config.sentenseCompareTreshold-1));
 			}
 		}
@@ -80,11 +82,19 @@ public abstract class KeywordOrder extends Order {
 	 * @param matcher ShaniMatcher created from command with applied keyword
 	 * @return List of addition executables for specyfied command.
 	 */
-	public List<Executable> createExecutables(ShaniString command, ShaniMatcher matcher){
+	protected List<Executable> createExecutables(ShaniString command, ShaniMatcher matcher){
 		return null;
 	}
 	
-	public UnmatchedAction getUnmatchedAction() {return null;}
+	/**Use to handle inputs matching key of order, but not matching any target
+	 * @param unmatched Input command without key of this Order.
+	 * @return Custom order for handling unmatched data.
+	 */
+	protected UnmatchedAction getUnmatchedAction(ShaniString unmatched) {return getUnmatchedAction();}
+	/**Use to handle inputs matching key of order, but not matching any target
+	 * @return Custom order for handling unmatched data.
+	 */
+	protected UnmatchedAction getUnmatchedAction() {return null;}
 	
 	public abstract class UnmatchedAction extends Action {
 		protected ShaniString unmatched;
