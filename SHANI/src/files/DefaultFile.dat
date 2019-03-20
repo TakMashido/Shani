@@ -54,7 +54,7 @@
             </ExecuteOrder>
             <MasterOrder>
                 <notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
-                <closeMessage>Do widzienia*Do zobaczenia*Cześć</closeMessage>
+                <closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
             </MasterOrder>
             <MergeOrder>
                 <connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>

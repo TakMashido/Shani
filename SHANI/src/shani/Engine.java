@@ -62,7 +62,7 @@ public class Engine {
 	private static boolean initialized=false;
 	
 	public static void main(String[] args) {
-		new ShaniString();								//FIXME becouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work property(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
+		new ShaniString();								//FIXME beacouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work property(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
 		initialize(args);
 		start();
 	}
@@ -92,7 +92,7 @@ public class Engine {
 				e1.printStackTrace();
 			}
 			try {
-				debug=new PrintStream(new BufferedOutputStream(new FileOutputStream("Debug.log",true),1024));
+				debug=new PrintStream(new BufferedOutputStream(new FileOutputStream("Debug.log"),1024));
 			} catch (FileNotFoundException e1) {
 				System.out.println("Failed to set debug file");
 				e1.printStackTrace();
@@ -118,7 +118,7 @@ public class Engine {
 		
 		try {
 			new File("info.txt").delete();
-			info=new PrintStream(new BufferedOutputStream(new FileOutputStream("Info.log",true),1024));
+			info=new PrintStream(new BufferedOutputStream(new FileOutputStream("Info.log"),1024));
 		} catch (FileNotFoundException e1) {
 			System.out.println("Failed to set info file");
 			e1.printStackTrace();
@@ -138,6 +138,9 @@ public class Engine {
 				try {
 					createMainFile();
 					System.out.println("File created. Please restart Shani.");
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {}
 					System.exit(0);
 				} catch (IOException | TransformerFactoryConfigurationError e) {
 					System.out.println("Failed to create main file");
@@ -151,7 +154,7 @@ public class Engine {
 		}
 		
 		try {
-			commands=new PrintStream(new BufferedOutputStream(new FileOutputStream("Commands.log")));
+			commands=new PrintStream(new BufferedOutputStream(new FileOutputStream("Commands.log",true)));
 		} catch (FileNotFoundException e) {
 			System.out.println("Failed to set commands file");
 			e.printStackTrace();
@@ -173,7 +176,6 @@ public class Engine {
 		@SuppressWarnings("resource")
 		Scanner in=new Scanner(System.in);
 		System.out.println(helloMessage);
-		
 		while (in.hasNextLine()) {
 			String str=in.nextLine().trim().toLowerCase();
 			if(str.length()==0)continue;
@@ -184,8 +186,7 @@ public class Engine {
 			if (exec==null) {
 				System.out.println(notUnderstandMessage);
 				commands.print('!');
-			}
-			else if(exec.isSuccesful()) lastExecuted=exec;
+			} else if(exec.isSuccesful()) lastExecuted=exec;
 			commands.println(str);
 		}
 	}
@@ -367,5 +368,6 @@ public class Engine {
 		saveMainFile();
 		debug.flush();
 		info.flush();
+		commands.flush();
 	}
 }

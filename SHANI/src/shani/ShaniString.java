@@ -297,9 +297,9 @@ public class ShaniString {
 			for(int y=1;y<=b.length;y++) {
 				val[x][y]=(short) min(val[x1][y]+Config.characterInsertionCost,
 									  val[x][y-1]+Config.characterDeletionCost,
-									  val[x1][y-1]+lookUpTable[a[x-1]][b[y-1]]);
+									  val[x1][y-1]+compareChar(a[x-1],b[y-1]));
 				if(x>2&&y>2) {
-					short swapCost=(short) (lookUpTable[a[x-1]][b[y-2]]+lookUpTable[a[x-2]][b[y-1]]);
+					short swapCost=(short) (compareChar(a[x-1],b[y-2])+compareChar(a[x-2],b[y-1]));
 					if(swapCost<Config.characterSwapTreshold) {
 						val[x][y]=(short) min(val[x-2][y-2]+swapCost+Config.characterSwapCost,
 											  val[x][y]);
@@ -327,6 +327,13 @@ public class ShaniString {
 		}
 		
 		return Return;
+	}
+	
+	private static byte compareChar(char a,char b) {
+		if(a>lookUpTable.length||b>lookUpTable[a].length) {
+			return Config.diffrendCharacterCost;
+		}
+		return lookUpTable[a][b];
 	}
 	
 	public String[] getArray() {

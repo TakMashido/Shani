@@ -55,6 +55,9 @@ public class MasterOrder extends Order {
 	private void exit() {
 		Engine.debug.println("exit\n");
 		System.out.println(closeMessage);
+		try {
+			Thread.sleep(700);
+		} catch (InterruptedException e) {}
 		System.exit(0);
 	}
 	

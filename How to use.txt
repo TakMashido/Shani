@@ -1,0 +1,31 @@
+"All you have to do is install the damm java 10 user!"
+To run SHANI you have to have installed java 10 or newer. If you have alredy installed java check if it's 10 not overused java 8.
+Next downland it's latest release and unzip it somewhere. To run just double click on Shani.bat file. New cmd window with SHANI launched should apper.
+
+Unfortunetly it only support Polish language for now. All messages and input patterns are stored in external file so translations can be made quite easy.
+Report to me if you want this in another language.
+
+FAQ:
+
+What I can do with it?
+It is pseudo intelligent assitant.
+For now it have three basic features:
+Run programs/files/open folders. Just type "w³¹cz xyz", "odpal xyz"... . For the first time it'll ask you what you want to run.
+	Copy paste path to folder/file. Next time you try to run something with same name is start automaticly. 
+	After what to run question you can also provide name of something runned before or url based run like steam://rungameid/335300.
+Search for translations in online dictionary. Type "Przetlumacz xyz".
+Calculator, type "policz 2+2" or something similar.
+
+To close just type "do widzenia" or try other goodbay phrase.
+
+It's still in developnet phase so new fetures and better language understending will come in the future.
+
+
+How can I check installed java version?
+Option 1: Run cmd(windows + r, write cmd) and wirte in it "java --version".
+Option 2: Find java control panel(Configure java/About java) in your computer and find version there.
+
+How to install java 10?
+Write in your browser "java 10" and dowland it from Oracle. Be avare default java dowland link refers to java 8 beacouse of some strange reasons.
+
+And please report any bugs or features you want to me on github issue page or via main email connected to my github accaunt.

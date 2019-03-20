@@ -12,4 +12,4 @@ For now it support only Polish language. I have to add data files with transalti
 Current modules:
 Execute(open file/application, exec batch script, or local url based aps(eg. steam://rungameid/335300)),
 Timer,
-Dictionary(Polish, English German. Taken from translatica.pl webside).
+Dictionary(Polish, English German. Taken from translatica.pl webside), Calculator.
