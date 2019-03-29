@@ -24,7 +24,7 @@ hs_err_pid*
 
 #eclipse data files
 .setting/
-src/
+bin/
 
 #SHANI data files
 SHANI/Shani.dat

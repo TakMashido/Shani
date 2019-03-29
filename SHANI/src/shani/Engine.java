@@ -281,6 +281,8 @@ public class Engine {
 		debug.flush();
 		info.flush();
 		commands.flush();
+		System.out.flush();
+		System.err.flush();
 	}
 	
 	public static Executable interprete(String command) {
@@ -366,8 +368,6 @@ public class Engine {
 	 */
 	private static void shutdownHook() {
 		saveMainFile();
-		debug.flush();
-		info.flush();
-		commands.flush();
+		flushBuffers();
 	}
 }

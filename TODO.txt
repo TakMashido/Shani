@@ -5,9 +5,13 @@ Move respones keys from config file to main file.
 Add speech recognition layer for input.
 Add speech sytesis layer for output.
 
-Modules to add:
-storage module
-Weatcher module
+Orders zone:
+CalculateOrder-> Let it react to queries like "podziel 3 przez 2"
+
+Order to add:
+storage order
+Weatcher Order
+ConverterOrder-> convert GB,currency,
 
 Space of dreams:
 Add NLP layer beetwen user input and program to add beter sentense understanding, and another beetwen program out and user to make sentenses more natural(and propably add some random intput value for it to increase it's randomness)

@@ -33,7 +33,7 @@
             </suborder>
         </order>
         <order classname="shani.orders.ExecuteOrder">
-            <keywords>odpal*włącz*otwórz*pokaż*show*start</keywords>
+            <keywords>odpal*włącz*otwórz*pokaż*show*start*uruchom</keywords>
         </order>
         <order classname="shani.orders.TranslateOrder">
             <keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
