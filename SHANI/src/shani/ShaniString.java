@@ -9,6 +9,13 @@ import java.util.regex.Pattern;
 
 import org.w3c.dom.Node;
 
+/**Object used to represent string values in SHANI.
+ * 
+ * It is optymalized for fuzzy string matching and have some methods allowing it.
+ * Also can contain one or more String for printing or used as keywords to search in other ShaniString objects.
+ * 
+ * @author TakMashido
+ */
 public class ShaniString {
 	private static final Random random=new Random();
 	private static final Pattern stringDivider=Pattern.compile("(?:\\s*\\*\\s*)+");
@@ -161,6 +168,38 @@ public class ShaniString {
 		return out;
 	}
 	
+	/**Splits ShaniString to words group and each to single words.
+	 * @return Array[][] of words. Each entry is single word.
+	 */
+	public ShaniString[][] split() {										//For further optymalization can store once splitted val somewhere. It needs changes in ShaniString to make inmutable. Any change on it have to be applied on new object like in original string.
+		var Return=new ShaniString[value.length][];
+		
+		for(int i=0;i<value.length;i++) {
+			var ls=new ArrayList<String>();
+			@SuppressWarnings("resource")
+			Scanner str=new Scanner(value[i]);
+			while(str.hasNext()) ls.add(str.next());
+			
+			String[] stra=ls.toArray(new String[0]);
+			Return[i]=new ShaniString[stra.length];
+			for(int j=0;j<stra.length;j++) {
+				Return[i][j]=new ShaniString(stra[j]);
+			}
+		}
+		if(stemmedValue!=null) {
+			for(int i=0;i<Return.length;i++) {
+				assert stemmedValue[i].length==Return[i].length:"Looks like stemming in ShaniString started deleting words. Method split don't support it. Fix it.";
+				for(int j=0;j<Return[i].length;j++) {
+					char[][][] stval=new char[1][1][stemmedValue[i][j].length];
+					System.arraycopy(stemmedValue[i][j], 0, stval[0][0], 0, stemmedValue[i][j].length);
+					Return[i][j].stemmedValue=stval;
+				}
+			}
+		}
+		
+		return Return;
+	}
+	
 	/**Loads string from storage section.
 	 * @param path Path to String represetation of ShaniString in storage.
 	 * @return New ShaniString object containing data pointed by path.
@@ -268,6 +307,13 @@ public class ShaniString {
 		return words.toArray(new char[0][0]);
 	}
 	
+	public short getCompareCost(String str) {
+		return getCompareCost(new ShaniString(str));
+	}
+	public short getCompareCost(ShaniString str) {
+		return getMatcher().apply(str).getCost();
+	}
+	
 	public boolean equals(String str) {
 		if(str.length()==0)return false;
 		return equals(new ShaniString(str));
@@ -276,7 +322,121 @@ public class ShaniString {
 		stem();
 		str.stem();
 		
-		return getMatcher().apply(str).getCost()<Config.sentenseCompareTreshold;
+		return getCompareCost(str)<Config.sentenseCompareTreshold;
+	}
+	
+	/**Tries to find optimal match beetwen two {@linkplain ShaniString} arrays using dtw algorithm.
+	 * @param data Array of ShaniString where search will be porformed.
+	 * @param dataIndex Index on which matching will start. Data before it are skipped.
+	 * @param str Acts like regex Pattern. Contain keywords which will be applied on data arg.
+	 * @return {@link ArraysMatchingResoult} object containing cost of optimal match and index of last matched word in data array.
+	 */
+	public static ArraysMatchingResoult getMatchingIndex(ShaniString[] data,int dataIndex,ShaniString[] str) {
+		short[][] costs=new short[data.length+1][str.length+1];
+		
+		for(int i=1;i<=str.length;i++) costs[dataIndex][i]=(short) (Config.wordInsertionCost*i);
+		for(int i=dataIndex;i<=data.length;i++) costs[i][0]=(short) (Config.wordDeletionCost*(i-dataIndex));
+		
+		for(int i=dataIndex+1;i<costs.length;i++) {
+			for(int j=1;j<costs[i].length;j++) {
+				costs[i][j]=data[i-1].getCompareCost(str[j-1]);
+			}
+		}
+		
+		for(int i=dataIndex+1;i<=data.length;i++) {
+			for(int j=1;j<costs[i].length;j++) {
+				costs[i][j]=(short) min(costs[i-1][j-1]+costs[i][j],costs[i-1][j]+Config.wordDeletionCost,costs[i][j-1]+Config.wordInsertionCost);			//Config.wordDeletionCost can not work well here. It can skip some words which should be matched as data in SentenceMatcher
+			}
+		}
+		
+//		for(int i=0;i<costs.length;i++) {
+//			for(int j=0;j<costs[i].length;j++) {
+//				System.out.printf("% 5d ",costs[i][j]);
+//			}
+//			System.out.println();
+//		}
+//		System.out.println("--------------------");
+		
+		int endIndex=costs[0].length-1;
+		int minIndex=dataIndex+1;
+		for(int i=dataIndex+2;i<costs.length;i++) {
+			if(costs[minIndex][endIndex]>costs[i][endIndex])minIndex=i;
+		}
+		
+//		System.out.println(Arrays.toString(data)+" "+Arrays.toString(str)+" "+costs[minIndex][endIndex]);
+		return new ArraysMatchingResoult(costs[minIndex][endIndex],dataIndex,minIndex);
+	}
+	/**Tries to find optimal match beetwen two {@linkplain ShaniString} arrays using dtw algorithm.
+	 * Starting point of match can be on any point greater then dataIndex. Thet is only diffrence beetwen this and {@link #getMatchingIndex(ShaniString[], int, ShaniString[]) getMatchingIndex} method.
+	 * @param data Array of ShaniString where search will be porformed.
+	 * @param dataIndex Index on which matching will start. Data before it are skipped.
+	 * @param str Acts like regex Pattern. Contain keywords which will be applied on data arg.
+	 * @return {@link ArraysMatchingResoult} object containing cost of optimal match, index of first and last matched word in data array.
+	 */
+	public static ArraysMatchingResoult getMatchingIndexMovable(ShaniString[] data,int dataIndex,ShaniString[] str) {
+		short[][] costs=new short[data.length+1][str.length+1];
+		
+		for(int i=1;i<=str.length;i++) costs[dataIndex][i]=(short) (Config.wordInsertionCost*i);
+		//for(int i=dataIndex;i<=data.length;i++) costs[i][0]=(short) (Config.wordDeletionCost*(i-dataIndex));
+		
+		for(int i=dataIndex+1;i<costs.length;i++) {
+			for(int j=1;j<costs[i].length;j++) {
+				costs[i][j]=data[i-1].getCompareCost(str[j-1]);
+			}
+		}
+		
+		for(int i=dataIndex+1;i<=data.length;i++) {
+			for(int j=1;j<costs[i].length;j++) {
+				costs[i][j]=(short) min(costs[i-1][j-1]+costs[i][j],costs[i-1][j]+Config.wordDeletionCost,costs[i][j-1]+Config.wordInsertionCost);			//Config.wordDeletionCost can not work well here. It can skip some words which should be matched as data in SentenceMatcher
+			}
+		}
+		
+//		for(int i=0;i<costs.length;i++) {
+//			for(int j=0;j<costs[j].length;j++) {
+//				System.out.printf("% 5d ",costs[i][j]);
+//			}
+//			System.out.println();
+//		}
+//		System.out.println("--------------------");
+		
+		int endIndex=costs[0].length-1;
+		int minIndex=dataIndex+1;
+		for(int i=dataIndex+2;i<costs.length;i++) {
+			if(costs[minIndex][endIndex]>costs[i][endIndex])minIndex=i;
+		}
+		
+		int startIndex=minIndex;
+		for(int i=str.length;i>1;i--) {								//Skip first row. Always 0 here.
+			if(startIndex==0)break;
+			short minCost=(short) min(costs[startIndex][i],costs[startIndex-1][i],costs[startIndex][i-1]);
+			if(minCost==costs[startIndex][i-1])continue;
+			if(!(minCost==costs[startIndex-1][i-1]))i++;
+			startIndex--;
+		}
+		startIndex--;
+		
+		return new ArraysMatchingResoult(costs[minIndex][endIndex],startIndex,minIndex);
+	}
+	public static class ArraysMatchingResoult{
+		public final short cost;
+		public final int startIndex;
+		public final int endIndex;
+		private ArraysMatchingResoult(short cost,int startIndex,int endIndex) {
+			this.cost=cost;
+			this.startIndex=startIndex;
+			this.endIndex=endIndex;
+		}
+	}
+	
+	/**Check if one of underlaying strings matches given regex Pattern.
+	 * @param pattern Patter used to check equality.
+	 * @return If one of underlaying strings matches given regex Pattern.
+	 */
+	public boolean isEquals(Pattern pattern) {
+		for(String str:value) {
+			if(pattern.matcher(str).matches())return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -575,14 +735,5 @@ public class ShaniString {
 			Return.costBias=costBias.clone();
 			return Return;
 		}
-	}
-	
-	public static void main(String[]args) {
-		Engine.initialize(args);
-		var s1=new ShaniString("ile wynosi 2*2",false);
-		var s2=new ShaniString("Ile wynosi");
-		
-		var m=s1.getMatcher().apply(s2);
-		System.out.println(m.isEqual()+" "+m.isSemiEqual()+" "+m.getCost()+"\n"+m.getUnmatched().toFullString());
 	}
 }

@@ -32,7 +32,7 @@ public class Config {
 		nationalSimilarityCost=(byte)getProperty(prop,"nationalSimilarityCost","10");
 		
 		wordCompareTreshold=(short)getProperty(prop,"wordCompareTreshold","100");
-		characterCompareCostMultiplier=new Multiplier(prop.getProperty("characterCompareCostMultiplier","10,5,2,1.5f,1"));
+		characterCompareCostMultiplier=new Multiplier(prop.getProperty("characterCompareCostMultiplier","10,5,2,1.2f,1"));
 		characterDeletionCost=(short)getProperty(prop,"characterDeletionCost","50");
 		characterInsertionCost=(short)getProperty(prop,"characterInsertionCost","50");
 		characterSwapTreshold=(short)getProperty(prop,"characterSwapTreshold","50");
@@ -71,7 +71,7 @@ public class Config {
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
 
-	/**Multilple value by parameter dependent in another one.
+	/**Multiple value by parameter dependent of another one.
 	 * @author TakMashido
 	 */
 	public static final class Multiplier{

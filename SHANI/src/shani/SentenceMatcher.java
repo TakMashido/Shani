@@ -62,7 +62,7 @@ public class SentenceMatcher {
 		ArrayList<SentenceResoult> Return=new ArrayList<>();
 		for(Sentence sen:sentences) {
 			SentenceResoult sr=sen.process(str);
-			if(sr!=null)Return.add(sr);
+			if(sr.cost<Config.sentenseCompareTreshold)Return.add(sr);
 		}
 		
 		return Return.toArray(new SentenceResoult[0]);
@@ -120,40 +120,65 @@ public class SentenceMatcher {
 				if(costs[minIndex]>costs[i])
 					minIndex=i;
 			
-			//if(costs[minIndex]>=Config.sentenseCompareTreshold)return null;				//TODO uncomment this after dubugging
 			Return[minIndex].cost=costs[minIndex];
 			return Return[minIndex];
 		}
-		private short process(SentenceResoult Return,ShaniString[]str,int strIndex,int sentenceIndex) {			//Returns cost of compartition
-			short cost=0;					//Check if can delete it.
-			
+		private short process(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {			//Returns cost of compartition
+//			System.out.println(strIndex+" "+sentenceIndex+" "+(sentenceIndex<sentence.length?sentence[sentenceIndex].type:"none"));
+			short ReturnValue=Short.MAX_VALUE;									//useful for debuging					
+			try {
 			if(strIndex>=str.length&&sentenceIndex>=sentence.length) {
-				return 0;
+				ReturnValue= 0;
+				return ReturnValue;
+			}
+			if(sentenceIndex>=sentence.length) {
+				ReturnValue= (short) (Config.wordDeletionCost*(str.length-strIndex));
+				return ReturnValue;
+			}
+			if(strIndex>=str.length) {
+				ReturnValue= (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
+				return ReturnValue;
 			}
 			
+			int minIndex;
 			int tempStrIndex;
 			var elem=sentence[sentenceIndex];
 			switch(elem.type) {
-			case data:
-				assert sentence[sentenceIndex+1].type!=Type.data:"Two data elements shouldn't apper next to each other.";
+			case data:										//TODO optymalize by decreasing number of self executions. If next sentence element is $ can predict start location of optimal match by ShaniString.getMatchingIndexMovable method.
 				StringBuffer strBuf=new StringBuffer();
 				if(sentenceIndex+1>=sentence.length) {			//end of sentence
 					strBuf.append(str[strIndex++]);
 					for(;strIndex<str.length;strIndex++)strBuf.append(' ').append(str[strIndex]);
-					Return.data.put(elem.string, strBuf.toString());
-					return 0;
+					resoult.data.put(elem.string, strBuf.toString());
+					ReturnValue= 0;
+					return ReturnValue;
 				}
-				int tempCost=0;
-				tempStrIndex=strIndex;
-				while(tempStrIndex<str.length&&(tempCost=process(Return,str,tempStrIndex++,sentenceIndex+1))>Config.sentenseCompareTreshold) {
-					strBuf.append(str[tempStrIndex]).append(' ');
+				assert sentence[sentenceIndex+1].type!=Type.data:"Two data elements shouldn't apper next to each other.";
+				short minCost=Short.MAX_VALUE;
+				minIndex=0;
+				SentenceResoult retResoult=null;
+				for(int i=strIndex;i<str.length;i++) {
+					var tempResoult=new SentenceResoult();
+					short tempCost=process(tempResoult,str,i,sentenceIndex+1);
+					if(tempCost<minCost) {
+						minCost=tempCost;
+						minIndex=i;
+						retResoult=tempResoult;
+					}
 				}
-				int length;
-				if(!((length=strBuf.length())==0)) {				//Handle not matching sentence ending and direct matching beetwen two sentence elemnets surrounding this one(no data returned)
-					strBuf.delete(length-1, length);
-					Return.data.put(elem.string, strBuf.toString());
+				
+				if(strIndex<minIndex) {
+					strBuf.append(str[strIndex]);
+					for(int i=strIndex+1;i<minIndex;i++) {
+						strBuf.append(' ').append(str[i]);
+					}
+					resoult.data.put(elem.string, strBuf.toString());
+					resoult.data.putAll(retResoult.data);
+					ReturnValue= minCost;
+					return ReturnValue;
 				} else {
-					return (short)(cost+Config.sentenseCompareTreshold);				//which one? theoretically it is only one not matched element, but it is data return elem so can be no point in processing longer and return Config.sentenceSompareTreshold
+					ReturnValue= Config.sentenseCompareTreshold;				//which one? theoretically it is only one not matched element, but it is data return elem so can be no point in processing longer and return Config.sentenceSompareTreshold
+					return ReturnValue;
 //					return (short)(cost+Config.wordInsertionCost);
 				}
 			case string:
@@ -162,33 +187,78 @@ public class SentenceMatcher {
 				
 				for(int i=0;i<subCosts.length;i++) {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, sentence[sentenceIndex].shaniStringArray[i]);
-					subCosts[i]=process((sr[i]=new SentenceResoult()),str,ret.endIndex,sentenceIndex+1);
+					subCosts[i]=(short) (process((sr[i]=new SentenceResoult()),str,ret.endIndex,sentenceIndex+1)+ret.cost);
 				}
 				
-				int minIndex=0;
+				minIndex=0;
 				for(int i=1;i<subCosts.length;i++) {
 					if(subCosts[i]<subCosts[minIndex]) minIndex=i;
 				}
 				
-				Return.data.putAll(sr[minIndex].data);
-				return subCosts[minIndex];
+				resoult.data.putAll(sr[minIndex].data);
+				ReturnValue= subCosts[minIndex];
+				return ReturnValue;
 			case regex:
-				tempStrIndex=strIndex;
 				short deleteCost=0;
-				while(!str[tempStrIndex++].isEquals(elem.regex)) {
+				for(tempStrIndex=strIndex;tempStrIndex<str.length;tempStrIndex++) {
+					if(str[tempStrIndex].isEquals(elem.regex)) {
+						if(deleteCost<Config.wordInsertionCost) {
+							ReturnValue= (short)(process(resoult,str,tempStrIndex+1,sentenceIndex+1)+deleteCost);
+							return ReturnValue;
+						} else {
+							ReturnValue= (short)(process(resoult,str,strIndex+1,sentenceIndex+1)+Config.wordInsertionCost);
+							return ReturnValue;
+						}
+					}
 					deleteCost+=Config.wordDeletionCost;
 				}
+				ReturnValue= (short)(process(resoult,str,strIndex,sentenceIndex+1)+Config.wordInsertionCost);
+				return ReturnValue;
 				
-				if(deleteCost<Config.wordInsertionCost) {
-					return (short)(process(Return,str,tempStrIndex,sentenceIndex+1)+deleteCost+cost);
-				} else {
-					return (short)(process(Return,str,strIndex+1,sentenceIndex+1)+Config.wordInsertionCost+cost);
-				}
 			default: 
 				assert false:"Trying to process unrecognized content SentenceElement in SentenceMatcher.";
-				return Config.wordInsertionCost;
+				ReturnValue= Config.wordInsertionCost;
+				return ReturnValue;
+			}
+			}finally {
+//				System.out.println("---------: "+strIndex+" "+sentenceIndex+" "+ReturnValue);
 			}
 		}
+	}
+	
+	/**Object containing resoult of matching ShaniString by SenetnceMenager
+	 * @author TakMashido
+	 */
+	public class SentenceResoult{
+		public final HashMap<String,String> data=new HashMap<String,String>();
+		private short cost;
+		private final String name;
+		
+		private SentenceResoult() {name=null;}
+		private SentenceResoult(String name) {
+			this.name=name;
+		}
+		
+		public HashMap<String,String> getData(){
+			return data;
+		}
+		public String getName() {
+			return name;
+		}
+		public short getCost() {
+			return cost;
+		}
+	}
+	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException {
+		Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("temp.xml"));
+		var parser=new SentenceMatcher(doc.getElementsByTagName("node").item(0));
+//		long time=System.nanoTime();
+		var resoults=parser.process(new ShaniString("word is a b c d e f end"));
+//		System.out.println("time: "+(System.nanoTime()-time));
+		System.out.println("resoults number: "+resoults.length);
+		for(var res:resoults)
+			System.out.println(res.name+" "+res.data.keySet()+" "+res.data.values()+" "+res.cost);
+		System.out.println("\nEnd of matching");
 	}
 	
 	/*private SentenceResoult process(ShaniString[]str) {				//copy of savenes
@@ -300,30 +370,4 @@ public class SentenceMatcher {
 	if(strIndex>=str.length&&sentenceIndex>=sentence.length)return Return;
 	return null;
 }*/
-	
-	/**Object containing resoult of matching ShaniString by SenetnceMenager
-	 * @author TakMashido
-	 */
-	public class SentenceResoult{
-		public final HashMap<String,String> data=new HashMap<String,String>();
-		private short cost;
-		private final String name;
-		
-		private SentenceResoult() {name=null;}
-		private SentenceResoult(String name) {
-			this.name=name;
-		}
-		
-		public short getCost() {
-			return cost;
-		}
-	}
-	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException {
-		Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("temp.xml"));
-		var parser=new SentenceMatcher(doc.getElementsByTagName("node").item(0));
-		var resoults=parser.process(new ShaniString("word is stefan idzie idzie gdzieœ królik"));
-		for(var res:resoults)
-			System.out.println(res.name+" "+res.data.keySet()+" "+res.data.values());
-		System.out.println("End of matching");
-	}
 }

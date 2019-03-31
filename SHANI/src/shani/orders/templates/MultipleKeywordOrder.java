@@ -41,7 +41,7 @@ public abstract class MultipleKeywordOrder extends Order{
 	/**Ovride if you want do some initializations to your module
 	 * @return If succesfuly initializated
 	 */
-	protected boolean initialize() {return false;}
+	protected boolean initialize() {return true;}
 	
 	/**Override if you want to creted handler for not specyfied target.
 	 * @return

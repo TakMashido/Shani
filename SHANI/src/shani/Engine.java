@@ -179,6 +179,7 @@ public class Engine {
 		while (in.hasNextLine()) {
 			String str=in.nextLine().trim().toLowerCase();
 			if(str.length()==0)continue;
+			long time=System.nanoTime();
 			ShaniString command=new ShaniString(str,false);
 			if(command.equals(""))continue;
 			Executable exec=interprete(command);
@@ -187,7 +188,8 @@ public class Engine {
 				System.out.println(notUnderstandMessage);
 				commands.print('!');
 			} else if(exec.isSuccesful()) lastExecuted=exec;
-			commands.println(str);
+			commands.print(str);
+			System.out.println(" "+(time-(System.nanoTime())/1000f)+" mikroS");
 		}
 	}
 	
@@ -343,10 +345,24 @@ public class Engine {
 		return lastCommand.copy();
 	}
 	
+	/**Checks if user confirmed given license. If not send license confirmation message to user.
+	 * Equivalent to {@link #getLicenseConfirmation(String,boolean) getLicenseConfirmation(name,true)}.
+	 * @param name Name of license which confirmation are being checked.
+	 * @return If license corfirmed
+	 */
 	public static boolean getLicenseConfirmation(String name) {
+		return getLicenseConfirmation(name,true);
+	}
+	/**Checks if user confirmed given license.
+	 * @param name Name of license which confirmation are being checked.
+	 * @param displayConfirmation If ask user for confirmation if not already getted.
+	 * @return If license corfirmed
+	 */
+	public static boolean getLicenseConfirmation(String name,boolean displayConfirmation) {
 		String nameToSearch=name.replace('.', '-');
 		boolean confirmed=Storage.getUserBoolean("acceptedLicences."+nameToSearch);
 		if(confirmed)return true;
+		if(!displayConfirmation)return false;
 		
 		@SuppressWarnings("resource")
 		Scanner in=new Scanner(System.in);

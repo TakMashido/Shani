@@ -29,7 +29,7 @@ public abstract class KeywordOrder extends Order {
 	/**Overide if you want do some initializations to your module
 	 * @return If succesfuly initializated
 	 */
-	protected boolean initialize() {return false;}
+	protected boolean initialize() {return true;}
 	
 	/**Creates Action object from specyfic xml Element
 	 * @param element Element containg Action data
