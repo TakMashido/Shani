@@ -1,5 +1,4 @@
 Can't merge order to ExecuteOrder directly after creating new target.
 Handle network errors in TranslateOrder.
-Handle errors of executing app/ opening file in ExecuteOrder.
+Handle errors of executing app/opening file in ExecuteOrder.
 Fix error caused by diffrend character encoding in cmd and java. Refer only to national characters like "¿". (Handled by using -Dfile.encoding=IBM852 in run bat file)
-In calculate module 0,6933*1024 is -709,9392; 1/0.02 is -5 (error with processing comma?)
