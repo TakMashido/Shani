@@ -171,7 +171,14 @@ public class ShaniString {
 	/**Splits ShaniString to words group and each to single words.
 	 * @return Array[][] of words. Each entry is single word.
 	 */
-	public ShaniString[][] split() {										//For further optymalization can store once splitted val somewhere. It needs changes in ShaniString to make inmutable. Any change on it have to be applied on new object like in original string.
+	public ShaniString[][] split() {
+		return split(true);
+	}
+	/**Splits ShaniString to words group and each to single words.
+	 * @param cut If cut given ShaniString on each occurence of '*'
+	 * @return Array[][] of words. Each entry is single word.
+	 */
+	public ShaniString[][] split(boolean cut){										//For further optymalization can store once splitted val somewhere. It needs changes in ShaniString to make inmutable. Any change on it have to be applied on new object like in original string.
 		var Return=new ShaniString[value.length][];
 		
 		for(int i=0;i<value.length;i++) {
@@ -183,12 +190,12 @@ public class ShaniString {
 			String[] stra=ls.toArray(new String[0]);
 			Return[i]=new ShaniString[stra.length];
 			for(int j=0;j<stra.length;j++) {
-				Return[i][j]=new ShaniString(stra[j]);
+				Return[i][j]=new ShaniString(stra[j],cut);
 			}
 		}
 		if(stemmedValue!=null) {
 			for(int i=0;i<Return.length;i++) {
-				assert stemmedValue[i].length==Return[i].length:"Looks like stemming in ShaniString started deleting words. Method split don't support it. Fix it.";
+				assert stemmedValue[i].length==Return[i].length:"Looks like stemming in ShaniString started deleting words. Method split don't support it. Fix sentence word splitting alg.";
 				for(int j=0;j<Return[i].length;j++) {
 					char[][][] stval=new char[1][1][stemmedValue[i][j].length];
 					System.arraycopy(stemmedValue[i][j], 0, stval[0][0], 0, stemmedValue[i][j].length);

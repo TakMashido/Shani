@@ -49,7 +49,7 @@ public class SentenceMatcher {
 	 * @return Array of {@code SentenceResoult} object representing resoults of successful matching.
 	 */
 	public SentenceResoult[] process(ShaniString string) {
-		var str=string.split();
+		var str=string.split(false);
 		
 		ArrayList<SentenceResoult> Return=new ArrayList<>();
 		for(Sentence sen:sentences) {

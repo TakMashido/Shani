@@ -6,13 +6,10 @@ Add 'or' option to two or more elements in SentenceMatcher.
 Override xml parser to add doc chenged flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
 Make project name a shortcut (Simple Heurestic n a Interpreter)
 Add errors handler (Mostly for loading modules time. Will allow to better error reporting and menagment)
-Move respones keys from config file to main file.
+Move respones keys from config file to main file. And perform other data movements. (store data of each Order in one xml node, except some data which be changen(user/computer dependet))
 Add option of compressing data files.
 Add speech recognition layer for input.
 Add speech sytesis layer for output.
-
-Orders zone:
-CalculateOrder-> Let it react to queries like "podziel 3 przez 2"
 
 Order to add:
 storage order

@@ -1,36 +1,57 @@
 package shani.orders;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 
-import org.w3c.dom.Element;
-
+import shani.Engine;
 import shani.ShaniString;
-import shani.orders.templates.KeywordOrder;
+import shani.orders.templates.SentenceMatcherOrder;
 
-public class CalculateOrder extends KeywordOrder {
+public class CalculateOrder extends SentenceMatcherOrder {
 	private static ShaniString calculationResoultMessage=ShaniString.loadString("orders.CalculateOrder.calculationResoultMessage");
 	private static ShaniString calculationFailedMessage=ShaniString.loadString("orders.CalculateOrder.calculationFailedMessage");
 	
-	public KeywordAction actionFactory(Element element) {
-		return null;
-	}
-	
-	public UnmatchedAction getUnmatchedAction() {
+	@Override
+	protected SentenceMatcherAction actionFactory(String sentenceName, HashMap<String, String> returnValues) {
 		return new CalculateAction();
 	}
 	
-	public class CalculateAction extends UnmatchedAction{
+	public class CalculateAction extends SentenceMatcherAction{
+
 		@Override
-		public boolean execute() {
+		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			try {
-				System.out.printf(calculationResoultMessage.toString(),calculate(unmatched.toString()));
-				System.out.println();
-				return true;
+				switch(sentenceName) {
+				case "count":
+					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("count")));
+					return true;
+				case "power":
+					System.out.printf(calculationResoultMessage.toString(),Math.pow(calculate(returnValues.get("power1")), calculate(returnValues.get("power2"))));
+					return true;
+				case "multiply":
+					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("multiply1"))*calculate(returnValues.get("multiply2")));
+					return true;
+				case "divide":
+					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("divide1"))/calculate(returnValues.get("divide2")));
+					return true;
+				case "add":
+					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("add1"))+calculate(returnValues.get("add2")));
+					return true;
+				case "substract":
+					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("substract1"))/calculate(returnValues.get("substract2")));
+					return true;
+				default:
+					assert false:sentenceName+" is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";
+					System.err.println(sentenceName+" is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.");
+					System.out.print(Engine.errorMessage);
+					return false;
+				}
 			} catch (Exception e) {
-				System.out.println(calculationFailedMessage);
+				System.out.print(calculationFailedMessage);
 				e.printStackTrace();
 				return false;
+			} finally {
+				System.out.println();
 			}
 		}
 	}
@@ -70,8 +91,6 @@ public class CalculateOrder extends KeywordOrder {
 			}
 		}
 		
-		System.out.println(Arrays.toString(elements.toArray()));
-		
 		Object el2=elements.get(0);														//Parse '.' and ','
 		for(int i=0;i<elements.size()-1;i++) {
 			Object el=el2;
@@ -95,8 +114,6 @@ public class CalculateOrder extends KeywordOrder {
 				}
 			}
 		}
-		
-		System.out.println(Arrays.toString(elements.toArray()));
 		
 		el2=elements.get(0);														//parse '-'
 		for(int i=0;i<elements.size()-1;i++) {
