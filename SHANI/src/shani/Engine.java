@@ -67,11 +67,13 @@ public class Engine {
 		start();
 	}
 	public static void initialize(String[]args) {
-		if(initialized) throw new RuntimeException("Engine already initialized");
+		if(initialized)
+//			return;
+			throw new RuntimeException("Engine already initialized");					//Can make problems. Throw not visible.
 		initialized=true;
 		ArgsDecoder argsDec=new ArgsDecoder(args);
 		
-		if(argsDec.containFlag("-c","--custom")) {		//costom args
+		if(argsDec.containFlag("-c","--custom")) {		//custom args
 			System.out.println("Please give args.");
 			@SuppressWarnings("resource")
 			Scanner in=new Scanner(new Scanner(System.in).nextLine());
@@ -189,7 +191,7 @@ public class Engine {
 				commands.print('!');
 			} else if(exec.isSuccesful()) lastExecuted=exec;
 			commands.print(str);
-			System.out.println(" "+(time-(System.nanoTime())/1000f)+" mikroS");
+			commands.println(" "+(time-(System.nanoTime())/1000f)+" mikroS");
 		}
 	}
 	

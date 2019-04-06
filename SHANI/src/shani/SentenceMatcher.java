@@ -1,19 +1,12 @@
 package shani;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 /**More powerfull matching engine than ShaniMatcher.
  * Tries to match whole sentence and get data out of it, not only apply some keywords.
@@ -23,7 +16,6 @@ public class SentenceMatcher {
 	private Sentence[] sentences;
 	
 	public SentenceMatcher(Node node) {
-		
 		var nodes=node.getChildNodes();
 		HashMap<String,String> parts=new HashMap<String,String>();
 		for(int i=0;i<nodes.getLength();i++) {
@@ -34,7 +26,7 @@ public class SentenceMatcher {
 		nodes=((Element)node).getElementsByTagName("template");
 		sentences=new Sentence[nodes.getLength()];
 		for(int i=0;i<nodes.getLength();i++) {
-			Node nod=nodes.item(0);
+			Node nod=nodes.item(i);
 			sentences[i]=new Sentence(parts,nod.getTextContent(),((Element)nod).getAttribute("name"));
 		}
 		
@@ -249,125 +241,4 @@ public class SentenceMatcher {
 			return cost;
 		}
 	}
-	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException {
-		Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("temp.xml"));
-		var parser=new SentenceMatcher(doc.getElementsByTagName("node").item(0));
-//		long time=System.nanoTime();
-		var resoults=parser.process(new ShaniString("word is a b c d e f end"));
-//		System.out.println("time: "+(System.nanoTime()-time));
-		System.out.println("resoults number: "+resoults.length);
-		for(var res:resoults)
-			System.out.println(res.name+" "+res.data.keySet()+" "+res.data.values()+" "+res.cost);
-		System.out.println("\nEnd of matching");
-	}
-	
-	/*private SentenceResoult process(ShaniString[]str) {				//copy of savenes
-	var Return=new SentenceResoult();
-	
-	int sentenceIndex=0;
-	int strIndex=-1;
-	int matchedIndex=-1;
-	int[] subIndexs = null;
-	StringBuffer strBuf=new StringBuffer();
-	while(++strIndex<str.length&&sentenceIndex<sentence.length) {
-		var elem=sentence[sentenceIndex];
-		switch(elem.type) {
-		case data:
-			subIndexs=null;
-			if(sentenceIndex+1==sentence.length) {
-				Return.data.put(elem.string, strBuf.toString());
-			}
-			if(sentenceIndex+1>=sentence.length) {			//end of sentence
-				strBuf.append(str[strIndex++]);
-				for(;strIndex<str.length;strIndex++)strBuf.append(' ').append(str[strIndex]);
-				Return.data.put(elem.string, strBuf.toString());
-				sentenceIndex++;
-				break;
-			}
-			var elem2=sentence[sentenceIndex+1];
-			switch(elem2.type) {
-			case data:
-				assert false:"Two data elements shouldn't apper next to each other.";
-				sentenceIndex++;
-				continue;
-			case string:
-				ShaniString sst=str[strIndex];
-				boolean matched=false;
-				for(int i=0;i<elem2.shaniStringArray.length;i++) {
-					if(sst.equals(elem2.shaniStringArray[i][0])) {
-						int length=strBuf.length()-1;
-						if(length>0) {
-							Return.data.put(elem.string, strBuf.delete(length, length+1).toString());
-							strBuf.delete(0, length);
-						}
-						sentenceIndex++;
-						strIndex--;
-						matched=true;
-						break;
-					}
-				}
-				if(!matched)strBuf.append(sst).append(' ');
-				break;
-			case regex:
-				if(!str[strIndex].isEquals(elem2.regex)) {
-					strBuf.append(str[strIndex]).append(' ');
-				} else {
-					Return.data.put(elem.string, strBuf.toString());
-					strBuf.delete(0, strBuf.length());
-					sentenceIndex+=2;			//Skip already matched regex pattern.
-					strIndex++;			
-				}
-				break;
-			default:
-				assert false:"Trying to process unrecognized content SentenceElement in SentenceMatcher.";
-			}
-			break;
-		case string:
-			if(subIndexs==null)subIndexs=new int[elem.shaniStringArray.length];
-			int processed=0;
-			boolean positive=false;
-			for(int i=0;i<subIndexs.length;i++) {
-				switch(subIndexs[i]) {				//-2 -> not matched, -1 -> matched, >=0 during checking
-				case -1:
-					positive=true;
-				case -2:
-					processed++;
-					continue;
-				}
-				if(!str[strIndex].equals(elem.shaniStringArray[i][subIndexs[i]])) {
-					subIndexs[i]=-2;
-					continue;
-				}
-				subIndexs[i]++;
-				if(subIndexs[i]==elem.shaniStringArray[i].length) {
-					processed++;
-					positive=true;
-					subIndexs[i]=-1;
-					matchedIndex=strIndex;
-				}
-			}
-			if(processed==subIndexs.length) {				//All of sub ShaniStrings processed
-				if(positive) {								//and one or more of them matched
-					strIndex=matchedIndex;
-					sentenceIndex++;
-				} else {
-					return null;
-				}
-			}
-			break;
-		case regex:
-			subIndexs=null;
-			if(!str[strIndex].isEquals(elem.regex)) {
-				return null;
-			}
-			sentenceIndex++;
-			break;
-		default: 
-			assert false:"Trying to process unrecognized content SentenceElement in SentenceMatcher.";
-			//System.err.println("Trying to process unrecognized content SentenceElement in SentenceMatcher.");
-		}
-	}
-	if(strIndex>=str.length&&sentenceIndex>=sentence.length)return Return;
-	return null;
-}*/
 }

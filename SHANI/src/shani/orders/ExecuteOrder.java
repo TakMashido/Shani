@@ -109,12 +109,12 @@ public class ExecuteOrder extends KeywordOrder {
 			if(Return)System.out.println(successfulMessage);
 			return Return;
 		}
-		private boolean execute(String command, int succesfulExitVal) {
+		private boolean execute(String command, int succesfullExitVal) {
 			try {
 				Process proc=Runtime.getRuntime().exec(command);
 				proc.waitFor();
 				Engine.debug.println(command+": "+proc.exitValue());
-				return proc.exitValue()==succesfulExitVal;
+				return proc.exitValue()==succesfullExitVal;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return false;

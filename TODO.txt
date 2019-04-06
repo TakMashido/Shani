@@ -1,7 +1,13 @@
 Add proxy support for web based modules
+Add module parsing numbers and it's words matching them to one form.
+Add module changing date description words (number of day, month, week day) to one form(exact date).
+Add return value optional return value checking by regex/ShaniString.
+Add 'or' option to two or more elements in SentenceMatcher.
+Override xml parser to add doc chenged flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
 Make project name a shortcut (Simple Heurestic n a Interpreter)
 Add errors handler (Mostly for loading modules time. Will allow to better error reporting and menagment)
 Move respones keys from config file to main file.
+Add option of compressing data files.
 Add speech recognition layer for input.
 Add speech sytesis layer for output.
 

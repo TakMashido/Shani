@@ -5,14 +5,10 @@ import java.util.Arrays;
 
 import org.w3c.dom.Element;
 
-import shani.Engine;
 import shani.ShaniString;
 import shani.orders.templates.KeywordOrder;
 
 public class CalculateOrder extends KeywordOrder {
-	static {
-		Engine.initialize(new String[] {"-d"});
-	}
 	private static ShaniString calculationResoultMessage=ShaniString.loadString("orders.CalculateOrder.calculationResoultMessage");
 	private static ShaniString calculationFailedMessage=ShaniString.loadString("orders.CalculateOrder.calculationFailedMessage");
 	

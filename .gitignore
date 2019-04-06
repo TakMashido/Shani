@@ -27,4 +27,7 @@ hs_err_pid*
 bin/
 
 #SHANI data files
-SHANI/Shani.dat
+SHANI/*.dat
+
+#test files
+test*

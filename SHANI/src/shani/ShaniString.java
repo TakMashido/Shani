@@ -281,7 +281,7 @@ public class ShaniString {
 		}
 	}
 	private char[][] stem(String data){
-		char[] dataArray=data.toCharArray();
+		char[] dataArray=data.toLowerCase().toCharArray();
 		
 		ArrayList<char[]> words=new ArrayList<char[]>();
 		

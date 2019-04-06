@@ -35,9 +35,9 @@ public abstract class SentenceMatcherOrder extends Order{
 		return Return;
 	}
 	
-	protected abstract SentenceAction actionFactory(String sentenceName, HashMap<String,String> returnValues);
+	protected abstract SentenceMatcherAction actionFactory(String sentenceName, HashMap<String,String> returnValues);
 	
-	protected abstract class SentenceAction extends Action{
+	protected abstract class SentenceMatcherAction extends Action{
 		private String sentenceName;
 		private HashMap<String,String> returnValues;
 		
