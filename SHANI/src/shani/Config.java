@@ -42,6 +42,11 @@ public class Config {
 		wordInsertionCost=(short)getProperty(prop,"wordInsertionCost","300");
 		wordDeletionCost=(short)getProperty(prop,"wordDeletionCost","120");
 		
+		socksProxyHost=prop.getProperty("socksProxyHost",null);
+		socksProxyPort=getProperty(prop,"socksProxyPort","0");
+		
+		HTTPProxyHost=prop.getProperty("HTTPProxyHost",null);
+		HTTPProxyPort=getProperty(prop,"HTTPProxyPort","0");
 	}
 	private static final int getProperty(Properties prop,String key,String defaultVal) {
 		try {
@@ -70,7 +75,13 @@ public class Config {
 	public static final short sentenseCompareTreshold;
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
-
+	
+	public static final String socksProxyHost;
+	public static final int socksProxyPort;
+	
+	public static final String HTTPProxyHost;
+	public static final int HTTPProxyPort;
+	
 	/**Multiple value by parameter dependent of another one.
 	 * @author TakMashido
 	 */

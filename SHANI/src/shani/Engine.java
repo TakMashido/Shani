@@ -26,6 +26,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.jsoup.Jsoup;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,7 +63,7 @@ public class Engine {
 	private static boolean initialized=false;
 	
 	public static void main(String[] args) {
-		new ShaniString();								//FIXME beacouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work property(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
+		new ShaniString();								//FIXME beacouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work properly(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
 		initialize(args);
 		start();
 	}
@@ -166,6 +167,17 @@ public class Engine {
 			System.out.println("Error ocured during loading storage data. Please read error log.");
 		}
 		
+		if(Config.socksProxyHost!=null) {
+//			System.setProperty("proxySet","true");
+			System.setProperty("socksProxyHost", Config.socksProxyHost);
+			System.setProperty("socksProxyPort", Integer.toString(Config.socksProxyPort));
+		}
+		if(Config.HTTPProxyHost!=null) {
+			System.setProperty("http.proxyHost", Config.HTTPProxyHost);
+			System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
+		}
+		
+		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				shutdownHook();
@@ -191,7 +203,7 @@ public class Engine {
 				commands.print('!');
 			} else if(exec.isSuccesful()) lastExecuted=exec;
 			commands.print(str);
-			commands.println(" "+(time-(System.nanoTime())/1000f)+" mikroS");
+			commands.println("-> "+(System.nanoTime()-time)/1000/1000f+" ms");
 		}
 	}
 	

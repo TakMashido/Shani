@@ -1,4 +1,3 @@
-Add proxy support for web based modules
 Add module parsing numbers and it's words matching them to one form.
 Add module changing date description words (number of day, month, week day) to one form(exact date).
 Add return value optional return value checking by regex/ShaniString.
