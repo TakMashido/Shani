@@ -507,12 +507,23 @@ public class ShaniString {
 		return value;
 	}
 	
+	/**Prints content to System.out.
+	 * Equivalent to System.out.println({@link #toString() toString()}).
+	 * 
+	 */
+	public void printOut() {
+		System.out.println(toString());
+	}
+	
 	public String toFullString() {
 		StringBuffer str=new StringBuffer();
 		str.append(value[0]);
 		for(int i=1;i<value.length;i++)str.append("*").append(value[i]);
 		return str.toString();
 	}
+	/* Return one random String from inner String set.
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		if(value.length<=0)return null;
 		return value[random.nextInt(value.length)];

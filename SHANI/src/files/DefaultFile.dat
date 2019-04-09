@@ -10,7 +10,7 @@
                 <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
                 <template name="divide">$divide ?divide1 $connect ?divide2</template>
                 <template name="add">$add ?add1 $connect ?add2</template>
-                <template name="substract">$substract ?substract1 $connect ?substract2</template>
+                <template name="substract">$substract ?substract2 $connect ?substract1</template>
                 <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
                 <power>potęga</power>
                 <multiply>pomnórz*iloczyn</multiply>
@@ -18,7 +18,7 @@
                 <add>dodaj*suma</add>
                 <substract>odejmij*różnica</substract>
                 <startword>ile mamy po*podaj*</startword>
-                <connect>przez*od*do*i</connect>
+                <connect>przez*od*do*i*na</connect>
             </sentence>
         </order>
         <order classname="shani.orders.MasterOrder">

@@ -38,7 +38,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("add1"))+calculate(returnValues.get("add2")));
 					return true;
 				case "substract":
-					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("substract1"))/calculate(returnValues.get("substract2")));
+					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("substract1"))-calculate(returnValues.get("substract2")));
 					return true;
 				default:
 					assert false:sentenceName+" is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";

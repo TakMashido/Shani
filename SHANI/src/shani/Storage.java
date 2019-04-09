@@ -31,7 +31,7 @@ public class Storage {
 	public static NodeList getUserNodes(String path) {
 		return getNodes(userdata,path);
 	}
-	public static ShaniString getUserString(String stringPath) {
+	public static ShaniString getUserShaniString(String stringPath) {
 		return getShaniString(userdata,stringPath);
 	}
 	public static boolean getUserBoolean(String path) {

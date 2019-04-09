@@ -29,20 +29,7 @@ public class SentenceMatcher {
 			Node nod=nodes.item(i);
 			sentences[i]=new Sentence(parts,nod.getTextContent(),((Element)nod).getAttribute("name"));
 		}
-		
 	}
-	private enum Type{
-		data,string,regex,none;
-		
-		private static Type get(String val) {
-			switch(val.charAt(0)) {
-			case '?': return data;
-			case '$': return string;
-			case '^': return regex;
-			default: return none;
-			}
-		}
-	};
 	
 	/**Process given ShaniString.
 	 * @param string {@code ShaniString} in which engine search for matches.
@@ -60,6 +47,18 @@ public class SentenceMatcher {
 		return Return.toArray(new SentenceResoult[0]);
 	}
 	
+	private enum Type{
+		data,string,regex,none;
+		
+		private static Type get(String val) {
+			switch(val.charAt(0)) {
+			case '?': return data;
+			case '$': return string;
+			case '^': return regex;
+			default: return none;
+			}
+		}
+	};
 	private class SentenceElement{
 		private Type type;
 		private String string;

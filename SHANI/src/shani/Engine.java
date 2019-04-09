@@ -26,7 +26,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.jsoup.Jsoup;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,8 +68,10 @@ public class Engine {
 	}
 	public static void initialize(String[]args) {
 		if(initialized)
-//			return;
 			throw new RuntimeException("Engine already initialized");					//Can make problems. Throw not visible.
+//			return;
+		long time=System.currentTimeMillis();
+		
 		initialized=true;
 		ArgsDecoder argsDec=new ArgsDecoder(args);
 		
@@ -183,6 +184,8 @@ public class Engine {
 				shutdownHook();
 			}
 		});
+		
+		commands.println("Startup time: "+(System.currentTimeMillis()-time)+"ms");
 	}
 	public static void start() {
 		if(!initialized) initialize(new String[0]);
