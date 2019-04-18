@@ -376,7 +376,7 @@ public class Engine {
 	 * @return If license corfirmed
 	 */
 	public static boolean getLicenseConfirmation(String name,boolean displayConfirmation) {
-		String nameToSearch=name.replace('.', '-');
+		String nameToSearch=name.replace('.', '-').toLowerCase();
 		boolean confirmed=Storage.getUserBoolean("acceptedLicences."+nameToSearch);
 		if(confirmed)return true;
 		if(!displayConfirmation)return false;

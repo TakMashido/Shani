@@ -1,56 +1,51 @@
 package shani;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
+import shani.SearchEngine.SearchResoults.SearchResoult;
+
 public class SearchEngine {
-	private static final Pattern websideMainAddressPattern=Pattern.compile("^(?:http://|https://)(?:[\\w\\d\\.]*\\.)?([\\w\\d-]+\\.[\\w\\d-]+)(?:/[\\w\\d-._~:/?#\\[\\]@!\\$&'\\(\\)\\*\\+,;%=]*)?$");
+	private static final Pattern websideMainAddressPattern=Pattern.compile("^(?:http://|https://)(?:[\\w\\d\\.]*\\.)?([\\w\\d\\-]+\\.[\\w\\d]+)(?:/[\\w\\d\\-._~:/?#\\[\\]@!\\$&'\\(\\)\\*\\+,;%=]*)?$");
 	
 	public static SearchResoults search(String query) throws IOException {
 		var Return=new SearchResoults();
 		
-//		Engine.getLicenseConfirmation("JSOUP");
-//		Engine.getLicenseConfirmation("duckduckgo.com");
+		Engine.getLicenseConfirmation("JSOUP");
+		Engine.getLicenseConfirmation("duckduckgo.com");
 		
-//		var doc=Jsoup.connect("https://duckduckgo.com/html?q="+query).get();
-		var doc=Jsoup.parse(new File("ducktest.html"), "UTF-8");
-		
-//		var out=new PrintStream(new FileOutputStream("ducktest.html"));
-//		out.print(doc.html());
-//		out.close();
+		var doc=Jsoup.connect("https://duckduckgo.com/html?q="+query).get();
 		
 		var entries=doc.getElementsByClass("result");
-		for(var entry:entries)Return.resoults.add(Return.new SearchResoult(entry));
+		for(var entry:entries)Return.add(Return.new SearchResoult(entry));
 		
 		return Return;
 	}
 	
-	public static class SearchResoults{
-		public final List<SearchResoult> resoults=new LinkedList<>();
-		
-		public void removeElementsByMainAddress(String address) {
-			int length=resoults.size();
+	public static class SearchResoults extends ArrayList<SearchResoult>{
+		public SearchResoults removeElementsByMainAddress(String address) {
+			int length=this.size();
 			for(int i=0;i<length;i++) {
-				if(resoults.get(i).getMainAddress().equals(address)) {
-					resoults.remove(i--);
+				if(this.get(i).getMainAddress().equals(address)) {
+					this.remove(i--);
 					length--;
 				}
 			}
+			return this;
 		}
-		public void selectElementsByMainAddress(String address) {
-			int length=resoults.size();
+		public SearchResoults selectElementsByMainAddress(String address) {
+			int length=this.size();
 			for(int i=0;i<length;i++) {
-				if(!resoults.get(i).getMainAddress().equals(address)) {
-					resoults.remove(i--);
+				if(!this.get(i).getMainAddress().equals(address)) {
+					this.remove(i--);
 					length--;
 				}
 			}
+			return this;
 		}
 		
 		public class SearchResoult{
@@ -80,11 +75,5 @@ public class SearchEngine {
 				return url+" :::: "+title;
 			}
 		}
-	}
-	
-	public static void main(String[]args) throws IOException {
-		var a=search("a");
-		a.selectElementsByMainAddress("wikipedia.org");
-		for(var res:a.resoults)System.out.println(res);
 	}
 }

@@ -5,6 +5,7 @@ Add return value of SentenceMatcher optional checking by regex/ShaniString.
 Add 'or' option to two or more elements in SentenceMatcher.
 Override xml parser to add doc chenged flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
 Intern long-life String (keywords/responses) during some SHANI inactivity time.
+Add loops detetion system for MergeOrder
 Make project name a shortcut (Simple Heurestic n a Interpreter)
 Add errors handler (Mostly for loading modules time. Will allow to better error reporting and menagment)
 Move respones keys from config file to main file. And perform other data movements. (store data of each Order in one xml node, except some data which be changen(user/computer dependet))

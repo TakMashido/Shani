@@ -30,4 +30,4 @@ bin/
 SHANI/*.dat
 
 #test files
-test*
+*test*
