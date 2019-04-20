@@ -1,7 +1,38 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <shani>
     <orders>
-        <version>v1</version>
+       <version>v1</version>
+       <order classname="shani.orders.WeatherOrder">
+            <sentence>
+                <template name="weather">$ask $weather $where ?where</template>
+                <template name="weather">$ask ?when $weather $where ?where</template>
+                <template name="temperature">$ask $temperature $where ?where</template>
+                
+                <where>w*</where>
+                <temperature>temperaturę*stopni</temperature>
+                <weather>pogoda*</weather>
+                <ask>jaka jest*jak jest*jaka będzie*podaj*podaj*pokaż*ile będzie</ask>
+            </sentence>
+            <daychooser>
+                <template name="1">$day1</template>
+                <template name="2">$day2</template>
+		<template name="n">$break ?number $day</template>
+		
+                <day1>jutro*jutrzejsza</day1>
+		<day2>pojutrze</day2>
+                <break>za</break>
+                <day>dzień*dni</day>
+            </daychooser>
+            <weathersentence>
+                <template name="weather">weather comma break1 tempMin break2 tempMax degree</template>
+                <template name="temperature">break1 tempMin break2 tempMax degree</template>
+                
+		<degree>stopni</degree>
+                <comma>, </comma>
+                <break1>od </break1>
+                <break2> do </break2>
+            </weathersentence>
+        </order>
        <order classname="shani.orders.CalculateOrder">
             <sentence>
                 <template name="count">$count ?count</template>
