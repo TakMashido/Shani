@@ -31,6 +31,13 @@ public class SentenceMatcher {
 		}
 	}
 	
+	/**Process given String.
+	 * @param string {@code ShaniString} in which engine search for matches.
+	 * @return Array of {@code SentenceResoult} object representing resoults of successful matching.
+	 */
+	public SentenceResoult[] process(String string) {
+		return process(new ShaniString(string,false));
+	}
 	/**Process given ShaniString.
 	 * @param string {@code ShaniString} in which engine search for matches.
 	 * @return Array of {@code SentenceResoult} object representing resoults of successful matching.
@@ -217,7 +224,7 @@ public class SentenceMatcher {
 		}
 	}
 	
-	/**Object containing resoult of matching ShaniString by SenetnceMenager
+	/**Object containing resoult of matching ShaniString by SenetenceMenager
 	 * @author TakMashido
 	 */
 	public class SentenceResoult{

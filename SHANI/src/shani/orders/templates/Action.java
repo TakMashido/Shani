@@ -15,7 +15,7 @@ public abstract class Action{
 	 */
 	public abstract boolean connectAction(String action);
 	/**Execute specyfic action
-	 * @return If succesful executed
+	 * @return If succesfully executed
 	 */
 	public abstract boolean execute();
 	

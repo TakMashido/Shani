@@ -27,7 +27,19 @@ public class SearchEngine {
 	}
 	
 	public static class SearchResoults extends ArrayList<SearchResoult>{
-		public SearchResoults removeElementsByMainAddress(String address) {
+		private static final long serialVersionUID = 3867440709404455784L;
+		
+		public SearchResoults selectElementsByDomain(String address) {
+			int length=this.size();
+			for(int i=0;i<length;i++) {
+				if(!this.get(i).getMainAddress().equals(address)) {
+					this.remove(i--);
+					length--;
+				}
+			}
+			return this;
+		}
+		public SearchResoults removeElementsByDomain(String address) {
 			int length=this.size();
 			for(int i=0;i<length;i++) {
 				if(this.get(i).getMainAddress().equals(address)) {
@@ -37,10 +49,21 @@ public class SearchEngine {
 			}
 			return this;
 		}
-		public SearchResoults selectElementsByMainAddress(String address) {
+		
+		public SearchResoults selectElementsWithTitleContaining(String s) {
 			int length=this.size();
 			for(int i=0;i<length;i++) {
-				if(!this.get(i).getMainAddress().equals(address)) {
+				if(!this.get(i).title.contains(s)) {
+					this.remove(i--);
+					length--;
+				}
+			}
+			return this;
+		}
+		public SearchResoults removeElementsWithTitleContaining(String s) {
+			int length=this.size();
+			for(int i=0;i<length;i++) {
+				if(this.get(i).title.contains(s)) {
 					this.remove(i--);
 					length--;
 				}

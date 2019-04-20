@@ -1,9 +1,6 @@
 Add module parsing numbers and it's words matching them to one form.
 Add module changing date description words (number of day, month, week day) to one form(exact date).
-Add to SentenceMatcher option of matching sub sentence
-Add return value of SentenceMatcher optional checking by regex/ShaniString.
-Add 'or' option to two or more elements in SentenceMatcher.
-Override xml parser to add doc chenged flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
+Override xml parser to add doc changed flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
 Intern long-life String (keywords/responses) during some SHANI inactivity time.
 Add loops detetion system for MergeOrder
 Make project name a shortcut (Simple Heurestic n a Interpreter)
@@ -13,10 +10,18 @@ Add option of compressing data files.
 Add speech recognition layer for input.
 Add speech sytesis layer for output.
 
+SentenceMatcher:
+If two or more return blocks presents near each other return all posible cofigurations of matched sentence, not report error like now.
+Add option of matching sub sentence
+Add return value optional checking by regex/ShaniString.
+Add 'or' option to two or more elements.
+
 Order to add:
 storage order
 Weatcher Order
 ConverterOrder-> convert GB,currency,
 
 Space of dreams:
-Add NLP layer beetwen user input and program to add beter sentense understanding, and another beetwen program out and user to make sentenses more natural(and propably add some random intput value for it to increase it's randomness)
+Add NLP layer beetwen program out and user to make sentenses more natural(learn it to put right ending of word)
+	+add some random input value for it to increase it's randomness
+Add NLP layer beetwen user input and program to add beter sentense understanding
