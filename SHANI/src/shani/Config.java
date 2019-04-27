@@ -42,6 +42,8 @@ public class Config {
 		wordInsertionCost=(short)getProperty(prop,"wordInsertionCost","300");
 		wordDeletionCost=(short)getProperty(prop,"wordDeletionCost","120");
 		
+		optionalMatchTreshold=(short)getProperty(prop,"optionalMatchTreshold","200");
+		
 		socksProxyHost=prop.getProperty("socksProxyHost",null);
 		socksProxyPort=getProperty(prop,"socksProxyPort","0");
 		
@@ -76,13 +78,15 @@ public class Config {
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
 	
+	public static final short optionalMatchTreshold;							//Minimal diffence beetwen cost with skipped and without skipping optional sentence part in SentenceMatcher
+	
 	public static final String socksProxyHost;
 	public static final int socksProxyPort;
 	
 	public static final String HTTPProxyHost;
 	public static final int HTTPProxyPort;
 	
-	/**Multiple value by parameter dependent of another one.
+	/**Multiple value by parameter depending on another one.
 	 * @author TakMashido
 	 */
 	public static final class Multiplier{

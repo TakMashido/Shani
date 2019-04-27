@@ -1,20 +1,46 @@
 package shani;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**More powerfull matching engine than ShaniMatcher.
- * Tries to match whole sentence and get data out of it, not only apply some keywords.
+ * <pre>
+ * 
+ * Match whole sentence and get data out of it.
+ * 
+ * It gets data directly from one xml node.
+ * 
+ * Subnodes named "sentence" are sentence templates.
+ * You can specifi "name" attribute in it for further recognizing which sentence was matched by matcher.
+ * It's text content contain words representing Sentence Elements with additional special characters at from of each word to choose their type. Following word is name of sentence element.
+ * If it's start with '*' character, would be not used durnig sentence mathing.
+ * $ means ShaniString. It'll perform normal ShaniStrig Matching with this element.
+ * ^ means regex. It'll try to match content with regex
+ * ? means return Value. It'll store corresponding value from processed String in HashMap under given keyword.
+ * 
+ * Subnodes with other names are used to provide addional data for sentence elements.
+ * E.g. element "$foo" will compare input value with ShaniString stored under "foo" subnode. This also apply for regex matching.
+ * </pre>
+ * 
  * @author TakMashido
  */
 public class SentenceMatcher {
 	private Sentence[] sentences;
 	
+	/**Creates new Senetnce Matcher Object based on data from given node.
+	 * @param node XML Node which contain Senetnce templates and it's elements information.
+	 */
 	public SentenceMatcher(Node node) {
 		var nodes=node.getChildNodes();
 		HashMap<String,String> parts=new HashMap<String,String>();
@@ -32,7 +58,7 @@ public class SentenceMatcher {
 	}
 	
 	/**Process given String.
-	 * @param string {@code ShaniString} in which engine search for matches.
+	 * @param string String in which engine search for matches.
 	 * @return Array of {@code SentenceResoult} object representing resoults of successful matching.
 	 */
 	public SentenceResoult[] process(String string) {
@@ -54,55 +80,17 @@ public class SentenceMatcher {
 		return Return.toArray(new SentenceResoult[0]);
 	}
 	
-	private enum Type{
-		data,string,regex,none;
-		
-		private static Type get(String val) {
-			switch(val.charAt(0)) {
-			case '?': return data;
-			case '$': return string;
-			case '^': return regex;
-			default: return none;
-			}
-		}
-	};
-	private class SentenceElement{
-		private Type type;
-		private String string;
-		private ShaniString[][] shaniStringArray;
-		private Pattern regex;
-		
-		private SentenceElement(HashMap<String,String> parts,String data) {
-			type=Type.get(data);
-			String realData=data.substring(1);
-			switch(type) {
-			case data:string=realData;break;
-			case string:
-				String temp=parts.get(realData);
-				if(temp==null)System.err.println("Can't find identifier "+data+" during processing shani.SentenceMather");
-				else shaniStringArray=new ShaniString(temp).split();
-				break;
-			case regex:
-				temp=parts.get(realData);
-				if(temp==null)System.err.println("Can't find identifier "+data+" during processing shani.SentenceMather");
-				regex=Pattern.compile(temp);
-				break;
-			default:System.err.println(realData+" in not valid sentence element of shani.SentenceMatcher");
-			}
-		}
-	}
 	private class Sentence{
 		private SentenceElement[] sentence;
-		private String name;
+		private String sentenceName;
 		
 		private Sentence(HashMap<String,String> parts,String content,String name) {
 			@SuppressWarnings("resource")
 			Scanner in=new Scanner(content);
-			this.name=name;
+			this.sentenceName=name;
 			
 			ArrayList<SentenceElement> sentenceTemp=new ArrayList<>();
-			SentenceElement elem;
-			while(in.hasNext()&&((elem=new SentenceElement(parts,in.next()))!=null))sentenceTemp.add(elem);
+			while(in.hasNext())sentenceTemp.add(createNewSentenceElement(parts,in.next()));
 			sentence=sentenceTemp.toArray(new SentenceElement[0]);
 		}
 		
@@ -111,7 +99,7 @@ public class SentenceMatcher {
 			short[] costs=new short[str.length];
 			
 			for(int i=0;i<str.length;i++)
-				costs[i]=process((Return[i]=new SentenceResoult(name)),str[i],0,0);
+				costs[i]=mainProcess((Return[i]=new SentenceResoult(sentenceName)),str[i],0,0);
 			
 			int minIndex=0;
 			for(int i=1;i<str.length;i++)
@@ -121,43 +109,95 @@ public class SentenceMatcher {
 			Return[minIndex].cost=costs[minIndex];
 			return Return[minIndex];
 		}
-		private short process(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {			//Returns cost of compartition
-//			System.out.println(strIndex+" "+sentenceIndex+" "+(sentenceIndex<sentence.length?sentence[sentenceIndex].type:"none"));
-			short ReturnValue=Short.MAX_VALUE;									//useful for debuging					
-			try {
-			if(strIndex>=str.length&&sentenceIndex>=sentence.length) {
-				ReturnValue= 0;
-				return ReturnValue;
+		
+		private SentenceElement createNewSentenceElement(HashMap<String,String> parts,String data) {
+			String name=data.substring(1);
+			switch(data.charAt(0)) {
+			case '*':return new OptionalElement(parts, name);
+			case '?':return new DataReturnElement(parts, name);
+			case '$':return new ShaniStringElement(parts, name);
+			case '^':return new RegexElement(parts, name);
 			}
-			if(sentenceIndex>=sentence.length) {
-				ReturnValue= (short) (Config.wordDeletionCost*(str.length-strIndex));
-				return ReturnValue;
-			}
-			if(strIndex>=str.length) {
-				ReturnValue= (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
-				return ReturnValue;
-			}
+			System.err.println("Unrecognized SenetnceMatcher elemet: "+data);
+			return null;
+		}
+		private final short mainProcess(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
+//			System.out.println(strIndex+" "+sentenceIndex);
+//			System.out.println(resoult.data);
+			if(strIndex>=str.length&&sentenceIndex>=sentence.length)
+				return 0;
+			if(sentenceIndex>=sentence.length)
+				return (short) (Config.wordDeletionCost*(str.length-strIndex));
 			
-			int minIndex;
-			int tempStrIndex;
-			var elem=sentence[sentenceIndex];
-			switch(elem.type) {
-			case data:										//TODO optymalize by decreasing number of self executions. If next sentence element is $ can predict start location of optimal match by ShaniString.getMatchingIndexMovable method.
+			
+			var ret=sentence[sentenceIndex].preProcess(resoult, str, strIndex, sentenceIndex);
+//			System.out.println(resoult.data);
+//			System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+ret);
+			return ret;
+		}
+		
+		private abstract class SentenceElement{
+			protected short preProcess(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
+				if(strIndex>=str.length)
+					return (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
+				return process(resoult,str,strIndex,sentenceIndex);
+			}
+			protected abstract short process(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex);
+		}
+		private class OptionalElement extends SentenceElement{
+			private SentenceElement element;
+			private OptionalElement(HashMap<String,String> parts,String data) {
+				element=createNewSentenceElement(parts, data);
+			}
+			@Override
+			protected short preProcess(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+				if(strIndex>=str.length) {
+					if(sentenceIndex==sentence.length-1) return 0;
+					else return (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
+				}
+				
+				var resCopy=new SentenceResoult(sentenceName);
+				
+				short normalCost=element.process(resCopy, str, strIndex, sentenceIndex);
+				if(normalCost<Config.optionalMatchTreshold)return normalCost;
+				
+				short skippedCost=mainProcess(resoult, str, strIndex, sentenceIndex+1);
+				
+				if(normalCost-skippedCost>Config.optionalMatchTreshold) {
+					resoult.add(resCopy);
+					return skippedCost;
+				}
+				return normalCost;
+			}
+			@Override
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+				assert false:"Method process in OptionalSentenceElement shouldn't be invoced";
+				return Short.MAX_VALUE;
+			}
+		}
+		private class DataReturnElement extends SentenceElement{
+			private String returnKey;
+			private DataReturnElement(HashMap<String,String> parts,String data) {
+				returnKey=data;
+			}
+			@Override
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
 				StringBuffer strBuf=new StringBuffer();
-				if(sentenceIndex+1>=sentence.length) {			//end of sentence
+				if(sentenceIndex+1>=sentence.length) {			//last elem of sentence
+					System.out.println("ret range2: "+strIndex+" "+str.length);
 					strBuf.append(str[strIndex++]);
 					for(;strIndex<str.length;strIndex++)strBuf.append(' ').append(str[strIndex]);
-					resoult.data.put(elem.string, strBuf.toString());
-					ReturnValue= 0;
-					return ReturnValue;
+					resoult.data.put(returnKey, strBuf.toString());
+					return 0;
 				}
-				assert sentence[sentenceIndex+1].type!=Type.data:"Two data elements shouldn't apper next to each other.";
-				short minCost=Short.MAX_VALUE;
-				minIndex=0;
-				SentenceResoult retResoult=null;
-				for(int i=strIndex;i<str.length;i++) {
-					var tempResoult=new SentenceResoult();
-					short tempCost=process(tempResoult,str,i,sentenceIndex+1);
+				assert !(sentence[sentenceIndex+1] instanceof DataReturnElement):"Two data elements shouldn't apper next to each other.";
+				
+				SentenceResoult retResoult=resoult.makeCopy();
+				int minIndex=strIndex;
+				short minCost=(short) (mainProcess(retResoult,str,strIndex,sentenceIndex+1)+Config.sentenseCompareTreshold);				//Add Config.sentenceCompareTreshold or Config.wordInsertionCost??
+				for(int i=strIndex+1;i<=str.length;i++) {
+					var tempResoult=resoult.makeCopy();
+					short tempCost=mainProcess(tempResoult,str,i,sentenceIndex+1);
 					if(tempCost<minCost) {
 						minCost=tempCost;
 						minIndex=i;
@@ -165,86 +205,130 @@ public class SentenceMatcher {
 					}
 				}
 				
-				if(strIndex<minIndex) {
+				if(minIndex>strIndex) {
 					strBuf.append(str[strIndex]);
 					for(int i=strIndex+1;i<minIndex;i++) {
 						strBuf.append(' ').append(str[i]);
 					}
-					resoult.data.put(elem.string, strBuf.toString());
-					resoult.data.putAll(retResoult.data);
-					ReturnValue= minCost;
-					return ReturnValue;
-				} else {
-					ReturnValue= Config.sentenseCompareTreshold;				//which one? theoretically it is only one not matched element, but it is data return elem so can be no point in processing longer and return Config.sentenceSompareTreshold
-					return ReturnValue;
-//					return (short)(cost+Config.wordInsertionCost);
-				}
-			case string:
-				short[] subCosts=new short[elem.shaniStringArray.length];
+					resoult.set(retResoult);
+					resoult.data.put(returnKey, strBuf.toString());
+				} else resoult.set(retResoult);
+				System.out.println("ret range: "+strIndex+" "+minIndex);
+				return minCost;
+			}
+		}
+		private class ShaniStringElement extends SentenceElement{
+			private ShaniString[][] value;
+			private ShaniStringElement(HashMap<String,String> parts,String data) {
+				value=new ShaniString(data).split();
+			}
+			@Override
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+				short[] subCosts=new short[value.length];
 				var sr=new SentenceResoult[subCosts.length];
 				
 				for(int i=0;i<subCosts.length;i++) {
-					var ret=ShaniString.getMatchingIndex(str, strIndex, sentence[sentenceIndex].shaniStringArray[i]);
-					subCosts[i]=(short) (process((sr[i]=new SentenceResoult()),str,ret.endIndex,sentenceIndex+1)+ret.cost);
+					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
+					if(ret.cost<Config.wordCompareTreshold);
+					subCosts[i]=(short) (mainProcess((sr[i]=new SentenceResoult(sentenceName)),str,ret.endIndex,sentenceIndex+1)+ret.cost);
 				}
 				
-				minIndex=0;
+				int minIndex=0;
 				for(int i=1;i<subCosts.length;i++) {
 					if(subCosts[i]<subCosts[minIndex]) minIndex=i;
 				}
 				
 				resoult.data.putAll(sr[minIndex].data);
-				ReturnValue= subCosts[minIndex];
-				return ReturnValue;
-			case regex:
+				return subCosts[minIndex];
+			}
+		}
+		private class RegexElement extends SentenceElement{
+			private Pattern pattern;
+			private RegexElement(HashMap<String,String> parts,String data) {
+				pattern=Pattern.compile(parts.get(data));
+			}
+			@Override
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+				int tempStrIndex;
 				short deleteCost=0;
 				for(tempStrIndex=strIndex;tempStrIndex<str.length;tempStrIndex++) {
-					if(str[tempStrIndex].isEquals(elem.regex)) {
+					if(str[tempStrIndex].isEquals(pattern)) {
 						if(deleteCost<Config.wordInsertionCost) {
-							ReturnValue= (short)(process(resoult,str,tempStrIndex+1,sentenceIndex+1)+deleteCost);
-							return ReturnValue;
+							return (short)(mainProcess(resoult,str,tempStrIndex+1,sentenceIndex+1)+deleteCost);
 						} else {
-							ReturnValue= (short)(process(resoult,str,strIndex+1,sentenceIndex+1)+Config.wordInsertionCost);
-							return ReturnValue;
+							return (short)(mainProcess(resoult,str,strIndex+1,sentenceIndex+1)+Config.wordInsertionCost);
 						}
 					}
 					deleteCost+=Config.wordDeletionCost;
 				}
-				ReturnValue= (short)(process(resoult,str,strIndex,sentenceIndex+1)+Config.wordInsertionCost);
-				return ReturnValue;
-				
-			default: 
-				assert false:"Trying to process unrecognized content SentenceElement in SentenceMatcher.";
-				ReturnValue= Config.wordInsertionCost;
-				return ReturnValue;
+				return (short)(mainProcess(resoult,str,strIndex,sentenceIndex+1)+Config.wordInsertionCost);
 			}
-			}finally {
-//				System.out.println("---------: "+strIndex+" "+sentenceIndex+" "+ReturnValue);
-			}
+			
 		}
 	}
 	
-	/**Object containing resoult of matching ShaniString by SenetenceMenager
+	/**Object containing resoult of matching ShaniString by SenetenceMenager.
 	 * @author TakMashido
 	 */
 	public class SentenceResoult{
+		/**Map contating words appered in return node position.
+		 */
 		public final HashMap<String,String> data=new HashMap<String,String>();
 		private short cost;
-		private final String name;
+		/**Name of matched sentence. Specyfied by name attribute in representing xml node.
+		 */
+		public final String name;
 		
 		private SentenceResoult() {name=null;}
 		private SentenceResoult(String name) {
 			this.name=name;
 		}
 		
+		/**Performs deep copy of this object. It not make copy of underlaying String, but there are immutale so no sense to doing it.
+		 * @return Deep copy of this object.
+		 */
+		public SentenceResoult makeCopy() {
+			var copy=new SentenceResoult(name);
+			copy.data.putAll(data);
+			copy.cost=cost;
+			
+			return copy;
+		}
+		private void set(SentenceResoult sr) {
+			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
+			this.cost=sr.cost;
+			data.clear();
+			data.putAll(sr.data);
+		}
+		private void add(SentenceResoult sr) {
+			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
+			this.cost+=sr.cost;
+			data.putAll(sr.data);
+		}
+		
+		/**Return's {@link SentenceResoult#data data} Map.
+		 * @return {@link SentenceResoult#data data} Map.
+		 */
 		public HashMap<String,String> getData(){
 			return data;
 		}
+		/**Return's {@link SentenceResoult#name} of matched sentence resoult.
+		 * @return {@link SentenceResoult#name} of matched sentence resoult.
+		 */
 		public String getName() {
 			return name;
 		}
 		public short getCost() {
 			return cost;
 		}
+	}
+	
+	public static void main(String[]args) throws IOException, SAXException, ParserConfigurationException{
+		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
+		
+		var res=mat.process("test asdfghd test2222222 test22fghjk2");
+		System.out.println("\nmatches number: "+res.length);
+		for(int i=0;i<res.length;i++)
+			System.out.println(res[i].cost+" "+res[i].data);
 	}
 }
