@@ -3,12 +3,15 @@ package liblaries;
 import java.util.ArrayList;
 
 /**Simple engine for procesing args.
- * @author Przemek
+ * @author TakMashido
  */
 public class ArgsDecoder {
 	private String[] args;
 	private boolean[] used;
 	
+	/**Creates new ArgsDecoder object.
+	 * @param args Args which will be processed by this Object.
+	 */
 	public ArgsDecoder(String... args) {
 		this.args=args;
 		used=new boolean[args.length];
@@ -30,8 +33,8 @@ public class ArgsDecoder {
 		return -1;
 	}
 	
-	/**Gets string value marked with specyfic flag
-	 * @param flag Flag to seach for.
+	/**Gets string value marked with specyfic flag.
+	 * @param flag Flag to search for.
 	 * @return First word after flag ocurence or empty string if flag not found.
 	 */
 	public String getString(String... flag) {
@@ -41,7 +44,7 @@ public class ArgsDecoder {
 		return args[index];
 	}
 	/**Gets integer value marked with specyfic flag
-	 * @param flag Flag to seach for.
+	 * @param flag Flag to search for.
 	 * @return Integer following given flag or null if flag not found.
 	 */
 	public Integer getInt(String...flag) {
@@ -49,8 +52,8 @@ public class ArgsDecoder {
 		if(val.equals(""))return null;
 		return Integer.parseInt(val);
 	}
-	/**Gets float value marked with specyfic flag
-	 * @param flag Flag to seach for.
+	/**Gets float value marked with specyfic flag.
+	 * @param flag Flag to search for.
 	 * @return Float following given flag or null if flag not found.
 	 */
 	public Float getFloat(String...flag) {
@@ -58,7 +61,7 @@ public class ArgsDecoder {
 		if(val.equals(""))return null;
 		return Float.parseFloat(val);
 	}
-	/**Check if given args have specyfic flag included
+	/**Check if given args have specyfic flag included.
 	 * @param flag Flag to search for. For exemple "-v","-ea".
 	 * @return If args conatain one of given flags.
 	 */
@@ -70,13 +73,14 @@ public class ArgsDecoder {
 	 * @return If all args was used.
 	 */
 	public boolean isProcesed() {
-		for(var bool:used) {
-			if(!bool)return false;
-		}
+		for(var bool:used) if(!bool)return false;
 		return true;
 	}
 	
-	public String[] getUnProcesed() {
+	/**Returns array of unused args.
+	 * @return Look above.
+	 */
+	public String[] getUnprocesed() {
 		ArrayList<String> Return=new ArrayList<String>();
 		
 		for(int i=0;i<args.length;i++) {

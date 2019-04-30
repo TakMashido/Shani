@@ -13,7 +13,7 @@ public class Tools {
 		return dat;
 	}
 	/**
-	 * Removes national characters from given string and repleace them 
+	 * Removes national characters from given string and repleace them with english representatives.
 	 * @param com String being procesed
 	 * @return com without national specyfic characters
 	 */

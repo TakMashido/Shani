@@ -7,6 +7,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**Class for getting and saving data in Shani data files.
+ * 
+ * Access to data is done by String containg path to it.
+ * It's form is standard java path. Names of nodes/elements divided with '.' Character.
+ * 
+ * @author TakMashido
+ */
 public class Storage {
 	private static final Node storage;
 	private static final Node userdata;
@@ -21,16 +28,33 @@ public class Storage {
 	private static boolean isErrorOccured=false;
 	public static boolean isErrorOccured() {return isErrorOccured;}
 	
+	/**Get nodes under given path in Storage part of file.
+	 * @param path Path to super node.
+	 * @return NodeList poinded by given path.
+	 */
 	public static NodeList getNodes(String path) {
 		return getNodes(storage,path);
 	}
+	
+	/**Get ShaniString under given path in Storage part of file.
+	 * @param stringPath Path to Node conataing wanted ShaniString.
+	 * @return ShaniString pointed by path.
+	 */
 	public static ShaniString getString(String stringPath) {
 		return getShaniString(storage,stringPath);
 	}
 	
+	/**Get nodes under given path in UserData part of file.
+	 * @param path Path to super node.
+	 * @return NodeList poinded by given path.
+	 */
 	public static NodeList getUserNodes(String path) {
 		return getNodes(userdata,path);
 	}
+	/**Get ShaniString under given path in UserData part of file.
+	 * @param stringPath Path to Node conataing wanted ShaniString.
+	 * @return ShaniString pointed by path.
+	 */
 	public static ShaniString getUserShaniString(String stringPath) {
 		return getShaniString(userdata,stringPath);
 	}
@@ -91,10 +115,23 @@ public class Storage {
 	public static void writeUserData(String path,boolean data) {
 		writeUserData(path,Boolean.toString(data));
 	}
+	/**Writes given ShaniString under path in UserData part of file.
+	 * @param path Path pointing to location in which data will be stored.
+	 * @param data Data to store.
+	 */
+	public static void writeUserData(String path,ShaniString data) {
+		Node stor=createDirectory(userdata,path);
+		stor.setTextContent(data.toFullString());
+	}
+	/**Writes given String under path in UserData part of file.
+	 * @param path Path pointing to location in which data will be stored.
+	 * @param data Data to store.
+	 */
 	public static void writeUserData(String path,String data) {
 		Node stor=createDirectory(userdata,path);
 		stor.setTextContent(data);
 	}
+	
 	
 	private static Node createDirectory(Node where,String path) {
 		@SuppressWarnings("resource")

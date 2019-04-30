@@ -5,13 +5,15 @@ package shani.orders.templates;
  * @author TakMashido
  */
 public final class Executable{
+	/**Cost beetwen input and action invoke pattern.*/
 	public final short cost;
+	/**{@link Action} which this Executable represent*/
 	public final Action action;
 	private boolean succesful=false;
 	
 	/**Creates Exetuable.
 	 * @param action Action to be stored.
-	 * @param cost Cost beetwen input and action invoce pattern.
+	 * @param cost Cost beetwen input and action invoke pattern.
 	 */
 	public Executable(Action action, short cost){
 		this.action=action;

@@ -314,17 +314,34 @@ public class ShaniString {
 		return words.toArray(new char[0][0]);
 	}
 	
+	/**Get cost of comparing this ShaniString and given String.
+	 * @param str String to compare
+	 * @return Cost of comapring this ShaniString and given String.
+	 */
 	public short getCompareCost(String str) {
 		return getCompareCost(new ShaniString(str));
 	}
+	/**Get cost of comparing two ShaniStrings.
+	 * @param str ShaniString to compare
+	 * @return Cost of comapring this ShaniString and given ShaniString.
+	 */
 	public short getCompareCost(ShaniString str) {
 		return getMatcher().apply(str).getCost();
 	}
 	
+	/**Check if given String is equal to this ShaniString.
+	 * Equivalent to {@link #equals(ShaniString)}.
+	 * @param str String to check.
+	 * @return If given String is equal to this ShaniString.
+	 */
 	public boolean equals(String str) {
 		if(str.length()==0)return false;
 		return equals(new ShaniString(str));
 	}
+	/**Check if this is equal to this. It don't check if 2 ShaniString are same, but perform fuzzy String Maptching.
+	 * @param str ShaniString to Check.
+	 * @return If given shaniString is equal to this.
+	 */
 	public boolean equals(ShaniString str) {
 		stem();
 		str.stem();
@@ -503,6 +520,9 @@ public class ShaniString {
 		return lookUpTable[a][b];
 	}
 	
+	/**Retruns array of String containig each underlaying String.
+	 * @return Look above.
+	 */
 	public String[] getArray() {
 		return value;
 	}
@@ -515,6 +535,10 @@ public class ShaniString {
 		System.out.println(toString());
 	}
 	
+	/**Returns full String represetation. Contain each underlaying String splitted with '*' character.
+	 * new ShaniString(oldShaniString.toFullString()) should give object identical to oldShaniString.
+	 * @return String representing this ShaniString.
+	 */
 	public String toFullString() {
 		StringBuffer str=new StringBuffer();
 		str.append(value[0]);
@@ -528,10 +552,16 @@ public class ShaniString {
 		if(value.length<=0)return null;
 		return value[random.nextInt(value.length)];
 	}
+	/**Create deep copy of this object.
+	 * @return Deep copy of this object.
+	 */
 	public ShaniString copy() {
 		return new ShaniString(value);
 	}
 	
+	/**Check if contain any not empty String(cotaing any character except white characters).
+	 * @return If this Shani String contain no data.
+	 */
 	public boolean isEmpty() {
 		if(value.length==0)return true;
 		for(var str:value) {
@@ -552,23 +582,28 @@ public class ShaniString {
 		return min;
 	}
  	
+	/**Return char array ready for fuzy string matching.
+	 * @return Look above.
+	 */
 	public char[][][] getStemmendValue(){
 		if(stemmedValue==null)stem();
 		return stemmedValue;
 	}
+	/**Creates and retruns new ({@link ShaniMatcher}.
+	 * @return Look above.
+	 */
 	public ShaniMatcher getMatcher() {
 		return new ShaniMatcher(this);
 	}
 	/**
-	 * An engine that performs match operations on a {@linkplain shani.ShaniString
-	 * ShaniString}.
-	 * @warning Not thread save, can some methods give error when original {@linkplain shani.ShaniString ShaniString} change after creation. 
+	 * An engine that performs match operations on a {@linkplain shani.ShaniString ShaniString}.
+	 * Warning: Not thread save, Some methods can give error when original {@linkplain shani.ShaniString ShaniString} change after creation. 
 	 * @author TakMashido
 	 */
 	public class ShaniMatcher{
 		private ShaniString data;
 		private short[][] wordCost;					//minCost of each word
-		private short[] costBias;							//cost bias
+		private short[] costBias;					//cost bias
 		
 		private ShaniMatcher(ShaniString origin) {
 			origin.stem();
@@ -582,8 +617,8 @@ public class ShaniString {
 		}
 		
 		/**Match given ShaniString[]. Equivalent to invoce apply(ShaniString) with each array element.
-		 * @param comparables
-		 * @return
+		 * @param comparables Array of ShaniString data which will be applied.
+		 * @return this
 		 */
 		public ShaniMatcher apply(ShaniString... comparables) {
 			for(var comp:comparables)apply(comp);
@@ -673,13 +708,22 @@ public class ShaniString {
 			wordCost[index]=wordsCosts[minCostIndex];
 		}
 		
+		/**Check if cost of compare is smaller then Config.senetenceCompareTreshold.
+		 * @return If underlaying ShaniString is equal to all applied data.
+		 */
 		public boolean isEqual() {
 			return getCost()<Config.sentenseCompareTreshold;
 		}
+		/**Check if appled data are {@link #isEqual() equal} and any word was matched.
+		 * @return Look above.
+		 */
 		public boolean isSemiEqual() {
 			return getMatchedCost()<Config.sentenseCompareTreshold&&getMatchedNumber()>0;
 		}
 		
+		/**Returns ShaniString containig all unmatched data.
+		 * @return Look above.
+		 */
 		public ShaniString getUnmatched() {
 			ShaniString Return=new ShaniString();
 			StringBuffer buffer;
