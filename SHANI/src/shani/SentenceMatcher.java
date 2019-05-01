@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 
 /**More powerfull matching engine than ShaniMatcher.
  * <pre>
- * 
  * Match whole sentence and get data out of it.
  * 
  * It gets data directly from one xml node.
@@ -28,15 +27,41 @@ import org.xml.sax.SAXException;
  * $ means ShaniString. It'll perform normal ShaniStrig Matching with this element.
  * ^ means regex. It'll try to match content with regex
  * ? means return Value. It'll store corresponding value from processed String in HashMap under given keyword.
+ * You can take part of sentence into brackets to make group it. Placing * before it means optional match of sentence inside.
  * 
  * Subnodes with other names are used to provide addional data for sentence elements.
  * E.g. element "$foo" will compare input value with ShaniString stored under "foo" subnode. This also apply for regex matching.
+ * 
+ * Exmples:
+ * 
+ * {@code <node>
+ * 	<template name="morning">$greetings ?who</template>
+ * 	<template name="afternoon">$greetings2 ?who</template>
+ * 	<greetings>hello*good morning</greetings>
+ * 	<greetings2>good afternoon</greetings2>
+ * <node>}
+ * Will match sentence "good morning mister" with element "mister" under "who" key in return HashMap. Name of matched sentence is "morning".
+ * Sentence "good afternoon foo" resoults: name=afternoon, Return Map: {who=foo}
+ * Sentence "good morning" aren't have any match.
+ * Sentence "good night bar" will not be matched(depends on values in Config file).
+ * 
+ * {@code<template>*$bar</template>}
+ * Mather with this setup tries to match ShaniString stored under "bar" but it can also match empty sentence.
+ * 
+ * {@code<template>$foo *(^regex ?return)</template>}
+ * Assume ShaniString stored under foo is already matched. Next it tries to match sentence in brackets. If fail try to match with this part skipped.
+ * 
+ * 
  * </pre>
  * 
  * @author TakMashido
  */
 public class SentenceMatcher {
 	private Sentence[] sentences;
+	
+	private interface ElementProcesser{
+		public abstract short processNext(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex);
+	}
 	
 	/**Creates new Senetnce Matcher Object based on data from given node.
 	 * @param node XML Node which contain Senetnce templates and it's elements information.
@@ -80,7 +105,7 @@ public class SentenceMatcher {
 		return Return.toArray(new SentenceResoult[0]);
 	}
 	
-	private class Sentence{
+	private class Sentence implements ElementProcesser{
 		private SentenceElement[] sentence;
 		private String sentenceName;
 		
@@ -89,8 +114,27 @@ public class SentenceMatcher {
 			Scanner in=new Scanner(content);
 			this.sentenceName=name;
 			
+			
 			ArrayList<SentenceElement> sentenceTemp=new ArrayList<>();
-			while(in.hasNext())sentenceTemp.add(createNewSentenceElement(parts,in.next()));
+			mainloop:
+			while(in.hasNext()) {
+				String next=in.next();
+				if(next.contains("(")) {
+					StringBuffer temp=new StringBuffer();
+					temp.append(next);
+					while(in.hasNext()) {
+						next=in.next();
+						temp.append(' ').append(next);
+						if(next.endsWith(")")){
+							sentenceTemp.add(createNewSentenceElement(parts,temp.toString()));
+							continue mainloop;
+						}
+					}
+					System.err.println("Failed to parse SentenceMatcher: group is never closed. SentenceName="+name);
+					return;
+				} else
+					sentenceTemp.add(createNewSentenceElement(parts,next));
+			}
 			sentence=sentenceTemp.toArray(new SentenceElement[0]);
 		}
 		
@@ -99,7 +143,7 @@ public class SentenceMatcher {
 			short[] costs=new short[str.length];
 			
 			for(int i=0;i<str.length;i++)
-				costs[i]=mainProcess((Return[i]=new SentenceResoult(sentenceName)),str[i],0,0);
+				costs[i]=processNext((Return[i]=new SentenceResoult(sentenceName)),str[i],0,0);
 			
 			int minIndex=0;
 			for(int i=1;i<str.length;i++)
@@ -111,17 +155,21 @@ public class SentenceMatcher {
 		}
 		
 		private SentenceElement createNewSentenceElement(HashMap<String,String> parts,String data) {
+			System.out.println(data);
 			String name=data.substring(1);
 			switch(data.charAt(0)) {
 			case '*':return new OptionalElement(parts, name);
 			case '?':return new DataReturnElement(parts, name);
 			case '$':return new ShaniStringElement(parts, name);
 			case '^':return new RegexElement(parts, name);
+			case '(':return new GroupElement(parts,name);
 			}
-			System.err.println("Unrecognized SenetnceMatcher elemet: "+data);
+			System.err.println("Unrecognized SenetnceMatcher element: "+data);
 			return null;
 		}
-		private final short mainProcess(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
+		
+		@Override
+		public short processNext(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
 //			System.out.println(strIndex+" "+sentenceIndex);
 //			System.out.println(resoult.data);
 			if(strIndex>=str.length&&sentenceIndex>=sentence.length)
@@ -129,20 +177,19 @@ public class SentenceMatcher {
 			if(sentenceIndex>=sentence.length)
 				return (short) (Config.wordDeletionCost*(str.length-strIndex));
 			
-			
-			var ret=sentence[sentenceIndex].preProcess(resoult, str, strIndex, sentenceIndex);
+			var ret=sentence[sentenceIndex].preProcess(resoult, str, strIndex, sentenceIndex,this);
 //			System.out.println(resoult.data);
 //			System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+ret);
 			return ret;
 		}
 		
 		private abstract class SentenceElement{
-			protected short preProcess(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
+			protected short preProcess(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex,ElementProcesser processer) {
 				if(strIndex>=str.length)
 					return (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
-				return process(resoult,str,strIndex,sentenceIndex);
+				return process(resoult,str,strIndex,sentenceIndex,processer);
 			}
-			protected abstract short process(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex);
+			protected abstract short process(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex, ElementProcesser getter);
 		}
 		private class OptionalElement extends SentenceElement{
 			private SentenceElement element;
@@ -150,7 +197,7 @@ public class SentenceMatcher {
 				element=createNewSentenceElement(parts, data);
 			}
 			@Override
-			protected short preProcess(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+			protected short preProcess(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
 				if(strIndex>=str.length) {
 					if(sentenceIndex==sentence.length-1) return 0;
 					else return (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
@@ -158,10 +205,10 @@ public class SentenceMatcher {
 				
 				var resCopy=new SentenceResoult(sentenceName);
 				
-				short normalCost=element.process(resCopy, str, strIndex, sentenceIndex);
+				short normalCost=element.process(resCopy, str, strIndex, sentenceIndex,processer);
 				if(normalCost<Config.optionalMatchTreshold)return normalCost;
 				
-				short skippedCost=mainProcess(resoult, str, strIndex, sentenceIndex+1);
+				short skippedCost=processer.processNext(resoult, str, strIndex, sentenceIndex+1);
 				
 				if(normalCost-skippedCost>Config.optionalMatchTreshold) {
 					resoult.add(resCopy);
@@ -170,7 +217,7 @@ public class SentenceMatcher {
 				return normalCost;
 			}
 			@Override
-			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
 				assert false:"Method process in OptionalSentenceElement shouldn't be invoced";
 				return Short.MAX_VALUE;
 			}
@@ -181,10 +228,9 @@ public class SentenceMatcher {
 				returnKey=data;
 			}
 			@Override
-			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
 				StringBuffer strBuf=new StringBuffer();
 				if(sentenceIndex+1>=sentence.length) {			//last elem of sentence
-					System.out.println("ret range2: "+strIndex+" "+str.length);
 					strBuf.append(str[strIndex++]);
 					for(;strIndex<str.length;strIndex++)strBuf.append(' ').append(str[strIndex]);
 					resoult.data.put(returnKey, strBuf.toString());
@@ -194,10 +240,10 @@ public class SentenceMatcher {
 				
 				SentenceResoult retResoult=resoult.makeCopy();
 				int minIndex=strIndex;
-				short minCost=(short) (mainProcess(retResoult,str,strIndex,sentenceIndex+1)+Config.sentenseCompareTreshold);				//Add Config.sentenceCompareTreshold or Config.wordInsertionCost??
+				short minCost=(short) (processer.processNext(retResoult,str,strIndex,sentenceIndex+1)+Config.sentenseCompareTreshold);				//Add Config.sentenceCompareTreshold or Config.wordInsertionCost??
 				for(int i=strIndex+1;i<=str.length;i++) {
 					var tempResoult=resoult.makeCopy();
-					short tempCost=mainProcess(tempResoult,str,i,sentenceIndex+1);
+					short tempCost=processer.processNext(tempResoult,str,i,sentenceIndex+1);
 					if(tempCost<minCost) {
 						minCost=tempCost;
 						minIndex=i;
@@ -213,7 +259,6 @@ public class SentenceMatcher {
 					resoult.set(retResoult);
 					resoult.data.put(returnKey, strBuf.toString());
 				} else resoult.set(retResoult);
-				System.out.println("ret range: "+strIndex+" "+minIndex);
 				return minCost;
 			}
 		}
@@ -223,14 +268,14 @@ public class SentenceMatcher {
 				value=new ShaniString(data).split();
 			}
 			@Override
-			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
 				short[] subCosts=new short[value.length];
 				var sr=new SentenceResoult[subCosts.length];
 				
 				for(int i=0;i<subCosts.length;i++) {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
 					if(ret.cost<Config.wordCompareTreshold);
-					subCosts[i]=(short) (mainProcess((sr[i]=new SentenceResoult(sentenceName)),str,ret.endIndex,sentenceIndex+1)+ret.cost);
+					subCosts[i]=(short) (processer.processNext((sr[i]=new SentenceResoult(sentenceName)),str,ret.endIndex,sentenceIndex+1)+ret.cost);
 				}
 				
 				int minIndex=0;
@@ -248,22 +293,53 @@ public class SentenceMatcher {
 				pattern=Pattern.compile(parts.get(data));
 			}
 			@Override
-			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
 				int tempStrIndex;
 				short deleteCost=0;
 				for(tempStrIndex=strIndex;tempStrIndex<str.length;tempStrIndex++) {
 					if(str[tempStrIndex].isEquals(pattern)) {
 						if(deleteCost<Config.wordInsertionCost) {
-							return (short)(mainProcess(resoult,str,tempStrIndex+1,sentenceIndex+1)+deleteCost);
+							return (short)(processer.processNext(resoult,str,tempStrIndex+1,sentenceIndex+1)+deleteCost);
 						} else {
-							return (short)(mainProcess(resoult,str,strIndex+1,sentenceIndex+1)+Config.wordInsertionCost);
+							return (short)(processer.processNext(resoult,str,strIndex+1,sentenceIndex+1)+Config.wordInsertionCost);
 						}
 					}
 					deleteCost+=Config.wordDeletionCost;
 				}
-				return (short)(mainProcess(resoult,str,strIndex,sentenceIndex+1)+Config.wordInsertionCost);
+				return (short)(processer.processNext(resoult,str,strIndex,sentenceIndex+1)+Config.wordInsertionCost);
 			}
 			
+		}
+		private class GroupElement extends SentenceElement implements ElementProcesser{				//NOT THREAD SAVE. Trying to processes sentence containing this element on more than one thread is going to cause uncorrect match.
+			private SentenceElement[] subElements;
+			
+			private ElementProcesser previousProcesser;					//Cause of non thread save.
+			private int nextIndex;
+			
+			private GroupElement(HashMap<String,String> parts,String data) {
+				System.out.println(data);
+				data=data.substring(0, data.length()-2);				//remove only cloasing bracked. Opening already removed in createNewSentenceElement method.
+				
+				ArrayList<SentenceElement> elements=new ArrayList<>();
+				@SuppressWarnings("resource")
+				Scanner in=new Scanner(data);
+				while(in.hasNext()) elements.add(createNewSentenceElement(parts, in.next()));
+				
+				subElements=elements.toArray(new SentenceElement[elements.size()]);
+			}
+			
+			@Override
+			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
+				previousProcesser=processer;
+				nextIndex=sentenceIndex+1;
+				return subElements[0].preProcess(resoult, str, strIndex, 0,this);
+			}
+
+			@Override
+			public short processNext(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex) {
+				if(sentenceIndex<subElements.length)return preProcess(resoult, str, strIndex, sentenceIndex, this);
+				else return previousProcesser.processNext(resoult, str, strIndex, nextIndex);
+			}
 		}
 	}
 	
@@ -323,12 +399,12 @@ public class SentenceMatcher {
 		}
 	}
 	
-	public static void main(String[]args) throws IOException, SAXException, ParserConfigurationException{
-		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
-		
-		var res=mat.process("test asdfghd test2222222 test22fghjk2");
-		System.out.println("\nmatches number: "+res.length);
-		for(int i=0;i<res.length;i++)
-			System.out.println(res[i].cost+" "+res[i].data);
-	}
+//	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException{
+//		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
+//		
+//		var res=mat.process("test asdfghd");
+//		System.out.println("\nmatches number: "+res.length);
+//		for(int i=0;i<res.length;i++)
+//			System.out.println(res[i].cost+" "+res[i].data);
+//	}
 }
