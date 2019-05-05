@@ -93,7 +93,7 @@ public class SentenceMatcher {
 	 * @param string {@code ShaniString} in which engine search for matches.
 	 * @return Array of {@code SentenceResoult} object representing resoults of successful matching.
 	 */
-	public SentenceResoult[] process(ShaniString string) {
+	public synchronized SentenceResoult[] process(ShaniString string) {
 		var str=string.split(false);
 		
 		ArrayList<SentenceResoult> Return=new ArrayList<>();
@@ -155,7 +155,6 @@ public class SentenceMatcher {
 		}
 		
 		private SentenceElement createNewSentenceElement(HashMap<String,String> parts,String data) {
-			System.out.println(data);
 			String name=data.substring(1);
 			switch(data.charAt(0)) {
 			case '*':return new OptionalElement(parts, name);
@@ -203,12 +202,11 @@ public class SentenceMatcher {
 					else return (short) (Config.wordInsertionCost*(sentence.length-sentenceIndex));
 				}
 				
-				var resCopy=new SentenceResoult(sentenceName);
-				
-				short normalCost=element.process(resCopy, str, strIndex, sentenceIndex,processer);
+				short normalCost=element.process(resoult, str, strIndex, sentenceIndex,processer);
 				if(normalCost<Config.optionalMatchTreshold)return normalCost;
 				
-				short skippedCost=processer.processNext(resoult, str, strIndex, sentenceIndex+1);
+				var resCopy=resoult.makeCopy();
+				short skippedCost=processer.processNext(resCopy, str, strIndex, sentenceIndex+1);
 				
 				if(normalCost-skippedCost>Config.optionalMatchTreshold) {
 					resoult.add(resCopy);
@@ -265,7 +263,7 @@ public class SentenceMatcher {
 		private class ShaniStringElement extends SentenceElement{
 			private ShaniString[][] value;
 			private ShaniStringElement(HashMap<String,String> parts,String data) {
-				value=new ShaniString(data).split();
+				value=new ShaniString(parts.get(data)).split();
 			}
 			@Override
 			protected short process(SentenceResoult resoult, ShaniString[] str, int strIndex, int sentenceIndex,ElementProcesser processer) {
@@ -399,12 +397,12 @@ public class SentenceMatcher {
 		}
 	}
 	
-//	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException{
-//		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
-//		
-//		var res=mat.process("test asdfghd");
-//		System.out.println("\nmatches number: "+res.length);
-//		for(int i=0;i<res.length;i++)
-//			System.out.println(res[i].cost+" "+res[i].data);
-//	}
+	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException{
+		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
+		
+		var res=mat.process("pogoda warszawie");
+		System.out.println("\nmatches number: "+res.length);
+		for(int i=0;i<res.length;i++)
+			System.out.println(res[i].cost+" "+res[i].data);
+	}
 }
