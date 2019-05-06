@@ -13,7 +13,7 @@ import shani.SearchEngine.SearchResoults.SearchResoult;
  * @author TakMashiddo
  */
 public class SearchEngine {
-	private static final Pattern websideDomainPattern=Pattern.compile("^(?:http://|https://)(?:[\\w\\d\\.]*\\.)?([\\w\\d\\-]+\\.[\\w\\d]+)(?:/[\\w\\d\\-._~:/?#\\[\\]@!\\$&'\\(\\)\\*\\+,;%=]*)?$");
+	private static final Pattern websideDomainPattern=Pattern.compile("^(?:http://|https://)(?:[\\w\\d\\.-]*\\.)?([\\w\\d\\-]+\\.[\\w\\d]+)(?:/[\\w\\d\\-._~:/?#\\[\\]@!\\$&'\\(\\)\\*\\+,;%=]*)?$");
 	
 	/**Private constructor to don't allow to create instances.*/
 	private SearchEngine() {}
@@ -124,7 +124,7 @@ public class SearchEngine {
 				if(domain!=null)return domain;
 				
 				var matcher=websideDomainPattern.matcher(url);
-				assert matcher.matches():"Fix websideMainAddressPattern regex Pattern in SearchEngine. It didn't match following url: \""+url+'"';
+				assert matcher.matches():"Fix websideDomainPattern regex Pattern in SearchEngine. It didn't match following url: \""+url+'"';
 				domain=matcher.group(1);
 				return domain;
 			}

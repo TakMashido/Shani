@@ -18,7 +18,7 @@ import org.w3c.dom.Node;
  */
 public class ShaniString {
 	private static final Random random=new Random();
-	private static final Pattern stringDivider=Pattern.compile("(?:\\s*\\*\\s*)+");
+	private static final Pattern stringDivider=Pattern.compile("(?:\\*)+");
 	private static byte[][] lookUpTable;				//~140KB of memory
 	
 	private String[] value;
@@ -450,6 +450,10 @@ public class ShaniString {
 			this.startIndex=startIndex;
 			this.endIndex=endIndex;
 		}
+		
+		public String toString() {
+			return startIndex+":"+endIndex+"->"+cost;
+		}
 	}
 	
 	/**Check if one of underlaying strings matches given regex Pattern.
@@ -504,11 +508,6 @@ public class ShaniString {
 		
 		int length=Math.min(a.length,b.length);
 		Return=Config.characterCompareCostMultiplier.multiple(Return, length);
-		
-		if(Return<Config.wordCompareTreshold*2) {
-			if(Engine.info!=null)					//Can be null if not Shani not started in normal way during debuging.
-				Engine.info.println(new String(a)+"-> "+new String(b)+": "+Return);
-		}
 		
 		return Return;
 	}

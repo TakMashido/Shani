@@ -3,6 +3,7 @@ package shani;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -171,10 +172,15 @@ public class SentenceMatcher {
 		public short processNext(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
 //			System.out.println(strIndex+" "+sentenceIndex);
 //			System.out.println(resoult.data);
-			if(strIndex>=str.length&&sentenceIndex>=sentence.length)
+			if(strIndex>=str.length&&sentenceIndex>=sentence.length) {
+//				System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+0);
 				return 0;
-			if(sentenceIndex>=sentence.length)
+				
+			}
+			if(sentenceIndex>=sentence.length) {
+//				System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+Config.wordDeletionCost*(str.length-strIndex));
 				return (short) (Config.wordDeletionCost*(str.length-strIndex));
+			}
 			
 			var ret=sentence[sentenceIndex].preProcess(resoult, str, strIndex, sentenceIndex,this);
 //			System.out.println(resoult.data);
@@ -189,6 +195,10 @@ public class SentenceMatcher {
 				return process(resoult,str,strIndex,sentenceIndex,processer);
 			}
 			protected abstract short process(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex, ElementProcesser getter);
+			
+			public String toString() {
+				return getClass().getSimpleName().substring(0,4);
+			}
 		}
 		private class OptionalElement extends SentenceElement{
 			private SentenceElement element;
@@ -272,8 +282,9 @@ public class SentenceMatcher {
 				
 				for(int i=0;i<subCosts.length;i++) {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
-					if(ret.cost<Config.wordCompareTreshold);
-					subCosts[i]=(short) (processer.processNext((sr[i]=new SentenceResoult(sentenceName)),str,ret.endIndex,sentenceIndex+1)+ret.cost);
+					if(ret.cost<Config.wordCompareTreshold)
+						subCosts[i]=(short) (processer.processNext((sr[i]=resoult.makeCopy()),str,ret.endIndex,sentenceIndex+1)+ret.cost);				//TODO not check same sentenceIndex and String index multiple times. Store it somewhere.
+					else subCosts[i]=Short.MAX_VALUE;
 				}
 				
 				int minIndex=0;
@@ -281,7 +292,9 @@ public class SentenceMatcher {
 					if(subCosts[i]<subCosts[minIndex]) minIndex=i;
 				}
 				
-				resoult.data.putAll(sr[minIndex].data);
+				if(subCosts[minIndex]==Short.MAX_VALUE)return Config.sentenseCompareTreshold;
+				
+				resoult.add(sr[minIndex]);
 				return subCosts[minIndex];
 			}
 		}
@@ -400,7 +413,9 @@ public class SentenceMatcher {
 	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException{
 		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
 		
-		var res=mat.process("pogoda warszawie");
+		System.out.println(Arrays.toString(mat.sentences[0].sentence));
+		
+		var res=mat.process("czy w warszawie bêdzie brzydko");
 		System.out.println("\nmatches number: "+res.length);
 		for(int i=0;i<res.length;i++)
 			System.out.println(res[i].cost+" "+res[i].data);

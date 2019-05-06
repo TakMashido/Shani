@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -14,6 +15,7 @@ import java.util.Scanner;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.w3c.dom.Node;
 
 import shani.Engine;
 import shani.SearchEngine;
@@ -33,74 +35,59 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	
 	private static final DateFormat websiteDateFormat=new SimpleDateFormat("MMM dd",Locale.ENGLISH);
 	
+	private int badWeatherTemp; 
+	private int badWeatherWind;
+	private String[] badWeatherTypes;
+	
 	@Override
 	protected boolean initialize() {
 		weatherSentence=new SentenceGenerator(orderFile.getElementsByTagName("weathersentence").item(0));
 		dayChooser=new SentenceMatcher(orderFile.getElementsByTagName("daychooser").item(0));
 		
-		return true;
-	}
-	
-	private enum Weather{																		//Make this more complecs. Some identifiers can have other meaning for other day time and enum doesn't rocognize it
-		//To add: Showers,PM Showers,AM Showers,Scattered Thunderstorms,Partly Cloudy/Wind,PM Thunderstorms,AM Thunderstorms
-		sunny,mostlySunny,partlySunny,clear,mostlyClear,partlyCloudy,mostlyCloudy,cloudy,lightRain,rain,none;
-		
-		private static final String sunnyIdentifier			= "Sunny";					//no sense to move to main file, depends on weather website. If's get changed other things on webside also will change and HTML Scraping part have to rewriten.
-		private static final String mostlySunnyIdentifier	= "Mostly Sunny";
-		private static final String partlySunnyIdentifier 	= "Partly Sunny";
-		private static final String clearIdentifier			= "Clear";
-		private static final String mostlyClearIdentifier 	= "Mostly Clear";
-		private static final String partlyCloudyIdentifier 	= "Partly Cloudy";
-		private static final String mostlyCloudyIdentifier 	= "Mostly Cloudy";
-		private static final String cloudyIdentifier 		= "Cloudy";
-		private static final String lightRainIdentifier 	= "Light Rain";
-		private static final String rainIdentifier 			= "Rain";
-		
-		private static final ShaniString sunnyRespond			= new ShaniString("s³onecznie");
-		private static final ShaniString mostlySunnyRespond		= new ShaniString("w wiêkszoœci s³onecznie");
-		private static final ShaniString partlySunnyRespond		= new ShaniString("lekko s³onecznie");
-		private static final ShaniString clearRespond			= new ShaniString("czyste niebo");
-		private static final ShaniString mostlyClearRespond		= new ShaniString("g³ównie czyste niebo");
-		private static final ShaniString partlyCloudyRespond	= new ShaniString("czêœciowo zachmurzone");
-		private static final ShaniString mostlyCloudyRespond	= new ShaniString("glównie zachmurzenie");
-		private static final ShaniString rainRespond			= new ShaniString("deszcz");
-		private static final ShaniString cloudyRespond			= new ShaniString("pochmurnie");
-		private static final ShaniString lightRainRespond		= new ShaniString("lekki deszcz");
-		private static final ShaniString noneRespond			= new ShaniString("nieznana pogoda");
-		
-		public static Weather getWeather(String repWord) {
-			switch(repWord) {
-			case sunnyIdentifier		: return sunny;
-			case mostlySunnyIdentifier	: return mostlySunny;
-			case partlySunnyIdentifier 	: return partlySunny;
-			case clearIdentifier		: return clear;
-			case mostlyClearIdentifier	: return mostlyClear;
-			case partlyCloudyIdentifier	: return partlyCloudy;
-			case mostlyCloudyIdentifier : return mostlyCloudy;
-			case cloudyIdentifier 		: return cloudy;
-			case lightRainIdentifier 	: return lightRain;
-			case rainIdentifier 		: return rain;
-			default						: System.err.println("Unknow weather identifier: "+repWord.toString());
-										  return none;
+		var elems=orderFile.getElementsByTagName("weatherResponses").item(0).getChildNodes();			//Initialize weather identifiers in Weather class
+		for(int i=0;i<elems.getLength();i++) {
+			var node=elems.item(i);
+			if(node.getNodeType()==Node.ELEMENT_NODE) {
+				Weather.responses.put(node.getNodeName().replaceAll("_", " ").replaceAll("-", "/"), new ShaniString(node.getTextContent()));
 			}
 		}
 		
-		public String toString() {
-			switch(this) {
-			case sunny			: return sunnyRespond		.toString();
-			case mostlySunny	: return mostlySunnyRespond	.toString();
-			case partlySunny	: return partlySunnyRespond	.toString();
-			case clear			: return clearRespond		.toString();
-			case mostlyClear	: return mostlyClearRespond	.toString();
-			case partlyCloudy	: return partlyCloudyRespond.toString();
-			case mostlyCloudy	: return mostlyCloudyRespond.toString();
-			case cloudy			: return cloudyRespond		.toString();
-			case lightRain		: return lightRainRespond	.toString();
-			case rain			: return rainRespond		.toString();
-			case none			: return noneRespond		.toString();
-			default				: assert false:"Unknow label in WeatherOrder.Weather";
-								 return null;
+		elems=orderFile.getChildNodes();
+		for(int i=0;i<elems.getLength();i++) {
+			var node=elems.item(i);
+			if(node.getNodeName().equals("badWeather")) {
+				var elem=(org.w3c.dom.Element)node;
+				badWeatherTemp=Integer.parseInt(elem.getElementsByTagName("temperature").item(0).getTextContent());
+				badWeatherWind=Integer.parseInt(elem.getElementsByTagName("windSpeed").item(0).getTextContent());
+				badWeatherTypes=new ShaniString(elem.getElementsByTagName("weatherTypes").item(0).getTextContent()).getArray();
+				Arrays.sort(badWeatherTypes);
+				break;
 			}
+		}
+		
+		return true;
+	}
+	
+	private static class Weather{																		//Make this more complecs. Some identifiers can have other meaning for other day time and enum doesn't rocognize it
+		//To add: PM Showers,AM Showers,Scattered Thunderstorms,Partly Cloudy/Wind,PM Thunderstorms,AM Thunderstorms
+		
+		private final String identifier; 
+		
+		private Weather(String identifier) {
+			this.identifier=identifier;
+			
+			if(!responses.containsKey(identifier))System.err.println("Unknow weather identifier: "+identifier.toString());			//Make this in assert block???
+		}
+		
+		private static final HashMap<String,ShaniString> responses=new HashMap<>();			//Data putted inside initialize method
+		
+		public ShaniString toShaniString() {
+			return responses.get(identifier);
+		}
+		public String toString() {
+			ShaniString Return=toShaniString();
+			if(Return==null)return identifier;
+			return Return.toString();
 		}
 	}
 	
@@ -172,7 +159,25 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				var dayWeather=weather.get(dayIndex);
 				var addParameters=dayWeather.getParamsMap();
 				
-				weatherSentence.printOut(sentenceName,addParameters);
+				boolean badWeather=false;
+				switch(sentenceName) {
+				case "badWeather":
+					badWeather=true;
+				case "goodWeather":
+					short score=0;
+					if(Arrays.binarySearch(badWeatherTypes, dayWeather.weather.identifier)<0) score+=2;
+					if(dayWeather.windSpeed>=badWeatherWind)score+=1;
+					if(dayWeather.tempMin!=null) {
+						if(dayWeather.tempMin<=badWeatherTemp)score+=1;
+					} else if(dayWeather.tempMax!=null&&dayWeather.tempMax<=badWeatherTemp)score+=1;
+					
+					if(!badWeather&&score>=2)score=0;
+					if(score>=2)weatherSentence.printOut("negativeRespond",addParameters);
+					else weatherSentence.printOut("positiveRespond",addParameters);
+					
+					break;
+				default:weatherSentence.printOut(sentenceName,addParameters);
+				}
 				
 				return true;
 			} catch (IOException e) {
@@ -183,7 +188,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		}
 	}
 	
-	private static class DayWeather{								//have also day sunrise and sunset hours left to proccess in constructor.
+	private static class DayWeather{								//Website provide also sunrise and sunset hours, proccess this in constructor.
 		private Date date;
 		private Weather weather;
 		
@@ -205,7 +210,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				e1.printStackTrace();
 			}
 			
-			weather=Weather.getWeather(e.getElementsByClass("description").get(0).text());
+			weather=new Weather(e.getElementsByClass("description").get(0).text());
 			
 			var elems=e.getElementsByClass("temp").get(0).getElementsByTag("span");			//min and max temp
 			try {																			//side can give "--" in this place.
@@ -229,7 +234,6 @@ public class WeatherOrder extends SentenceMatcherOrder {
 			precipitationChance=Integer.parseInt(temp.substring(0,temp.length()-1));
 		}
 
-		
 		public Map<String,Object> getParamsMap() {
 			Map<String,Object> Return=new HashMap<>();
 			

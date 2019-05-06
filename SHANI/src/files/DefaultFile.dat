@@ -1,136 +1,155 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <shani>
-    <orders>
-       <version>v1</version>
-       <order classname="shani.orders.WeatherOrder">
+	<orders>
+	    <version>v1</version>
+	    <order classname="shani.orders.WeatherOrder">
             <sentence>
-                <template name="weather">$ask $weather $where ?where</template>
-                <template name="weather">$ask ?when $weather $where ?where</template>
-                <template name="temperature">$ask $temperature $where ?where</template>
-                
-                <where>w*</where>
-                <temperature>temperaturę*stopni</temperature>
-                <weather>pogoda*</weather>
-                <ask>jaka jest*jak jest*jaka będzie*podaj*podaj*pokaż*ile będzie</ask>
+                <template name="weather">$ask *?when $weather *$where ?where</template>
+                <template name="weather">$ask ?where $weather</template>
+                <template name="temperature">$ask *?when $temperature *$where ?where</template>
+                <template name="windSpeed">$ask *?when $wind *$where ?where</template>
+                <template name="humidity">$ask *?when $humidity *$where ?where</template>
+                <template name="badWeather">$ask $where ?where $badWeather</template>
+                <template name="goodWeather">$ask $where ?where $goodWeather</template>
+                <where>w</where>
+                <temperature>temperaturę*temperatura*stopni</temperature>
+                <weather>pogoda*pogodę*</weather>
+                <wind>wiatr*prętkość wiatru*szybkość wiatru</wind>
+                <humidity>wilgotność</humidity>
+                <badWeather>będzie brzydko*jest brzydko</badWeather>
+                <goodWeather>będzie ładnie*jest ładnie</goodWeather>
+                <ask>czy*jaka jest*jak jest*jaka będzie*podaj*pokaż*ile jest*ile będzie</ask>
             </sentence>
             <daychooser>
+                <template name="0">$day0</template>
                 <template name="1">$day1</template>
                 <template name="2">$day2</template>
-		<template name="n">$break ?number $day</template>
-		
+                <template name="n">$break ?number $day</template>
+                <day0>dzisiaj*disiejsza*wieczorem</day0>
                 <day1>jutro*jutrzejsza</day1>
-		<day2>pojutrze</day2>
+                <day2>pojutrze</day2>
                 <break>za</break>
                 <day>dzień*dni</day>
             </daychooser>
             <weathersentence>
-                <template name="weather">weather comma break1 tempMin break2 tempMax degree</template>
-                <template name="temperature">break1 tempMin break2 tempMax degree</template>
-                
-		<degree>stopni</degree>
+                <template name="weather">weather comma break1 tempMin break2 tempMax degree dot</template>
+                <template name="temperature">break1 tempMin break2 tempMax degree dot</template>
+                <template name="windSpeed">windSpeed speed</template>
+                <template name="negativeRespond">yes</template>
+                <template name="positiveRespond">no</template>
+                <yes>tak *youp </yes>
+                <no>nie *niet *nope </no>
+                <is>jest</is>
+                <speed> km na godzinę* km/h</speed>
+                <degree> stopni* celcjuszów</degree>
                 <comma>, </comma>
+                <dot>.</dot>
                 <break1>od </break1>
                 <break2> do </break2>
+                <weather>Pogoda </weather>
             </weathersentence>
+            <weatherResponses>
+                <Sunny>słonecznie</Sunny>
+                <Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
+                <Partly_Sunny>lekko słonecznie</Partly_Sunny>
+                <Sunny-Wind>słonecznie i wietrznie</Sunny-Wind>
+                <Clear>czyste niebo</Clear>
+                <Mostly_Clear>głównie czyste niebo</Mostly_Clear>
+                <Partly_Cloudy>częściowo zachmurzone</Partly_Cloudy>
+                <Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
+                <Cloudy>pochmurnie</Cloudy>
+                <AM_Showers>poranne deszcze</AM_Showers>
+                <Showers>lekki deszcz</Showers>
+                <Light_Rain>lekki deszcz</Light_Rain>
+                <Rain>deszcz</Rain>
+                <PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
+                <Scattered_Thunderstorms>burze</Scattered_Thunderstorms>
+            </weatherResponses>
+            <badWeather>
+                <temperature>10</temperature>
+                <windSpeed>5</windSpeed>
+                <weatherTypes>Rain</weatherTypes>
+            </badWeather>
         </order>
-       <order classname="shani.orders.CalculateOrder">
-            <sentence>
-                <template name="count">$count ?count</template>
-                <template name="power">$power ?power1 $connect ?power2</template>
-                <template name="power">?power1 $power ?power2</template>
-                <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
-                <template name="divide">$divide ?divide1 $connect ?divide2</template>
-                <template name="add">$add ?add1 $connect ?add2</template>
-                <template name="substract">$substract ?substract2 $connect ?substract1</template>
-                <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
-                <power>potęga</power>
-                <multiply>pomnórz*iloczyn</multiply>
-                <divide>podziel*iloraz</divide>
-                <add>dodaj*suma</add>
-                <substract>odejmij*różnica</substract>
-                <startword>ile mamy po*podaj*</startword>
-                <connect>przez*od*do*i*na</connect>
-            </sentence>
-        </order>
-        <order classname="shani.orders.MasterOrder">
-            <exit>exit*żegnam*do widzenia*wyłącz się</exit>
-            <autosave>autosavetime</autosave>
-            <save>save*zapisz*zabezpiecz się</save>
-        </order>
-        <order classname="shani.orders.MergeOrder">
-            <key>i</key>
-        </order>
-        <order classname="shani.orders.TimerOrder">
-            <keyword>timer*zegar</keyword>
-            <suborder>
-                <keyword>odpal*start*włącz</keyword>
-                <method>start</method>
-            </suborder>
-            <suborder classname="stop*wyłącz*zatrzymaj">
-                <keyword></keyword>
-                <method>stop</method>
-            </suborder>
-            <suborder>
-                <keyword>wyświetl*show*pokaż ile zliczył‚</keyword>
-                <method>show</method>
-            </suborder>
-            <suborder>
-                <keyword>reset*zeruj*wyzeruj</keyword>
-                <method>reset</method>
-            </suborder>
-        </order>
-        <order classname="shani.orders.ExecuteOrder">
-            <keywords>odpal*włącz*otwórz*pokaż*show*start*uruchom</keywords>
-        </order>
-        <order classname="shani.orders.TranslateOrder">
-            <keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
-        </order>
-    </orders>
-    <storage>
-        <engine>
-            <helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
-            <notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
-            <errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
-            <licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
-            <licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
-        </engine>
-        <orders>
-            <ExecuteOrder>
-                <successfulMessage>Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia</successfulMessage>
-                <notKnowMessage>Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?</notKnowMessage>
-            </ExecuteOrder>
-            <MasterOrder>
-                <notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
-                <closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
-            </MasterOrder>
-            <MergeOrder>
-                <connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
-                <cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
-            </MergeOrder>
-            <TimerOrder>
-                <startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
-                <alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
-                <stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
-                <alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
-                <resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
-                <printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
-                <nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
-                <nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
-                <nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
-                <nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
-            </TimerOrder>
-            <TranslateOrder>
-                <maxLineSize>70</maxLineSize>
-                <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
-                <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
-            </TranslateOrder>
-            <CalculateOrder>
-                <calculationResoultMessage>Wynik to %f.*%f*Po podliczeniu mamy %f.</calculationResoultMessage>
-                <calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
-            </CalculateOrder>
-        </orders>
-    </storage>
-    <userdata>
-        <acceptedLicences/>
-    </userdata>
+		<order classname="shani.orders.MasterOrder">
+			<exit>exit*żegnam*do widzenia*wyłącz się</exit>
+			<autosave>autosavetime</autosave>
+			<save>save*zapisz*zabezpiecz się</save>
+		</order>
+		<order classname="shani.orders.MergeOrder">
+			<key>i</key>
+		</order>
+		<order classname="shani.orders.TimerOrder">
+			<keyword>timer*zegar</keyword>
+			<suborder>
+				<keyword>odpal*start*włącz</keyword>
+				<method>start</method>
+			</suborder>
+			<suborder classname="stop*wyłącz*zatrzymaj">
+				<keyword></keyword>
+				<method>stop</method>
+			</suborder>
+			<suborder>
+				<keyword>wyświetl*show*pokaż ile zliczył‚</keyword>
+				<method>show</method>
+			</suborder>
+			<suborder>
+				<keyword>reset*zeruj*wyzeruj</keyword>
+				<method>reset</method>
+			</suborder>
+		</order>
+		<order classname="shani.orders.ExecuteOrder">
+			<keywords>odpal*włącz*otwórz*pokaż*show*start*uruchom</keywords>
+		</order>
+		<order classname="shani.orders.TranslateOrder">
+			<keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
+		</order>
+	</orders>
+	<storage>
+		<engine>
+			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
+			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
+			<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+			<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
+			<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
+		</engine>
+		<orders>
+			<ExecuteOrder>
+				<successfulMessage>Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia</successfulMessage>
+				<notKnowMessage>Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?</notKnowMessage>
+			</ExecuteOrder>
+			<MasterOrder>
+				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
+				<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
+			</MasterOrder>
+			<MergeOrder>
+				<connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
+				<cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
+			</MergeOrder>
+			<TimerOrder>
+				<startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
+				<alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
+				<stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
+				<alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
+				<resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
+				<printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
+				<nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
+				<nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
+				<nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
+				<nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
+			</TimerOrder>
+			<TranslateOrder>
+				<maxLineSize>70</maxLineSize>
+				<translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
+				<translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
+			</TranslateOrder>
+			<CalculateOrder>
+				<calculationResoultMessage>Wynik to %f.*%f*Po podliczeniu mamy %f.</calculationResoultMessage>
+				<calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
+			</CalculateOrder>
+		</orders>
+	</storage>
+	<userdata>
+		<acceptedLicences/>
+	</userdata>
 </shani>
