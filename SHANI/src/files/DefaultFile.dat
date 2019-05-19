@@ -1,7 +1,50 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <shani>
+	<version>v1</version>
+	<modules>
+        <module classname="shani.modules.NumberFilter">
+            <_1000000000>miliard</_1000000000>
+            <_1000000>milion</_1000000>
+            <_1000>tysiąc</_1000>
+            <_900>dziewięćset</_900>
+            <_800>osiemset</_800>
+            <_700>siedemset</_700>
+            <_600>sześćset</_600>
+            <_500>pięćset</_500>
+            <_400>czterysta</_400>
+            <_300>trzysta</_300>
+            <_200>dwieście</_200>
+            <_100>sto</_100>
+            <_90>dziewięćdziesiąt</_90>
+            <_80>osiemdziesiąt</_80>
+            <_70>siedemdziesiąt</_70>
+            <_60>sześćdziesiąt</_60>
+            <_50>pięćdziesiąt</_50>
+            <_40>czterdzieści</_40>
+            <_30>trzydzieści</_30>
+            <_20>dwadzieścia</_20>
+            <_19>dziewiętnaście</_19>
+            <_18>osienaście</_18>
+            <_17>siedemnaście</_17>
+            <_16>szesnaście</_16>
+            <_15>piętnaście</_15>
+            <_14>czternaście</_14>
+            <_13>trzynaście</_13>
+            <_12>dwanaście</_12>
+            <_11>jedenaście</_11>
+            <_10>dziesięć*dziesiątka</_10>
+            <_9>dziewięć*dziewiątka</_9>
+            <_8>osiem*ósemka*ósmy</_8>
+            <_7>siedem*siódemka*siódmy</_7>
+            <_6>sześć*szóstka*szósty</_6>
+            <_5>pięć*piątka*piąty</_5>
+            <_4>cztery*czwórka*czwarty</_4>
+            <_3>trzy*trójka*trzeci</_3>
+            <_2>dwa*dwójka*drugi</_2>
+            <_1>jeden*raz*pierwszy</_1>
+        </module>
+    </modules>
 	<orders>
-	    <version>v1</version>
 	    <order classname="shani.orders.WeatherOrder">
             <sentence>
                 <template name="weather">$ask *?when $weather *$where ?where</template>

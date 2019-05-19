@@ -34,6 +34,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import liblaries.ArgsDecoder;
+import shani.modules.templates.FilterModule;
+import shani.modules.templates.ShaniModule;
 import shani.orders.templates.Executable;
 import shani.orders.templates.Order;
 import shani.tools.MainFileTools;
@@ -54,6 +56,7 @@ public class Engine {
 	
 	public static Document doc;
 	private static ArrayList<Order> orders = new ArrayList<Order>();
+	private static ArrayList<FilterModule> filterModules = new ArrayList<>();
 	
 	private static Executable lastExecuted;
 	
@@ -113,9 +116,22 @@ public class Engine {
 				System.exit(0);
 			}
 		}
+		Integer integer;
+		if((integer=argsDec.getInt("-cl","--close"))!=null) {
+			Thread closingThread=new Thread("ClouserThread") {
+				public void run() {
+					try {
+						Thread.sleep(60*1000*integer);
+						interprete("exit");
+					} catch (InterruptedException e) {}
+				}
+			};
+			closingThread.setDaemon(true);
+			closingThread.start();
+		}
 		if(!argsDec.isProcesed()) {
 			System.out.println("Program input contain un recognized parameters:");
-			var unmatched=argsDec.getUnProcesed();
+			var unmatched=argsDec.getUnprocesed();
 			for(var un:unmatched)System.out.println(un);
 			System.exit(0);
 		}
@@ -198,7 +214,6 @@ public class Engine {
 			if(str.length()==0)continue;
 			long time=System.nanoTime();
 			ShaniString command=new ShaniString(str,false);
-			if(command.equals(""))continue;
 			Executable exec=interprete(command);
 			
 			if (exec==null) {
@@ -206,7 +221,7 @@ public class Engine {
 				commands.print('!');
 			} else if(exec.isSuccesful()) lastExecuted=exec;
 			commands.print(str);
-			commands.println("-> "+(System.nanoTime()-time)/1000/1000f+" ms");
+			commands.println(" -> "+(System.nanoTime()-time)/1000/1000f+" ms");
 		}
 	}
 	
@@ -232,7 +247,6 @@ public class Engine {
 	private static void parseMainFile() throws SAXException, IOException, ParserConfigurationException {
 		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.mainFile);
 		doc.getDocumentElement().normalize();
-		NodeList ordersNode = ((Element)doc.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
 		
 		helloMessage=ShaniString.loadString("engine.helloMessage");					
 		notUnderstandMessage=ShaniString.loadString("engine.notUnderstandMessage");
@@ -240,6 +254,7 @@ public class Engine {
 		licenseConfirmationMessage=ShaniString.loadString("engine.licenseConfirmationMessage");
 		licensesNotConfirmedMessage=ShaniString.loadString("engine.licensesNotConfirmedMessage");
 		
+		NodeList ordersNode = ((Element)doc.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
 		for (int i = 0; i < ordersNode.getLength(); i++) {
 			Node node = ordersNode.item(i);
 			
@@ -252,15 +267,39 @@ public class Engine {
 						System.err.println("Classname of an order is not specyfied.");
 						continue;
 					}
-					info.printf("Loading \"%s\" module%n",className);
+					info.printf("Loading \"%s\" order%n",className);
 					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
-					info.println("Module loaded");
+					info.println("Order loaded");
 					order.init(e);
 					orders.add(order);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 					System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
 					ex.printStackTrace();
 				}
+			}
+		}
+		
+		NodeList moduleNodes=((Element)doc.getElementsByTagName("modules").item(0)).getElementsByTagName("module");
+		for(int i=0;i<moduleNodes.getLength();i++) {
+			Element e=(Element)moduleNodes.item(i);
+			try {
+				String className=e.getAttribute("classname");
+				if(className.equals("")) {
+					System.out.println("Error in mainfile found");
+					System.err.println("Classname of an order is not specyfied.");
+					continue;
+				}
+				info.printf("Loading \"%s\" module%n",className);
+				ShaniModule module=(ShaniModule) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+				
+				if(module instanceof FilterModule) {
+					filterModules.add((FilterModule)module);
+				} else {
+					System.out.println("Unrecognized module \""+className+"\".");
+				}
+			} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" module from main file.");
+				ex.printStackTrace();
 			}
 		}
 	}
@@ -309,6 +348,11 @@ public class Engine {
 	}
 	public static Executable interprete(ShaniString command) {
 		if(command.isEmpty())return null;
+		
+		info.print(command.toFullString()+" --> ");
+		for(FilterModule filter:filterModules)command=filter.filter(command);
+		info.println(command.toFullString());
+		
 		lastCommand=command;
 		Executable toExec=getExecutable(command);
 		
