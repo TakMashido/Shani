@@ -88,7 +88,7 @@ public class MainFileTools {
 		var mainOriginNode=originDoc.getElementsByTagName("shani").item(0);
 		var mainTargetNode=targetDoc.getElementsByTagName("shani").item(0);
 		
-		var originNode=((Element)mainOriginNode).getElementsByTagName("orders").item(0);
+		var originNode=((Element)mainOriginNode).getElementsByTagName("orders").item(0);				//orders
 		var targetNode=((Element)mainTargetNode).getElementsByTagName("orders").item(0);
 		
 		var originNL=((Element)originNode).getElementsByTagName("order");
@@ -107,10 +107,29 @@ public class MainFileTools {
 			targetNode.appendChild(targetDoc.importNode(originNL.item(i), true));
 		}
 		
-		originNL=((Element)mainOriginNode).getElementsByTagName("storage");
+		originNL=((Element)mainOriginNode).getElementsByTagName("storage");					//storage
 		targetNL=((Element)mainTargetNode).getElementsByTagName("storage");
 		
 		deepCopyNode(originNL.item(0),originDoc,targetNL.item(0),targetDoc);
+		
+		originNode=((Element)mainOriginNode).getElementsByTagName("modules").item(0);		//modules
+		targetNode=((Element)mainTargetNode).getElementsByTagName("modules").item(0);
+		
+		originNL=((Element)originNode).getElementsByTagName("module");
+		targetNL=((Element)targetNode).getElementsByTagName("module");
+		
+		String[] targetModules=new String[targetNL.getLength()];
+		for(int i=0;i<targetModules.length;i++) {
+			targetModules[i]=((Element)targetNL.item(i)).getAttribute("classname");
+			if(targetModules[i].equals(""))System.out.println("Found corruption in main file. Property \"classname\" in a module not found");
+		}
+		
+		orders:
+		for(int i=0;i<originNL.getLength();i++) {																	//coping orders
+			String name=((Element)originNL.item(i)).getAttribute("classname");
+			for(String str:targetModules)if(str.equals(name))continue orders;
+			targetNode.appendChild(targetDoc.importNode(originNL.item(i), true));
+		}
 		
 		saveMainFile(targetDoc,target);
 	}
