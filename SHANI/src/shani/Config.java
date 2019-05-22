@@ -1,6 +1,7 @@
 package shani;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -22,41 +23,77 @@ public class Config {
 			e.printStackTrace();
 		}
 		
+		String config2Name=prop.getProperty("secondConfig");
+		File config2;
+		if(config2Name!=null)
+			config2=new File(prop.getProperty("secondConfig"));
+		else config2=null;
+		
+		secondConfig=config2;
+		
+		Properties prop2=null;
+		try {
+			if(config2!=null) {
+				prop2=new Properties();
+				prop2.load(new FileInputStream(config2));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Properties[] props;
+		if(prop2!=null) {
+			props=new Properties[] {prop2,prop};
+		} else {
+			props=new Properties[] {prop};
+		}
+		
 		mainFile=new File(prop.getProperty("mainFile","Shani.dat"));									//If failed to load properties from file dedfault onw will be used
 		
-		positiveResponeKey=new ShaniString(prop.getProperty("positiveResponeKey","failed to load positiveResponeKey"));
-		negativeResponeKey=new ShaniString(prop.getProperty("negativeResponeKey","failed to load negaticeResponeKey"));
+		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey","failed to load positiveResponeKey"));
+		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey","failed to load negaticeResponeKey"));
 		
-		diffrendCharacterCost=(byte)getProperty(prop,"diffrendCharacterCost","50");
-		qwertyNeighbourCost=(byte)getProperty(prop,"qwertyNeighbourCost","30");
-		nationalSimilarityCost=(byte)getProperty(prop,"nationalSimilarityCost","10");
+		diffrendCharacterCost=(byte)getIntProperty(props,"diffrendCharacterCost","50");
+		qwertyNeighbourCost=(byte)getIntProperty(props,"qwertyNeighbourCost","30");
+		nationalSimilarityCost=(byte)getIntProperty(props,"nationalSimilarityCost","10");
 		
-		wordCompareTreshold=(short)getProperty(prop,"wordCompareTreshold","100");
-		characterCompareCostMultiplier=new Multiplier(prop.getProperty("characterCompareCostMultiplier","10,5,2,1.2f,1"));
-		characterDeletionCost=(short)getProperty(prop,"characterDeletionCost","50");
-		characterInsertionCost=(short)getProperty(prop,"characterInsertionCost","50");
-		characterSwapTreshold=(short)getProperty(prop,"characterSwapTreshold","50");
-		characterSwapCost=(short)getProperty(prop,"characterSwapCost","30");
+		wordCompareTreshold=(short)getIntProperty(props,"wordCompareTreshold","100");
+		characterCompareCostMultiplier=new Multiplier(getProperty(props,"characterCompareCostMultiplier","10,5,2,1.2f,1"));
+		characterDeletionCost=(short)getIntProperty(props,"characterDeletionCost","50");
+		characterInsertionCost=(short)getIntProperty(props,"characterInsertionCost","50");
+		characterSwapTreshold=(short)getIntProperty(props,"characterSwapTreshold","50");
+		characterSwapCost=(short)getIntProperty(props,"characterSwapCost","30");
 		
-		sentenseCompareTreshold=(short)getProperty(prop,"sentenseCompareTreshold","300");
-		wordInsertionCost=(short)getProperty(prop,"wordInsertionCost","300");
-		wordDeletionCost=(short)getProperty(prop,"wordDeletionCost","120");
+		sentenseCompareTreshold=(short)getIntProperty(props,"sentenseCompareTreshold","300");
+		wordInsertionCost=(short)getIntProperty(props,"wordInsertionCost","300");
+		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost","120");
 		
-		optionalMatchTreshold=(short)getProperty(prop,"optionalMatchTreshold","200");
+		optionalMatchTreshold=(short)getIntProperty(props,"optionalMatchTreshold","200");
 		
-		socksProxyHost=prop.getProperty("socksProxyHost",null);
-		socksProxyPort=getProperty(prop,"socksProxyPort","0");
+		socksProxyHost=getProperty(props,"socksProxyHost",null);
+		socksProxyPort=getIntProperty(props,"socksProxyPort","0");
 		
-		HTTPProxyHost=prop.getProperty("HTTPProxyHost",null);
-		HTTPProxyPort=getProperty(prop,"HTTPProxyPort","0");
+		HTTPProxyHost=getProperty(props,"HTTPProxyHost",null);
+		HTTPProxyPort=getIntProperty(props,"HTTPProxyPort","0");
 	}
-	private static final int getProperty(Properties prop,String key,String defaultVal) {
+	private static final String getProperty(Properties props[], String key, String defaultVal) {
+		for(int i=0;i<props.length;i++) {
+			String val=props[i].getProperty(key);
+			if(val!=null)return val;
+		}
+		
+		return defaultVal;
+	}
+	private static final int getIntProperty(Properties props[],String key,String defaultVal) {
 		try {
-			return Integer.parseInt(prop.getProperty(key,defaultVal));
+			return Integer.parseInt(getProperty(props, key, defaultVal));
 		} catch(NumberFormatException ex) {
 			return Integer.parseInt(defaultVal);
 		}
 	}
+	
+	@SuppressWarnings("unused")
+	private static final File secondConfig;
 	
 	public static final File mainFile;
 	
