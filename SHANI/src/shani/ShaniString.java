@@ -338,7 +338,7 @@ public class ShaniString {
 		if(str.length()==0)return false;
 		return equals(new ShaniString(str));
 	}
-	/**Check if this is equal to this. It don't check if 2 ShaniString are same, but perform fuzzy String Maptching.
+	/**Check if this is equal to this. It don't check if two ShaniString are same, but perform fuzzy String Maptching.
 	 * @param str ShaniString to Check.
 	 * @return If given shaniString is equal to this.
 	 */
@@ -539,6 +539,7 @@ public class ShaniString {
 	 * @return String representing this ShaniString.
 	 */
 	public String toFullString() {
+		if(value.length==0)return "EMPTY_SHANI_STRING";
 		StringBuffer str=new StringBuffer();
 		str.append(value[0]);
 		for(int i=1;i<value.length;i++)str.append("*").append(value[i]);
@@ -548,7 +549,7 @@ public class ShaniString {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		if(value.length<=0)return null;
+		if(value.length<=0)return "EMPTY_SHANI_STRING";
 		return value[random.nextInt(value.length)];
 	}
 	/**Create deep copy of this object.
@@ -629,6 +630,17 @@ public class ShaniString {
 		 */
 		public ShaniMatcher apply(ShaniString comparable) {
 			assert comparable!=null:"comparable item can't be null";
+			assert comparable.value.length!=0:"compareble item shouldn't be empty";
+			if(comparable==null) {
+				for(int i=0;i<costBias.length;i++) {
+					costBias[i]+=Config.wordInsertionCost;
+				}
+				return this;
+			}
+			if(comparable.value.length==0) {
+				return this;
+			}
+			
 			comparable.stem();
 			
 			for(int i=0;i<wordCost.length;i++) {

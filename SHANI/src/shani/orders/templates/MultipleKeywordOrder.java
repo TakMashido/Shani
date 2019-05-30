@@ -10,6 +10,14 @@ import shani.Config;
 import shani.Engine;
 import shani.ShaniString;
 
+
+/**
+ * Allows to execute multiple commands on single target.
+ * E.g. timer with stop/start/reset/print commands.
+ * @author TakMashido
+ * @deprecated Use SentenceMatcherOrder instead.
+ */
+@Deprecated 
 public abstract class MultipleKeywordOrder extends Order{
 	protected ShaniString keyword;
 	protected ArrayList<OrderTarget> orderTargets;
@@ -70,8 +78,9 @@ public abstract class MultipleKeywordOrder extends Order{
 				if(!ordersMatched[i])continue;
 				var notMatchedTarget=getUnmatchedTarget();
 				if (notMatchedTarget==null)continue;
-				notMatchedTarget.setUnmatched(matcher.clone().apply(orders.get(i).keyword).getUnmatched());
-				Return.add(new MultipleKeywordAction(notMatchedTarget,orders.get(i)).getExecutable(Config.sentenseCompareTreshold-2));				//Create executable have cost Config.sentenceCompareTreshold-1, making it -2 there make sure i'll be executed if timerkeyword exist in command
+				var matcherClone=matcher.clone().apply(orders.get(i).keyword);
+				notMatchedTarget.setUnmatched(matcherClone.getUnmatched());
+				Return.add(new MultipleKeywordAction(notMatchedTarget,orders.get(i)).getExecutable(matcher.getMatchedCost()));				//Create executable have cost Config.sentenceCompareTreshold-1, making it -2 there make sure i'll be executed if timerkeyword exist in command
 			}
 			return Return;
 		}
