@@ -65,7 +65,7 @@ public class Engine {
 	private static boolean initialized=false;
 	
 	public static void main(String[] args) {
-		new ShaniString();								//FIXME beacouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work properly(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
+		new ShaniString();								//FIXME becouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work properly(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
 		initialize(args);
 		start();
 	}
@@ -91,7 +91,10 @@ public class Engine {
 		
 		if(argsDec.containFlag("-d","--debug")) {		//debug
 			debug=System.out;
-		}else {
+		} else if(argsDec.containFlag("-dd")){
+			debug=System.out;
+			commands=System.out;
+		} else {
 			try {
 				System.setErr(new PrintStream(new FileOutputStream("Errors.log",true)));
 			} catch (FileNotFoundException e1) {
@@ -118,7 +121,7 @@ public class Engine {
 		}
 		Integer integer;
 		if((integer=argsDec.getInt("-cl","--close"))!=null) {
-			Thread closingThread=new Thread("ClouserThread") {
+			Thread closingThread=new Thread("CloserThread") {
 				public void run() {
 					try {
 						Thread.sleep(60*1000*integer);
@@ -129,7 +132,11 @@ public class Engine {
 			closingThread.setDaemon(true);
 			closingThread.start();
 		}
-		if(!argsDec.isProcesed()) {
+		if(argsDec.containFlag("-v","--verbose")) {
+			Config.verbose=true;
+		}
+		
+		if(!argsDec.isProcesed()) {														//End of args processing
 			System.out.println("Program input contain un recognized parameters:");
 			var unmatched=argsDec.getUnprocesed();
 			for(var un:unmatched)System.out.println(un);
@@ -153,7 +160,7 @@ public class Engine {
 				return;
 			}
 		} else {
-			System.out.println("Main config file doesn't exist. Create now y/n?");
+			System.out.println("Main data file doesn't exist. Create now y/n?");
 			if (in.next().equals("y")) {
 				try {
 					createMainFile();
@@ -173,11 +180,13 @@ public class Engine {
 			}
 		}
 		
-		try {
-			commands=new PrintStream(new BufferedOutputStream(new FileOutputStream("Commands.log",true)));
-		} catch (FileNotFoundException e) {
-			System.out.println("Failed to set commands file");
-			e.printStackTrace();
+		if(commands==null) {
+			try {
+				commands=new PrintStream(new BufferedOutputStream(new FileOutputStream("Commands.log",true)));
+			} catch (FileNotFoundException e) {
+				System.out.println("Failed to set commands file");
+				e.printStackTrace();
+			}
 		}
 		
 		if(Storage.isErrorOccured()) {
@@ -387,7 +396,8 @@ public class Engine {
 			List<Executable> execs=order.getExecutables(command);
 			if(execs==null)continue;
 			for(Executable exec:execs) {
-//				System.out.println(exec.action.getClass().toString()+" "+exec.cost);
+				if(Config.verbose)
+					commands.println(exec.action.getClass().toString()+" "+exec.cost);
 				if(exec.cost<minCost) {
 					minCost=exec.cost;
 					Return=exec;

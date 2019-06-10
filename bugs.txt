@@ -5,3 +5,4 @@ Handle network errors in WeatherOrder.
 Handle errors of executing app/opening file in ExecuteOrder.
 Fix error caused by diffrend character encoding in cmd and java. Refer only to national characters like "¿". (Handled by using -Dfile.encoding=IBM852 in run bat file)
 Tools.removeNational now works only with Polish Charaters.
+In calculate order "policz 28*28" gives 28(String still splitted in '*' position?)

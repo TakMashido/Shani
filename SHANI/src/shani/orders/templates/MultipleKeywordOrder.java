@@ -132,7 +132,7 @@ public abstract class MultipleKeywordOrder extends Order{
 		 */
 		protected OrderTarget(Element e) {
 			targetFile=e;
-			targetKeyword=new ShaniString(targetFile.getElementsByTagName("keyword").item(0));
+			targetKeyword=new ShaniString(targetFile.getElementsByTagName("key").item(0));
 		}
 		/**Creates new target.
 		 * @param keyword Keyword which will be used to represent this target.

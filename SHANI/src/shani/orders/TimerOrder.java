@@ -2,6 +2,7 @@ package shani.orders;
 
 import org.w3c.dom.Element;
 
+import shani.Engine;
 import shani.ShaniString;
 import shani.orders.templates.MultipleKeywordOrder;
 
@@ -98,10 +99,13 @@ public class TimerOrder extends MultipleKeywordOrder{
 		private final String getTimeString() {
 			String Return="";
 			int time=timeCounted;
+			boolean insertAnd=false;
 			if(time>60) {					//min
 				if(time>3600) {				//h
+					insertAnd=true;
 					int h=time/3600;
 					if(h==1)Return+=" godzina ";
+					else if(h<5)Return+=" godziny ";
 					else Return+=h+" godzin ";
 					time%=3600;
 				}
@@ -110,7 +114,13 @@ public class TimerOrder extends MultipleKeywordOrder{
 				else Return+=m+" minut ";
 				time%=60;
 			}
-			Return+=time+" sekund";
+			if(time>0) {
+				if(insertAnd)Return+=" i ";
+				Return+=time;
+				if(time%10>1)
+					Return+=" sekundy";
+				else Return+=" sekund";
+			}
 			Return=Return.trim();
 			return Return;
 		}
@@ -123,7 +133,12 @@ public class TimerOrder extends MultipleKeywordOrder{
 		}
 		private void save() {
 			updateTime();
-			targetFile.getElementsByTagName("time").item(0).setTextContent(Integer.toString(timeCounted));
+			var timeNode=targetFile.getElementsByTagName("time").item(0);
+			if(timeNode==null) {
+				timeNode=Engine.doc.createElement("time");
+				targetFile.appendChild(timeNode);
+			}
+			timeNode.setTextContent(Integer.toString(timeCounted));
 		}
 	}
 	private class NoTimerTarget extends NotMatchedTarget{

@@ -25,9 +25,12 @@ public class Config {
 		
 		String config2Name=prop.getProperty("secondConfig");
 		File config2;
-		if(config2Name!=null)
-			config2=new File(prop.getProperty("secondConfig"));
-		else config2=null;
+		if(config2Name!=null) {
+			File preConfig=new File(prop.getProperty("secondConfig"));
+			if(preConfig.exists())
+				config2=new File(prop.getProperty("secondConfig"));
+			else config2=null;
+		} else config2=null;
 		
 		secondConfig=config2;
 		
@@ -122,6 +125,8 @@ public class Config {
 	
 	public static final String HTTPProxyHost;
 	public static final int HTTPProxyPort;
+	
+	public static boolean verbose=false;
 	
 	/**Multiple value by parameter depending on another one.
 	 * @author TakMashido

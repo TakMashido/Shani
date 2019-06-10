@@ -1,6 +1,7 @@
 Add JavaDoc to Engine class!!!!!!!!!!!!!!!!
 Let ExecuteOrder execute programs with command line arguments.
 Move TimerOrder to SentenceMatcher
+Move TimerOrder time convertion constants from code to main file.
 Add module changing date description words (number of day, month, week day) to one form(exact date).
 Add option to choose beetwen multiple matched Orders not choose one witch smallest cost.
 Override xml parser to add doc changed flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
