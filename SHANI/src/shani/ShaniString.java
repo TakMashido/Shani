@@ -135,9 +135,20 @@ public class ShaniString {
 	 * @param origin Strings constaining data. All of them will be cutted on '*' occurences.
 	 */
 	public ShaniString(String... origin) {
-		ArrayList<String> buf=new ArrayList<String>();
-		for(String str:origin)processString(str,buf);
-		value=buf.toArray(new String[] {});
+		this(true,origin);
+	}
+	public ShaniString(boolean cut,String... origin) {
+		if(cut) {
+			ArrayList<String> buf=new ArrayList<String>();
+			for(String str:origin)processString(str,buf);
+			value=buf.toArray(new String[] {});
+		} else {
+			StringBuffer data=new StringBuffer();
+			for(String str:origin) {
+				data.append(' ').append(str);
+			}
+			value=new String[] {data.toString()};
+		}
 	}
 	/**Load ShaniString from xml node. Any change done to this object will also be pushed to given node.
 	 * @param origin XML Node storing ShaniString data.

@@ -1,5 +1,7 @@
+Add debug mode, printing somewhere where input sentence was matched and waht caused this(keywords, sentence patern from sentence matcher, ...)
 Add JavaDoc to Engine class!!!!!!!!!!!!!!!!
 Let ExecuteOrder execute programs with command line arguments.
+Add option of reloading main file without restarting whole app(or automate restart).
 Move TimerOrder to SentenceMatcher
 Move TimerOrder time convertion constants from code to main file.
 Add module changing date description words (number of day, month, week day) to one form(exact date).
@@ -7,13 +9,14 @@ Add option to choose beetwen multiple matched Orders not choose one witch smalle
 Override xml parser to add doc changed flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
 Intern long-life String (keywords/responses) during some SHANI inactivity time.
 Make ShaniString immutable.
-Add loops detetion system for MergeOrder
+Add loops detection system for MergeOrder
 Make project name a shortcut (Simple Heurestic n a Interpreter)
 Add errors handler (Mostly for loading modules time. Will allow to better error reporting and menagment)
 Move respones keys from config file to main file. And perform other data movements. (store data of each Order in one xml node, except some data which be changen(user/computer dependet))
 Add option of compressing data files.
 Add speech recognition layer for input.
 Add speech sytesis layer for output.
+
 
 SentenceMatcher:
 If two or more return blocks presents near each other return all posible cofigurations of matched sentence, not report error like now.
@@ -22,12 +25,15 @@ Add return value optional checking by regex/ShaniString.
 Add 'or' option to two or more elements.
 
 Order to add:
+cmd order: Execuses you some app like in normal cmd session, or just one command
 storage order
 ConverterOrder-> convert GB,currency.
+AliasOrder: Set up aliases for other commands
 
 To update:
 Finish weather order.
-Let NumberFilter parse queries like "dwatysi¹ce" (no beetwen number parts)
+Let NumberFilter parse queries like "dwatysi¹ce" (no " " beetwen number parts)
+
 
 Space of dreams:
 Add NLP layer beetwen program out and user to make sentenses more natural(learn it to put right ending of word)

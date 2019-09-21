@@ -1,31 +1,41 @@
 "All you have to do is install the damm java 10 user!"
-To run SHANI you have to have installed java 10 or newer. If you have alredy installed java check if it's 10 not overused java 8.
-Next downland it's latest release and unzip it somewhere. To run just double click on Shani.bat file. New cmd window with SHANI launched should apper.
+To run SHANI you have to have installed java 10 or newer. If you have alredy installed java check if it's 10 not java 8 which is most often installed in personal computers.
+Next download shani latest release and unzip it somewhere. To run just double click on Shani.bat file. New cmd window with SHANI launched should apper.
 
 Unfortunetly it only support Polish language for now. All messages and input patterns are stored in external file so translations can be made quite easy.
 Report to me if you want this in another language.
 
-FAQ:
+Just type action which you want to execute in cmd window.
+It applies heavy Fuzzy string matching(sometimes to heavy) so no need to type everything correctly, it should be able to understand even with lots of literals.
 
-What I can do with it?
-It is pseudo intelligent assitant.
-For now it have three basic features:
-Run programs/files/open folders. Just type "w��cz xyz", "odpal xyz"... . For the first time it'll ask you what you want to run.
-	Copy paste path to folder/file. Next time you try to run something with same name is start automaticly. 
-	After what to run question you can also provide name of something runned before or url based run like steam://rungameid/335300.
-Search for translations in online dictionary. Type "Przetlumacz xyz".
-Calculator, type "policz 2+2" or something similar.
 
-To close just type "do widzenia" or try other goodbay phrase.
+Supported actions:
+Launch program, open file/directory:
+Type odpal/w³¹cz/start or something symilar and then name of thing you want to start. First time it'll ask for full path to file/directory. Program do not index files of your divice so it's impossible skip it.
+If you already launched thing with this program will launch it immadiately. You can also create alias for thing just type normal start command but provide one of the previous thing name instead of path.
 
-It's still in developnet phase so new fetures and better language understending will come in the future.
+Calculator:
+Type something like "policz 2+2", "pomnórz trzy i cztery". To get the resoult.
+
+Timer:
+The most messed/bugged of them all. Use "w³acz timer name", "ile zliczy³ zegar name", "zatrzymaj zegar n".
+
+Dictionary:
+Type "przet³umacz abcd", "jak jest answer". Tarnslation taken from translatica.pl website translatica.pl webside. Support only english, german and polish words.
+
+Weather forecast:
+"Jaka jest pogoda/temperatura/... w miasto", "Ile bêdzie stopni za dwa dni w ...". "Czy w xyz jest brzytko".
 
 
 How can I check installed java version?
-Option 1: Run cmd(windows + r, write cmd) and wirte in it "java --version".
+Option 1: Run cmd(windows + r, write cmd) and write in it "java --version".
 Option 2: Find java control panel(Configure java/About java) in your computer and find version there.
 
-How to install java 10?
-Write in your browser "java 10" and dowland it from Oracle. Be avare default java dowland link refers to java 8 beacouse of some strange reasons.
+Closing:
+Just type some kind of greedings???? message. "Żegnaj", "Do widzenia" or similar should work.
 
-And please report any bugs or features you want to me on github issue page or via main email connected to my github accaunt.
+How to install java 10?
+Write in your browser "java 10" and dowland it from Oracle. Be avare default java dowloand link refers to java 8.
+Now java 10 is outdated but newer version should run it. If no try to find 10 in archive.
+
+Unfortunetly now it's very bugged, I've decided to fix ewerything I was able to found before adding more features.

@@ -32,7 +32,7 @@ public class NumberFilter extends FilterModule {
 	
 	@Override
 	public ShaniString filter(ShaniString orginalRespond) {
-		var org=orginalRespond.split();
+		var org=orginalRespond.split(false);
 		
 		StringBuffer[] returnBuffer=new StringBuffer[org.length];
 		
@@ -77,7 +77,8 @@ public class NumberFilter extends FilterModule {
 		
 		String[] Return=new String[org.length];
 		for(int i=0;i<org.length;i++)Return[i]=returnBuffer[i].toString();
-		return new ShaniString(Return);
+		
+		return new ShaniString(false,Return);
 	}
 	
 	private static boolean tenPowerCheck(int number) {
