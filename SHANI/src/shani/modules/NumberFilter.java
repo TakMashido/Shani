@@ -7,6 +7,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import shani.Config;
 import shani.ShaniString;
 import shani.modules.templates.FilterModule;
 
@@ -28,6 +29,7 @@ public class NumberFilter extends FilterModule {
 			if(node.getNodeType()!=Node.ELEMENT_NODE)continue;
 			elements.add(new NumberElement((Element)node));
 		}
+		elements.trimToSize();
 	}
 	
 	@Override
@@ -43,14 +45,31 @@ public class NumberFilter extends FilterModule {
 			int[] intArray=new int[strArray.length];
 			Arrays.fill(intArray, -1);
 			
+			short[] costs=new short[elements.size()];
 			for(int j=0;j<strArray.length;j++) {
-				for(NumberElement el:elements) {
-					if(el.keyword.equals(org[i][j])) {
+				Arrays.fill(costs, Short.MAX_VALUE);
+				for(int k=0;k<elements.size();k++) {
+					NumberElement el=elements.get(k);
+					costs[k]=el.keyword.getCompareCost(org[i][j]);
+					if(costs[k]==0) {
 						intArray[j]=el.value;
 						break;
 					}
 				}
-				if(intArray[j]==-1) strArray[j]=org[i][j].toString();
+				System.out.println(Arrays.toString(costs));
+				if(intArray[j]==-1) {
+					short min=costs[0];
+					int minIndex=0;
+					for(int k=1;k<costs.length;k++)
+						if(costs[k]>min) {
+							min=costs[k];
+							minIndex=k;
+						}
+					if(min<Config.sentenseCompareTreshold) {
+						intArray[j]=elements.get(minIndex).value;
+					} else
+						strArray[j]=org[i][j].toString();
+				}
 			}
 			
 			int length=intArray.length-1;

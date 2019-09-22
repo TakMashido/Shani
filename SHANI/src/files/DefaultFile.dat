@@ -36,11 +36,11 @@
             <_9>dziewięć*dziewiątka</_9>
             <_8>osiem*ósemka*ósmy</_8>
             <_7>siedem*siódemka*siódmy</_7>
-            <_6>sześć*szóstka*szósty</_6>
-            <_5>pięć*piątka*piąty</_5>
-            <_4>cztery*czwórka*czwarty</_4>
-            <_3>trzy*trójka*trzeci</_3>
-            <_2>dwa*dwójka*drugi</_2>
+            <_6>sześć*szóstka*szósty*sześciu</_6>
+            <_5>pięć*piątka*piąty*pięciu</_5>
+            <_4>cztery*czwórka*czwarty*czterech</_4>
+            <_3>trzy*trójka*trzeci*trzech</_3>
+            <_2>dwa*dwójka*drugi*dwóch</_2>
             <_1>jeden*raz*pierwszy</_1>
         </module>
     </modules>
