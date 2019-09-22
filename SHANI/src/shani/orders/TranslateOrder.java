@@ -1,6 +1,7 @@
 package shani.orders;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class TranslateOrder extends KeywordOrder{
 			}
 			var entries=getEntries(unmatched.toString());
 			
+			if(entries==null)return true;
 			if(entries.size()>0) {
 				System.out.printf(translationSuccessMessage.toString(),unmatched.toString());
 				System.out.println();
@@ -76,11 +78,6 @@ public class TranslateOrder extends KeywordOrder{
 	public static List<Entry> getEntries(String wordToTranslate) {
 		try {
 			Document doc=Jsoup.connect("https://translatica.pl/szukaj/"+wordToTranslate).get();
-//			Document doc = Jsoup.parse(new File("test.html"),"UTF-8","https://translatica.pl/szukaj/transparent");
-		
-//			var out=new PrintStream(new FileOutputStream(new File("test.html")));
-//			out.print(doc.html());
-//			out.close();
 			
 			ArrayList<Entry> Return=new ArrayList<>();
 			
@@ -91,9 +88,10 @@ public class TranslateOrder extends KeywordOrder{
 			}
 			
 			return Return;
+		} catch (SocketTimeoutException e) {
+			ShaniString.loadString("misc.connection.connectionTimeoutMessage").printOut();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ShaniString.loadString("misc.connection.connectionFailedMessage").printOut();
 		}
 		return null;
 	}

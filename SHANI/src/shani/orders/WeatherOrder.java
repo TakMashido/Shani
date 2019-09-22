@@ -182,6 +182,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
+				ShaniString.loadString("misc.connection.connectionFailedMessage").printOut();
 			}
 			
 			return true;

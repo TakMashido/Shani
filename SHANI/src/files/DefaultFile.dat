@@ -2,118 +2,118 @@
 <shani>
 	<version>v1</version>
 	<modules>
-        <module classname="shani.modules.NumberFilter">
-            <_1000000000>miliard</_1000000000>
-            <_1000000>milion</_1000000>
-            <_1000>tysiąc</_1000>
-            <_900>dziewięćset</_900>
-            <_800>osiemset</_800>
-            <_700>siedemset</_700>
-            <_600>sześćset</_600>
-            <_500>pięćset</_500>
-            <_400>czterysta</_400>
-            <_300>trzysta</_300>
-            <_200>dwieście</_200>
-            <_100>sto</_100>
-            <_90>dziewięćdziesiąt</_90>
-            <_80>osiemdziesiąt</_80>
-            <_70>siedemdziesiąt</_70>
-            <_60>sześćdziesiąt</_60>
-            <_50>pięćdziesiąt</_50>
-            <_40>czterdzieści</_40>
-            <_30>trzydzieści</_30>
-            <_20>dwadzieścia</_20>
-            <_19>dziewiętnaście</_19>
-            <_18>osienaście</_18>
-            <_17>siedemnaście</_17>
-            <_16>szesnaście</_16>
-            <_15>piętnaście</_15>
-            <_14>czternaście</_14>
-            <_13>trzynaście</_13>
-            <_12>dwanaście</_12>
-            <_11>jedenaście</_11>
-            <_10>dziesięć*dziesiątka</_10>
-            <_9>dziewięć*dziewiątka</_9>
-            <_8>osiem*ósemka*ósmy</_8>
-            <_7>siedem*siódemka*siódmy</_7>
-            <_6>sześć*szóstka*szósty*sześciu</_6>
-            <_5>pięć*piątka*piąty*pięciu</_5>
-            <_4>cztery*czwórka*czwarty*czterech</_4>
-            <_3>trzy*trójka*trzeci*trzech</_3>
-            <_2>dwa*dwójka*drugi*dwóch</_2>
-            <_1>jeden*raz*pierwszy</_1>
-        </module>
-    </modules>
+		<module classname="shani.modules.NumberFilter">
+			<_1000000000>miliard</_1000000000>
+			<_1000000>milion</_1000000>
+			<_1000>tysiąc</_1000>
+			<_900>dziewięćset</_900>
+			<_800>osiemset</_800>
+			<_700>siedemset</_700>
+			<_600>sześćset</_600>
+			<_500>pięćset</_500>
+			<_400>czterysta</_400>
+			<_300>trzysta</_300>
+			<_200>dwieście</_200>
+			<_100>sto</_100>
+			<_90>dziewięćdziesiąt</_90>
+			<_80>osiemdziesiąt</_80>
+			<_70>siedemdziesiąt</_70>
+			<_60>sześćdziesiąt</_60>
+			<_50>pięćdziesiąt</_50>
+			<_40>czterdzieści</_40>
+			<_30>trzydzieści</_30>
+			<_20>dwadzieścia</_20>
+			<_19>dziewiętnaście</_19>
+			<_18>osienaście</_18>
+			<_17>siedemnaście</_17>
+			<_16>szesnaście</_16>
+			<_15>piętnaście</_15>
+			<_14>czternaście</_14>
+			<_13>trzynaście</_13>
+			<_12>dwanaście</_12>
+			<_11>jedenaście</_11>
+			<_10>dziesięć*dziesiątka</_10>
+			<_9>dziewięć*dziewiątka</_9>
+			<_8>osiem*ósemka*ósmy</_8>
+			<_7>siedem*siódemka*siódmy</_7>
+			<_6>sześć*szóstka*szósty*sześciu</_6>
+			<_5>pięć*piątka*piąty*pięciu</_5>
+			<_4>cztery*czwórka*czwarty*czterech</_4>
+			<_3>trzy*trójka*trzeci*trzech</_3>
+			<_2>dwa*dwójka*drugi*dwóch</_2>
+			<_1>jeden*raz*pierwszy</_1>
+		</module>
+	</modules>
 	<orders>
-	    <order classname="shani.orders.WeatherOrder">
-            <sentence>
-                <template name="weather">$ask *?when $weather *$where ?where</template>
-                <template name="weather">$ask ?where $weather</template>
-                <template name="temperature">$ask *?when $temperature *$where ?where</template>
-                <template name="windSpeed">$ask *?when $wind *$where ?where</template>
-                <template name="humidity">$ask *?when $humidity *$where ?where</template>
-                <template name="badWeather">$ask $where ?where $badWeather</template>
-                <template name="goodWeather">$ask $where ?where $goodWeather</template>
-                <where>w</where>
-                <temperature>temperaturę*temperatura*stopni</temperature>
-                <weather>pogoda*pogodę*</weather>
-                <wind>wiatr*prętkość wiatru*szybkość wiatru</wind>
-                <humidity>wilgotność</humidity>
-                <badWeather>będzie brzydko*jest brzydko</badWeather>
-                <goodWeather>będzie ładnie*jest ładnie</goodWeather>
-                <ask>czy*jaka jest*jak jest*jaka będzie*podaj*pokaż*ile jest*ile będzie</ask>
-            </sentence>
-            <daychooser>
-                <template name="0">$day0</template>
-                <template name="1">$day1</template>
-                <template name="2">$day2</template>
-                <template name="n">$break ?number $day</template>
-                <day0>dzisiaj*disiejsza*wieczorem</day0>
-                <day1>jutro*jutrzejsza</day1>
-                <day2>pojutrze</day2>
-                <break>za</break>
-                <day>dzień*dni</day>
-            </daychooser>
-            <weathersentence>
-                <template name="weather">weather comma break1 tempMin break2 tempMax degree dot</template>
-                <template name="temperature">break1 tempMin break2 tempMax degree dot</template>
-                <template name="windSpeed">windSpeed speed</template>
-                <template name="negativeRespond">yes</template>
-                <template name="positiveRespond">no</template>
-                <yes>tak *youp </yes>
-                <no>nie *niet *nope </no>
-                <is>jest</is>
-                <speed> km na godzinę* km/h</speed>
-                <degree> stopni* celcjuszów</degree>
-                <comma>, </comma>
-                <dot>.</dot>
-                <break1>od </break1>
-                <break2> do </break2>
-                <weather>Pogoda </weather>
-            </weathersentence>
-            <weatherResponses>
-                <Sunny>słonecznie</Sunny>
-                <Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
-                <Partly_Sunny>lekko słonecznie</Partly_Sunny>
-                <Sunny-Wind>słonecznie i wietrznie</Sunny-Wind>
-                <Clear>czyste niebo</Clear>
-                <Mostly_Clear>głównie czyste niebo</Mostly_Clear>
-                <Partly_Cloudy>częściowo zachmurzone</Partly_Cloudy>
-                <Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
-                <Cloudy>pochmurnie</Cloudy>
-                <AM_Showers>poranne deszcze</AM_Showers>
-                <Showers>lekki deszcz</Showers>
-                <Light_Rain>lekki deszcz</Light_Rain>
-                <Rain>deszcz</Rain>
-                <PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
-                <Scattered_Thunderstorms>burze</Scattered_Thunderstorms>
-            </weatherResponses>
-            <badWeather>
-                <temperature>10</temperature>
-                <windSpeed>5</windSpeed>
-                <weatherTypes>Rain</weatherTypes>
-            </badWeather>
-        </order>
+		<order classname="shani.orders.WeatherOrder">
+			<sentence>
+				<template name="weather">$ask *?when $weather *$where ?where</template>
+				<template name="weather">$ask ?where $weather</template>
+				<template name="temperature">$ask *?when $temperature *$where ?where</template>
+				<template name="windSpeed">$ask *?when $wind *$where ?where</template>
+				<template name="humidity">$ask *?when $humidity *$where ?where</template>
+				<template name="badWeather">$ask $where ?where $badWeather</template>
+				<template name="goodWeather">$ask $where ?where $goodWeather</template>
+				<where>w</where>
+				<temperature>temperaturę*temperatura*stopni</temperature>
+				<weather>pogoda*pogodę*</weather>
+				<wind>wiatr*prętkość wiatru*szybkość wiatru</wind>
+				<humidity>wilgotność</humidity>
+				<badWeather>będzie brzydko*jest brzydko</badWeather>
+				<goodWeather>będzie ładnie*jest ładnie</goodWeather>
+				<ask>czy*jaka jest*jak jest*jaka będzie*podaj*pokaż*ile jest*ile będzie</ask>
+			</sentence>
+			<daychooser>
+				<template name="0">$day0</template>
+				<template name="1">$day1</template>
+				<template name="2">$day2</template>
+				<template name="n">$break ?number $day</template>
+				<day0>dzisiaj*disiejsza*wieczorem</day0>
+				<day1>jutro*jutrzejsza</day1>
+				<day2>pojutrze</day2>
+				<break>za</break>
+				<day>dzień*dni</day>
+			</daychooser>
+			<weathersentence>
+				<template name="weather">weather comma break1 tempMin break2 tempMax degree dot</template>
+				<template name="temperature">break1 tempMin break2 tempMax degree dot</template>
+				<template name="windSpeed">windSpeed speed</template>
+				<template name="negativeRespond">yes</template>
+				<template name="positiveRespond">no</template>
+				<yes>tak *youp </yes>
+				<no>nie *niet *nope </no>
+				<is>jest</is>
+				<speed> km na godzinę* km/h</speed>
+				<degree> stopni* celcjuszów</degree>
+				<comma>, </comma>
+				<dot>.</dot>
+				<break1>od </break1>
+				<break2> do </break2>
+				<weather>Pogoda </weather>
+			</weathersentence>
+			<weatherResponses>
+				<Sunny>słonecznie</Sunny>
+				<Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
+				<Partly_Sunny>lekko słonecznie</Partly_Sunny>
+				<Sunny-Wind>słonecznie i wietrznie</Sunny-Wind>
+				<Clear>czyste niebo</Clear>
+				<Mostly_Clear>głównie czyste niebo</Mostly_Clear>
+				<Partly_Cloudy>częściowo zachmurzone</Partly_Cloudy>
+				<Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
+				<Cloudy>pochmurnie</Cloudy>
+				<AM_Showers>poranne deszcze</AM_Showers>
+				<Showers>lekki deszcz</Showers>
+				<Light_Rain>lekki deszcz</Light_Rain>
+				<Rain>deszcz</Rain>
+				<PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
+				<Scattered_Thunderstorms>burze</Scattered_Thunderstorms>
+			</weatherResponses>
+			<badWeather>
+				<temperature>10</temperature>
+				<windSpeed>5</windSpeed>
+				<weatherTypes>Rain</weatherTypes>
+			</badWeather>
+		</order>
 		<order classname="shani.orders.MasterOrder">
 			<exit>exit*żegnam*do widzenia*wyłącz się</exit>
 			<autosave>autosavetime</autosave>
@@ -191,6 +191,12 @@
 				<calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
 			</CalculateOrder>
 		</orders>
+		<misc>
+			<connection>
+				<connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
+				<connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
+			</connection>
+		</misc>
 	</storage>
 	<userdata>
 		<acceptedLicences/>
