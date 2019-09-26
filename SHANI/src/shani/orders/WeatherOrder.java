@@ -25,9 +25,9 @@ import shani.ShaniString;
 import shani.orders.templates.SentenceMatcherOrder;
 
 public class WeatherOrder extends SentenceMatcherOrder {
-	private ShaniString notKnowLocationMessage=new ShaniString("Nie wiem dla jakiego miejsca podaæ pogodê.");
-	private ShaniString cannotProcessDayMessage=new ShaniString("Nie wiem o jaki dzieñ ci chodzi");
-	private ShaniString cannotParseDayNumberMessage=new ShaniString("Aktualnie potrafiê zrozumieæ tylko liczbê podan¹ liczebnie nie s³ownie.");
+	private ShaniString notKnowLocationMessage=ShaniString.loadString("orders.WeatherOrder.notKnowLocationMessage");
+	private ShaniString cannotProcessDayMessage=ShaniString.loadString("orders.WeatherOrder.cannotProcessDayMessage");
+	private ShaniString cannotParseDayNumberMessage=ShaniString.loadString("orders.WeatherOrder.cannotParseDayNumberMessage");
 	
 	private SentenceGenerator weatherSentence;
 	
@@ -125,7 +125,11 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	
 	private class WeatherAction extends SentenceMatcherAction{
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
-			Engine.getLicenseConfirmation("weather.com");
+			if(!Engine.getLicenseConfirmation("weather.com")) {
+				Engine.licensesNotConfirmedMessage.printOut();
+				return false;
+			}
+			
 			
 			String where=returnValues.get("where");
 			if(where==null) {									//Add getting location by IP address??

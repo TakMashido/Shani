@@ -56,7 +56,6 @@ public class NumberFilter extends FilterModule {
 						break;
 					}
 				}
-				System.out.println(Arrays.toString(costs));
 				if(intArray[j]==-1) {
 					short min=costs[0];
 					int minIndex=0;

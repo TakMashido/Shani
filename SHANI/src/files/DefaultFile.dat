@@ -190,6 +190,11 @@
 				<calculationResoultMessage>Wynik to %f.*%f*Po podliczeniu mamy %f.</calculationResoultMessage>
 				<calculationFailedMessage>Nie mogÅ‚am policzyÄ‡ wyraÅ¼enia.*Nie wiem jak to policzyÄ‡.</calculationFailedMessage>
 			</CalculateOrder>
+			<WeatherOrder>
+				<notKnowLocationMessage>Nie wiem dla jakiego miejsca podaæ pogodê.</notKnowLocationMessage>
+				<cannotProcessDayMessage>Nie wiem o jaki dzieñ ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
+				<cannotParseDayNumberMessage>Aktualnie potrafiê zrozumieæ tylko liczbê podan¹ liczebnie nie s³ownie.</cannotParseDayNumberMessage>
+			</WeatherOrder>
 		</orders>
 		<misc>
 			<connection>

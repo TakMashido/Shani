@@ -57,6 +57,8 @@ public class CalculateOrder extends SentenceMatcherOrder {
 	}
 	
 	private static double calculate(String expresion) throws Exception {
+		Engine.debug.println("CalculateOrder: "+expresion);
+		
 		class Value{										//Creating special object for it will make easier adding multichar operations(e.g sin), complex numbers
 			double value;
 			Value(double val){value=val;}
@@ -134,7 +136,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 			Object el=el2;
 			el2=elements.get(i+1);
 			if(el instanceof Operation&&((Operation) el).type=='^') {
-				if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illega use of '^'");					//Illega use of '^'
+				if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '^'");					//Illegal use of '^'
 				((Value)el1).value=Math.pow(((Value)el1).value, ((Value)el2).value);
 				elements.remove(i);
 				elements.remove(i);
@@ -142,7 +144,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 			}
 			el1=el;
 		}
-		if((el1=elements.get(elements.size()-1))instanceof Operation&&((Operation)el1).type=='^') throw new Exception("Illega use of '^'");		//Illega use of '^'
+		if((el1=elements.get(elements.size()-1))instanceof Operation&&((Operation)el1).type=='^') throw new Exception("Illegal use of '^'");		//Illegal use of '^'
 		
 		el2=elements.get(0);							//Parse * and /
 		for(int i=0;i<elements.size()-1;i++) {
@@ -150,13 +152,13 @@ public class CalculateOrder extends SentenceMatcherOrder {
 			el2=elements.get(i+1);
 			if(el instanceof Operation) {
 				if(((Operation) el).type=='*') {
-					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("//Illega use of '*'");					//Illega use of '*'
+					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '*'");					//Illegal use of '*'
 					((Value)el1).value*=((Value)el2).value;
 					elements.remove(i);
 					elements.remove(i);
 					i-=3;
 				} else if(((Operation) el).type=='/') {
-					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illega use of '/'");					//Illega use of '/'
+					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '/'");					//Illegal use of '/'
 					((Value)el1).value/=((Value)el2).value;
 					elements.remove(i);
 					elements.remove(i);
@@ -165,7 +167,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 			}
 			el1=el;
 		}
-		if((el1=elements.get(elements.size()-1))instanceof Operation&&((Operation)el1).type=='^')throw new Exception("Illega use of '*' or '/'");			//Illega use of '*' or '/'
+		if((el1=elements.get(elements.size()-1))instanceof Operation&&((Operation)el1).type=='^')throw new Exception("Illegal use of '*' or '/'");			//Illegal use of '*' or '/'
 		
 		el2=elements.get(0);							//Parse + and /
 		for(int i=0;i<elements.size()-1;i++) {
@@ -173,13 +175,13 @@ public class CalculateOrder extends SentenceMatcherOrder {
 			el2=elements.get(i+1);
 			if(el instanceof Operation) {
 				if(((Operation) el).type=='+') {
-					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '+'");					//Illega use of '+'
+					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '+'");					//Illegal use of '+'
 					((Value)el1).value+=((Value)el2).value;
 					elements.remove(i);
 					elements.remove(i);
 					i-=3;
 				} else if(((Operation) el).type=='-') {
-					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '-'");					//Illega use of '-'
+					if(i==0||!(el1 instanceof Value)||!(el2 instanceof Value))throw new Exception("Illegal use of '-'");					//Illegal use of '-'
 					((Value)el1).value-=((Value)el2).value;
 					elements.remove(i);
 					elements.remove(i);
@@ -188,13 +190,12 @@ public class CalculateOrder extends SentenceMatcherOrder {
 			}
 			el1=el;
 		}
-		if((el1=elements.get(elements.size()-1))instanceof Operation&&((Operation)el1).type=='^')throw new Exception();			//Illega use of '+' or '-'
+		if((el1=elements.get(elements.size()-1))instanceof Operation&&((Operation)el1).type=='^')throw new Exception("Illegal use of '+' or '-'");			//Illegal use of '+' or '-'
 		
 		double resoult=0;
 		for(int i=0;i<elements.size();i++) {
 			Object el=elements.get(i);
-			if(el instanceof Operation)throw new Exception();					//Operation stored in el is unnsupported
-			if(el2 instanceof Operation)throw new Exception();				//Operation stored in el2 is unnsupported
+			if(el instanceof Operation|el2 instanceof Operation)throw new Exception("CalculateOrder Error during parsing \""+expresion+'"');					//Operation stored in el/el2 is unnsupported
 			assert el instanceof Value&&el2 instanceof Value:"elements list should contain only Value and Operation objects";
 			resoult+=((Value)el).value;
 		}

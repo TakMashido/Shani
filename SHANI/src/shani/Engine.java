@@ -65,11 +65,11 @@ public class Engine {
 	private static boolean initialized=false;
 	
 	public static void main(String[] args) {
-		new ShaniString();								//FIXME becouse of some strange reason in static init of Config class something go wrong and ShaniString matching don't work properly(jvm/javac bug??) have to investigate it. Occur in java 10 other versions not checked
 		initialize(args);
 		start();
 	}
 	public static void initialize(String[]args) {
+		new ShaniString();								//FIXME becouse of some strange reason something go wrong and ShaniString matching don't work properly.
 		if(initialized)
 			throw new RuntimeException("Engine already initialized");					//Can make problems. Throw not visible.
 //			return;
@@ -212,6 +212,7 @@ public class Engine {
 		
 		commands.println("Startup time: "+(System.currentTimeMillis()-time)+"ms");
 	}
+	/**Runs Shani on current thread */
 	public static void start() {
 		if(!initialized) initialize(new String[0]);
 		
@@ -323,13 +324,10 @@ public class Engine {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,"yes");
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			//transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-			//transformer.transform(new DOMSource(doc), new StreamResult(Config.mainFile));
 			
 			var string=new StringWriter();
 			transformer.transform(new DOMSource(doc), new StreamResult(string));
 			Scanner output=new Scanner(string.toString());
-			//var fileOut=new PrintStream(new FileOutputStream(Config.mainFile));
 			var fileOut=new OutputStreamWriter(new FileOutputStream(Config.mainFile),StandardCharsets.UTF_8);
 			while(output.hasNextLine()) {
 				String line=output.nextLine();

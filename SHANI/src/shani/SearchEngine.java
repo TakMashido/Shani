@@ -117,14 +117,17 @@ public class SearchEngine {
 				url=titleElement.attr("href");
 			}
 			
-			/**Returns domain of wensite. E.g. for "en.wikipedia.org/wiki/A" return "wikipedia.org"
+			/**Returns domain of website. E.g. for "en.wikipedia.org/wiki/A" return "wikipedia.org"
 			 * @return Look above.
 			 */
 			public String getDomain() {
 				if(domain!=null)return domain;
 				
 				var matcher=websideDomainPattern.matcher(url);
-				assert matcher.matches():"Fix websideDomainPattern regex Pattern in SearchEngine. It didn't match following url: \""+url+'"';
+				if(!matcher.matches()) {
+					System.err.println("Fix websideDomainPattern regex Pattern in SearchEngine. It didn't match following url: \""+url+'"');
+					return "ERROR_DOMAIN_NOT_FOUND";
+				}
 				domain=matcher.group(1);
 				return domain;
 			}

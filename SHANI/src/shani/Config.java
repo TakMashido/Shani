@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class Config {
 	private Config() {}
 	
-	static {									//Playing with static initializer is soo hard and tricky
+	static {
 		var prop=new Properties();
 		try {
 			prop.load(Config.class.getResourceAsStream("/files/config.properties"));

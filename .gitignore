@@ -34,3 +34,6 @@ SHANI/*.dat
 
 #temp javadoc files
 SHANI/doc
+
+#my personal configurarions
+SHANI/config.properties

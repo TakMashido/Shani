@@ -1,10 +1,7 @@
 Can't merge order to ExecuteOrder directly after creating new target.
 "odpal" and "dopal" are for it diffrend keywords. (Error with swaping first letters?)
-Handle network errors in TranslateOrder.
-Handle network errors in WeatherOrder.
 Weather order crushes if it can't find city.
 Handle errors of executing app/opening file in ExecuteOrder.
 Tools.removeNational now works only with Polish Charaters.
-In TimerOrder more then one timer cause previus one are no longer visible(but still are saved in mainFile)
 in execute order during adding new entry, space in file name make query unregognized
 Fix error caused by diffrend character encoding in cmd and java. Refer only to national characters like "¿". (Handled by using -Dfile.encoding=IBM852 in run bat file)
