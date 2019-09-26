@@ -78,8 +78,8 @@ public class TimerOrder extends MultipleKeywordOrder{
 			if(isRunning) {
 				updateTime();
 				isRunning=false;
-				System.out.printf(stopMessage.toString(),keyword.toString());
-			} else System.out.printf(alreadyStoppedMessage.toString(),keyword.toString());
+				System.out.printf(stopMessage.toString(),targetKeyword.toString());
+			} else System.out.printf(alreadyStoppedMessage.toString(),targetKeyword.toString());
 			System.out.println();
 		}
 		@SuppressWarnings("unused")						//Used using java reflecion API
@@ -105,7 +105,7 @@ public class TimerOrder extends MultipleKeywordOrder{
 					insertAnd=true;
 					int h=time/3600;
 					if(h==1)Return+=" godzina ";
-					else if(h<5)Return+=" godziny ";
+					else if(h<5)Return+=h+" godziny ";
 					else Return+=h+" godzin ";
 					time%=3600;
 				}

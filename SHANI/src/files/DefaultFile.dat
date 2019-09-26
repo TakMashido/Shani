@@ -133,7 +133,7 @@
 				<method>stop</method>
 			</suborder>
 			<suborder>
-				<keyword>wyświetl*show*pokaż ile zliczył‚</keyword>
+				<keyword>wyświetl*show*pokaż ile zliczył*podaj ile zliczył*ile zliczył</keyword>
 				<method>show</method>
 			</suborder>
 			<suborder>

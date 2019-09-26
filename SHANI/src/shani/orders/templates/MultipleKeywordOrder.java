@@ -65,7 +65,7 @@ public abstract class MultipleKeywordOrder extends Order{
 		for(int i=0;i<targetMatched.length;i++) {
 			boolean matched=matcher.clone().apply(orderTargets.get(i).targetKeyword).isSemiEqual();
 			targetMatched[i]=matched;
-			anyMatched=matched;
+			anyMatched|=matched;
 		}
 		
 		boolean[] ordersMatched=new boolean[orders.size()];
