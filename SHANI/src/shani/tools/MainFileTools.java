@@ -110,7 +110,12 @@ public class MainFileTools {
 		originNL=((Element)mainOriginNode).getElementsByTagName("storage");					//storage
 		targetNL=((Element)mainTargetNode).getElementsByTagName("storage");
 		
-		deepCopyNode(originNL.item(0),originDoc,targetNL.item(0),targetDoc);
+		deepCopyNode(originNL.item(0),originDoc,targetNL.item(0),targetDoc,"storage",true);
+		
+		originNL=((Element)mainOriginNode).getElementsByTagName("parsers");					//parsers
+		targetNL=((Element)mainTargetNode).getElementsByTagName("parsers");
+		
+		deepCopyNode(originNL.item(0),originDoc,targetNL.item(0),targetDoc,"parsers",true);
 		
 		originNode=((Element)mainOriginNode).getElementsByTagName("modules").item(0);		//modules
 		targetNode=((Element)mainTargetNode).getElementsByTagName("modules").item(0);
@@ -124,17 +129,34 @@ public class MainFileTools {
 			if(targetModules[i].equals(""))System.out.println("Found corruption in main file. Property \"classname\" in a module not found");
 		}
 		
-		orders:
-		for(int i=0;i<originNL.getLength();i++) {																	//coping orders
+		modules:
+		for(int i=0;i<originNL.getLength();i++) {																	//coping modules
 			String name=((Element)originNL.item(i)).getAttribute("classname");
-			for(String str:targetModules)if(str.equals(name))continue orders;
+			for(String str:targetModules)if(str.equals(name))continue modules;
 			targetNode.appendChild(targetDoc.importNode(originNL.item(i), true));
 		}
 		
 		saveMainFile(targetDoc,target);
 	}
 	
-	private static void deepCopyNode(Node origin, Document originDoc, Node target, Document targetDoc) {
+	private static void deepCopyNode(Node origin, Document originDoc, Node target, Document targetDoc, String nodeName, boolean tryToFix) {
+		if(origin==null) {
+			System.err.println("Node "+nodeName+" in defaultMainFile is missing.");
+			System.out.println("Error during udpating mainFile, some resources in default one are missing.");
+			return;
+		}
+		if(target==null) {
+			if(tryToFix) {
+				System.err.println("Failed to find "+nodeName+" node in mainFile, adding new one in root of shani file hoping it will help.");
+				System.out.println("Found corruption in mainFile, trying to repair.");
+				target=targetDoc.getElementsByTagName("shani").item(0).appendChild(targetDoc.createElement(nodeName));
+			} else {
+				System.err.println("Node "+nodeName+" in mainFile is missing.");
+				System.out.println("Error during udpating mainFile, some resources in mainFile missing, corruption fixing disabled, not enought informations.");
+				return;
+			}
+		}
+		
 		var originNL=((Element)origin).getElementsByTagName("*");
 		var targetNL=((Element)target).getElementsByTagName("*");
 		
@@ -151,7 +173,7 @@ public class MainFileTools {
 			String originName=originNode.getNodeName();
 			for(int j=0;j<targetNames.length;j++) {
 				if(originName.equals(targetNames[j])) {
-					deepCopyNode(originNode,originDoc,targetNL.item(j),targetDoc);
+					deepCopyNode(originNode,originDoc,targetNL.item(j),targetDoc,"dumpNode",false);
 					continue originNodes;
 				}
 			}

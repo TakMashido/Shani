@@ -15,14 +15,16 @@ import org.w3c.dom.NodeList;
  * @author TakMashido
  */
 public class Storage {
+	private static final Node mainNode;
 	private static final Node storage;
 	private static final Node userdata;
 	
 	private static final Pattern divider=Pattern.compile("(?:\\s*\\.\\s*)+");
 	
 	static {
-		storage=((Element)(Engine.doc.getElementsByTagName("shani").item(0))).getElementsByTagName("storage").item(0);						//Can throw error if initialized before invocing Engin.initialize
-		userdata=((Element)(Engine.doc.getElementsByTagName("shani").item(0))).getElementsByTagName("userdata").item(0);
+		mainNode=Engine.doc.getElementsByTagName("shani").item(0);
+		storage=((Element)mainNode).getElementsByTagName("storage").item(0);						//Can throw error if initialized before invocing Engin.initialize
+		userdata=((Element)mainNode).getElementsByTagName("userdata").item(0);
 	}
 	
 	private static boolean isErrorOccured=false;
@@ -42,6 +44,30 @@ public class Storage {
 	 */
 	public static ShaniString getString(String stringPath) {
 		return getShaniString(storage,stringPath);
+	}
+	
+	/**Returns node from "shani" node from mainFile pointed by provided path.
+	 * @param path Path to Node
+	 * @return Node from given path or null if not found.
+	 */
+	public static Node readNodeBase(String path) {
+		NodeList nodes=getNodes(mainNode,path);
+		if(nodes!=null)return nodes.item(0);
+		return null;
+	}
+	/**Read data from directly from "shani" node in mainFile. 
+	 * @param path Path to data in xml file.
+	 * @return String from node under provided path.
+	 */
+	public static String readStringBase(String path) {
+		return getString(mainNode,path);
+	}
+	/**Read data from directly from "shani" node in mainFile. 
+	 * @param path Path to data in xml file.
+	 * @return ShaniString from node under provided path.
+	 */
+	public static ShaniString readShaniStringBase(String path) {
+		return getShaniString(mainNode,path);
 	}
 	
 	/**Get nodes under given path in UserData part of file.
@@ -77,17 +103,15 @@ public class Storage {
 		return Return;
 	}
 	private static ShaniString getShaniString(Node where, String stringPath) {			//All changes here have to be made also in getString(Node,String). This methods do the same but output is diffrend.
-		var nodes=getNodes(stringPath);
+		var nodes=getNodes(where,stringPath);
 		if(nodes==null) {
-			System.err.printf("Can't find \"%s\" in storage.",stringPath);
-			System.err.println();
+			System.err.printf("Can't find \"%s\" in %s.%n",where.getNodeName(),stringPath);
 			isErrorOccured=true;
 			return null;
 		}
 		var node=nodes.item(0);
 		if(node==null) {
-			System.err.printf("Can't find \"%s\" in storage.",stringPath);
-			System.err.println();
+			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where.getNodeName());
 			isErrorOccured=true;
 			return null;
 		}
@@ -131,7 +155,6 @@ public class Storage {
 		Node stor=createDirectory(userdata,path);
 		stor.setTextContent(data);
 	}
-	
 	
 	private static Node createDirectory(Node where,String path) {
 		@SuppressWarnings("resource")

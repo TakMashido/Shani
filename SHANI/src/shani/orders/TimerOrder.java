@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 import shani.Engine;
 import shani.ShaniString;
 import shani.orders.templates.MultipleKeywordOrder;
+import shani.tools.Parsers;
 
 public class TimerOrder extends MultipleKeywordOrder{
 //	private ShaniString startMessage=new ShaniString("Timer %s wystartowa³.*Zegar w³¹czony.*Timer %s dzia³a.*W³¹czy³am timer %s.");
@@ -92,37 +93,8 @@ public class TimerOrder extends MultipleKeywordOrder{
 		@SuppressWarnings("unused")						//Used using java reflecion API
 		private void show() {
 			updateTime();
-			System.out.printf(printTimeMessage.toString(), getTimeString());
+			System.out.printf(printTimeMessage.toString(), Parsers.parseTime(timeCounted));
 			System.out.println();
-		}
-		
-		private final String getTimeString() {
-			String Return="";
-			int time=timeCounted;
-			boolean insertAnd=false;
-			if(time>60) {					//min
-				if(time>3600) {				//h
-					insertAnd=true;
-					int h=time/3600;
-					if(h==1)Return+=" godzina ";
-					else if(h<5)Return+=h+" godziny ";
-					else Return+=h+" godzin ";
-					time%=3600;
-				}
-				int m=time/60;
-				if(m==1)Return+=" minuta ";
-				else Return+=m+" minut ";
-				time%=60;
-			}
-			if(time>0) {
-				if(insertAnd)Return+=" i ";
-				Return+=time;
-				if(time%10>1)
-					Return+=" sekundy";
-				else Return+=" sekund";
-			}
-			Return=Return.trim();
-			return Return;
 		}
 		
 		private void updateTime() {

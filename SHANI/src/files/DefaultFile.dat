@@ -128,8 +128,8 @@
 				<keyword>odpal*start*wÅ‚Ä…cz</keyword>
 				<method>start</method>
 			</suborder>
-			<suborder classname="stop*wyÅ‚Ä…cz*zatrzymaj">
-				<keyword></keyword>
+			<suborder>
+				<keyword>"stop*wyÅ‚Ä…cz*zatrzymaj"</keyword>
 				<method>stop</method>
 			</suborder>
 			<suborder>
@@ -191,9 +191,9 @@
 				<calculationFailedMessage>Nie mogÅ‚am policzyÄ‡ wyraÅ¼enia.*Nie wiem jak to policzyÄ‡.</calculationFailedMessage>
 			</CalculateOrder>
 			<WeatherOrder>
-				<notKnowLocationMessage>Nie wiem dla jakiego miejsca podaæ pogodê.</notKnowLocationMessage>
-				<cannotProcessDayMessage>Nie wiem o jaki dzieñ ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
-				<cannotParseDayNumberMessage>Aktualnie potrafiê zrozumieæ tylko liczbê podan¹ liczebnie nie s³ownie.</cannotParseDayNumberMessage>
+				<notKnowLocationMessage>Nie wiem dla jakiego miejsca poda?pogod?</notKnowLocationMessage>
+				<cannotProcessDayMessage>Nie wiem o jaki dzie?ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
+				<cannotParseDayNumberMessage>Aktualnie potrafi?zrozumie?tylko liczb?podan? liczebnie nie s?ownie.</cannotParseDayNumberMessage>
 			</WeatherOrder>
 		</orders>
 		<misc>
@@ -203,6 +203,44 @@
 			</connection>
 		</misc>
 	</storage>
+	<parsers>
+		<TimeParser>
+			<andWord>i*oraz*i*i</andWord>
+			<h>
+				<strict>
+					<_1>godzina</_1>
+					<_12-14>godzin</_12-14>
+				</strict>
+				<lastDigit>
+					<_0-1>godzin</_0-1>
+					<_2-4>godziny</_2-4>
+					<_5-21>godzin</_5-21>
+				</lastDigit>
+			</h>
+			<m>
+				<strict>
+					<_1>minuta</_1>
+					<_12-14>minut</_12-14>
+				</strict>
+				<lastDigit>
+					<_0-1>minut</_0-1>
+					<_2-4>minuty</_2-4>
+					<_5-21>minut</_5-21>
+				</lastDigit>
+			</m>
+			<s>
+				<strict>
+					<_1>sekunda</_1>
+					<_12-14>sekund</_12-14>
+				</strict>
+				<lastDigit>
+					<_0-1>sekund</_0-1>
+					<_2-4>sekundy</_2-4>
+					<_5-21>sekund</_5-21>
+				</lastDigit>
+			</s>
+		</TimeParser>
+	</parsers>
 	<userdata>
 		<acceptedLicences/>
 	</userdata>
