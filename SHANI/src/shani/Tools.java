@@ -1,8 +1,34 @@
 package shani;
 
+import java.util.Arrays;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 public class Tools {
-	public static char[] stem(String dat) {
-		return dat.trim().toLowerCase().toCharArray();
+	private static String[] suffix;
+	private static String[] replacement;
+	public static String stem(String dat) {
+		if(suffix==null) {
+			NodeList nodes=Storage.getNodes("patterns.stem.tag");
+			
+			suffix=new String[nodes.getLength()];
+			replacement=new String[nodes.getLength()];
+			
+			for(int i=0;i<suffix.length;i++) {
+				Element elem=(Element)nodes.item(i);
+				suffix[i]=elem.getAttribute("suf");
+				replacement[i]=elem.getAttribute("rep");
+			}
+		}
+		
+		for(int i=0;i<suffix.length;i++) {
+			if(dat.endsWith(suffix[i])) {
+				return dat.substring(0,dat.length()-suffix[i].length())+replacement[i];
+			}
+		}
+		
+		return dat;
 	}
 	public static String clear(String dat) {
 		dat=dat.trim();

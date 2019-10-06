@@ -19,15 +19,19 @@ import org.w3c.dom.Node;
 
 import shani.Engine;
 import shani.SearchEngine;
+import shani.SearchEngine.SearchResoults;
+import shani.SearchEngine.SearchResoults.SearchResoult;
 import shani.SentenceGenerator;
 import shani.SentenceMatcher;
 import shani.ShaniString;
+import shani.Tools;
 import shani.orders.templates.SentenceMatcherOrder;
 
 public class WeatherOrder extends SentenceMatcherOrder {
-	private ShaniString notKnowLocationMessage=ShaniString.loadString("orders.WeatherOrder.notKnowLocationMessage");
-	private ShaniString cannotProcessDayMessage=ShaniString.loadString("orders.WeatherOrder.cannotProcessDayMessage");
-	private ShaniString cannotParseDayNumberMessage=ShaniString.loadString("orders.WeatherOrder.cannotParseDayNumberMessage");
+	private static ShaniString notKnowLocationMessage=ShaniString.loadString("orders.WeatherOrder.notKnowLocationMessage");
+	private static ShaniString cannotProcessDayMessage=ShaniString.loadString("orders.WeatherOrder.cannotProcessDayMessage");
+	private static ShaniString cannotParseDayNumberMessage=ShaniString.loadString("orders.WeatherOrder.cannotParseDayNumberMessage");
+	private static ShaniString noForecastFoundMessage=ShaniString.loadString("orders.WeatherOrder.noForecastFoundMessage");
 	
 	private SentenceGenerator weatherSentence;
 	
@@ -68,7 +72,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		return true;
 	}
 	
-	private static class Weather{																		//Make this more complecs. Some identifiers can have other meaning for other day time and enum doesn't rocognize it
+	private static class Weather{
 		//To add: PM Showers,AM Showers,Scattered Thunderstorms,Partly Cloudy/Wind,PM Thunderstorms,AM Thunderstorms
 		
 		private final String identifier; 
@@ -95,18 +99,18 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		return new WeatherAction();
 	}
 	
-	private static ArrayList<DayWeather> getWeather(String where) throws IOException {
-		var sr=SearchEngine.search("weather.com 10 day weather "+where);
-		sr.selectElementsByDomain("weather.com").selectElementsWithTitleContaining("10-Day Weather Forecast");
+	private static ArrayList<DayWeather> getWeather(String where) throws IOException {					//TODO Cache site-city connection.
+		var sr=SearchEngine.search(where+" forecast site:weather.com/weather/tenday/l");
+
+//		var sr=SearchEngine.search("weather.com 10 day weather "+where);
+//		sr.selectElementsByDomain("weather.com").selectElementsWithTitleContaining("10-Day Weather Forecast");
+		
+		if(sr.isEmpty()) return null;
 		
 		var Return=new ArrayList<DayWeather>();
 		
-		System.out.println("Fix city chosing."); 							//Now it gets first found city, and throw IndexOutOfBoundsException if no forecast found.
+		System.err.println("Fix city chosing in WeatherOrder.");				//Check in page content name of city(if it do not sunk to much time), add ShaniString matching if multimple matches let user choose wchich of them is correct.
 		Document doc=Jsoup.connect(sr.get(0).url).get();
-		
-		for(var res:sr){
-			System.out.println(res.url+" "+res.title);
-		}
 		
 		var elems=doc.getElementsByClass("forecast-fiveday").get(0).getElementsByClass("clickable");
 		for(var elem:elems) {
@@ -130,21 +134,26 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				return false;
 			}
 			
-			
 			String where=returnValues.get("where");
-			if(where==null) {									//Add getting location by IP address??
+			if(where==null) {									//Add getting location (by IP address??/user home location from mainFile+(add Class for getting user info))
 				notKnowLocationMessage.printOut();
 				return false;
 			}
+			where=Tools.stem(where);
 			
 			try {
 				ArrayList<DayWeather> weather=getWeather(where);
+				
+				if(weather==null) {
+					noForecastFoundMessage.printOut();
+					return true;
+				}
 				
 				int dayIndex=0;
 				String when;
 				if((when=returnValues.get("when"))!=null) {
 					var res=dayChooser.process(when);
-					if(res.length<0) {
+					if(res.length==0) {
 						System.out.println(cannotProcessDayMessage);
 						return false;
 					}
@@ -162,6 +171,8 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				
 				var dayWeather=weather.get(dayIndex);
 				var addParameters=dayWeather.getParamsMap();
+				
+				System.out.println(sentenceName);
 				
 				boolean badWeather=false;
 				switch(sentenceName) {
@@ -251,6 +262,10 @@ public class WeatherOrder extends SentenceMatcherOrder {
 			Return.put("precipitationChance", precipitationChance);
 			
 			return Return;
+		}
+		
+		public String toString() {
+			return getParamsMap().toString();
 		}
 	}
 }

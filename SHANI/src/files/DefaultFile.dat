@@ -52,8 +52,8 @@
 				<template name="temperature">$ask *?when $temperature *$where ?where</template>
 				<template name="windSpeed">$ask *?when $wind *$where ?where</template>
 				<template name="humidity">$ask *?when $humidity *$where ?where</template>
-				<template name="badWeather">$ask $where ?where $badWeather</template>
-				<template name="goodWeather">$ask $where ?where $goodWeather</template>
+				<template name="badWeather">$ask $where ?where $badWeather *$weather</template>
+				<template name="goodWeather">$ask $where ?where $goodWeather *$weather</template>
 				<where>w</where>
 				<temperature>temperaturę*temperatura*stopni</temperature>
 				<weather>pogoda*pogodę*</weather>
@@ -76,6 +76,8 @@
 			</daychooser>
 			<weathersentence>
 				<template name="weather">weather comma break1 tempMin break2 tempMax degree dot</template>
+				<template name="weather">weather comma tempMin singleDegree dot</template>
+				<template name="weather">weather comma tempMax singleDegree dot</template>
 				<template name="temperature">break1 tempMin break2 tempMax degree dot</template>
 				<template name="windSpeed">windSpeed speed</template>
 				<template name="negativeRespond">yes</template>
@@ -85,6 +87,7 @@
 				<is>jest</is>
 				<speed> km na godzinę* km/h</speed>
 				<degree> stopni* celcjuszów</degree>
+				<singleDegree> stopnie* stopnie celcjusza</singleDegree>
 				<comma>, </comma>
 				<dot>.</dot>
 				<break1>od </break1>
@@ -92,21 +95,34 @@
 				<weather>Pogoda </weather>
 			</weathersentence>
 			<weatherResponses>
-				<Sunny>słonecznie</Sunny>
-				<Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
-				<Partly_Sunny>lekko słonecznie</Partly_Sunny>
-				<Sunny-Wind>słonecznie i wietrznie</Sunny-Wind>
-				<Clear>czyste niebo</Clear>
-				<Mostly_Clear>głównie czyste niebo</Mostly_Clear>
-				<Partly_Cloudy>częściowo zachmurzone</Partly_Cloudy>
-				<Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
-				<Cloudy>pochmurnie</Cloudy>
+				<AM_Clouds-PM_Sun>pochmurny poranek</AM_Clouds-PM_Sun>
+				<AM_Light_Rain>poranny lekki deszcz</AM_Light_Rain>
+				<AM_Rain>poranny deszcz</AM_Rain>
 				<AM_Showers>poranne deszcze</AM_Showers>
-				<Showers>lekki deszcz</Showers>
+				<Clear>czyste niebo</Clear>
+				<Cloudy>pochmurnie</Cloudy>
+				<Few_Showers>deszczowo</Few_Showers>
 				<Light_Rain>lekki deszcz</Light_Rain>
-				<Rain>deszcz</Rain>
+				<Isolated_Thunderstorms>samotne burze</Isolated_Thunderstorms>
+				<Mostly_Clear>głównie czyste niebo</Mostly_Clear>
+				<Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
+				<Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
+				<Partly_Cloudy>częściowo zachmurzone</Partly_Cloudy>
+				<Partly_Sunny>lekko słonecznie</Partly_Sunny>
+				<PM_Light_Rain-Wind>popoudniowy deszcz/wiatr</PM_Light_Rain-Wind>
+				<PM_Rain>popoudniowy deszcz</PM_Rain>
+				<PM_Showers>popołudniowe deszcze</PM_Showers>
 				<PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
-				<Scattered_Thunderstorms>burze</Scattered_Thunderstorms>
+				<Rain>deszcz</Rain>
+				<Rain-Wind>deszczowo i wietrznie</Rain-Wind>
+				<Scattered_Thunderstorms>rozproszone burze</Scattered_Thunderstorms>
+				<Showers>lekki deszcz</Showers>
+				<Showers_Late>wieczorny deszczyk</Showers_Late>
+				<Showers-Wind>zlewa i wiatr</Showers-Wind>
+				<Sunny>słonecznie</Sunny>
+				<Sunny-Wind>słonecznie i wietrznie</Sunny-Wind>
+				<Thundershowers>burza</Thundershowers>
+				<Thunderstorms>burze</Thunderstorms>
 			</weatherResponses>
 			<badWeather>
 				<temperature>10</temperature>
@@ -149,6 +165,15 @@
 		</order>
 	</orders>
 	<storage>
+		<patterns>
+			<stem>
+				<!-- Suffix indentical to suf attribute will be changed to value from rep attribute. 
+					 Used by Tools.stem(String)-->
+				<tag suf="ie" rep=""/>
+				<tag suf="u" rep=""/>
+				<tag suf="ach" rep="e"/>
+			</stem>
+		</patterns>
 		<engine>
 			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
 			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
@@ -191,9 +216,10 @@
 				<calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
 			</CalculateOrder>
 			<WeatherOrder>
-				<notKnowLocationMessage>Nie wiem dla jakiego miejsca poda?pogod?</notKnowLocationMessage>
-				<cannotProcessDayMessage>Nie wiem o jaki dzie?ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
-				<cannotParseDayNumberMessage>Aktualnie potrafi?zrozumie?tylko liczb?podan? liczebnie nie s?ownie.</cannotParseDayNumberMessage>
+				<notKnowLocationMessage>Nie wiem dla jakiego miejsca podać pogodę</notKnowLocationMessage>
+				<cannotProcessDayMessage>Nie wiem o jaki dzień ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
+				<cannotParseDayNumberMessage>Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie.</cannotParseDayNumberMessage>
+				<noForecastFoundMessage>Nie znalazłam prognozy*Pogoda nie znaleziona</noForecastFoundMessage>
 			</WeatherOrder>
 		</orders>
 		<misc>

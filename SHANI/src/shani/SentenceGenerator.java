@@ -131,7 +131,8 @@ public class SentenceGenerator {
 			checked[toCheck]=true;
 			checkedNumber++;
 		}
-		return Return;
+		System.err.printf("Can't generate sentence with name %s and params %s",name,params.keySet().toString());
+		return name+" "+params.toString();
 	}
 	
 	private class SentenceTemplate {
@@ -151,16 +152,6 @@ public class SentenceGenerator {
 			elementNames=data.toArray(new String[data.size()]);
 		}
 		
-		/*private void createPresentTable(){						//Not load all of them during initialization. Decrease start time and average memory usage(not all of instances will be used)
-			if(isPresent!=null)return;
-			isPresent=new boolean[elementNames.length];
-			for(int i=0;i<elementNames.length;i++)isPresent[i]=mainParams.containsKey(elementNames[i]);
-		}*/
-		/*private boolean canPrint(Map<String,ShaniString> params) {
-			createPresentTable();
-			for(int i=0;i<elementNames.length;i++)if(!params.containsKey(elementNames[i]))return false;
-			return true;
-		}*/
 		private String getString(Map<String,? extends Object> params) {
 			StringBuffer Return=new StringBuffer();
 			
