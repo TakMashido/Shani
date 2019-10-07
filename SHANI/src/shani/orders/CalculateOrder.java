@@ -60,8 +60,12 @@ public class CalculateOrder extends SentenceMatcherOrder {
 		Engine.debug.println("CalculateOrder: "+expresion);
 		
 		class Value{										//Creating special object for it will make easier adding multichar operations(e.g sin), complex numbers
+			int leadingZeros;
 			double value;
-			Value(double val){value=val;}
+			Value(double val, int leadingZeros){
+				value=val;
+				this.leadingZeros=leadingZeros;
+			}
 			
 			public String toString() {
 				return Double.toString(value);
@@ -83,11 +87,13 @@ public class CalculateOrder extends SentenceMatcherOrder {
 		for(Integer i=0;i<exp.length;i++) {
 			if(Character.isDigit(exp[i])) {
 				double value=0;
+				int leadingZeros=0;
 				while(i<exp.length&&Character.isDigit(exp[i])) {
 					value=value*10+exp[i++]-'0';
+					if(value==0)leadingZeros++;
 				}
 				i--;
-				elements.add(new Value(value));
+				elements.add(new Value(value,leadingZeros));
 			} else {
 				elements.add(new Operation(exp[i]));
 			}
@@ -102,7 +108,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 					if(i+2==elements.size())elements.remove(i+1);
 					Object el3=elements.get(i+2);
 					if(el3 instanceof Value) {
-						double divider=1;
+						double divider=Math.pow(10, ((Value) el3).leadingZeros);
 						int val=(int)((Value)el3).value;
 						while(val>0) {
 							val/=10;

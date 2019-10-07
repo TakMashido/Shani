@@ -163,6 +163,25 @@
 		<order classname="shani.orders.TranslateOrder">
 			<keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
 		</order>
+		<order classname="shani.orders.CalculateOrder">
+            <sentence>
+                <template name="count">$count ?count</template>
+                <template name="power">$power ?power1 $connect ?power2</template>
+                <template name="power">?power1 $power ?power2</template>
+                <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
+                <template name="divide">$divide ?divide1 $connect ?divide2</template>
+                <template name="add">$add ?add1 $connect ?add2</template>
+                <template name="substract">$substract ?substract1 $connect ?substract2</template>
+                <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
+                <power>potęga</power>
+                <multiply>pomnórz*iloczyn</multiply>
+                <divide>podziel*iloraz</divide>
+                <add>dodaj*suma</add>
+                <substract>odejmij*różnica</substract>
+                <startword>ile mamy po*podaj*</startword>
+                <connect>przez*od*do*i*na</connect>
+            </sentence>
+        </order>
 	</orders>
 	<storage>
 		<patterns>
