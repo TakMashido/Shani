@@ -1,7 +1,5 @@
 package shani;
 
-import java.util.Arrays;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -33,8 +31,8 @@ public class Tools {
 	public static String clear(String dat) {
 		dat=dat.trim();
 		
-		if(dat.endsWith("\""))dat=dat.substring(0, dat.length());
-		if(dat.startsWith("\""))dat=dat.substring(1, dat.length()-1);
+		
+		if(dat.endsWith("\"")&&dat.startsWith("\""))dat=dat.substring(1, dat.length()-1);
 		
 		return dat;
 	}
@@ -55,10 +53,23 @@ public class Tools {
 		return com;
 	}
 	
+	/**Check if ans value stands for confirmation 
+	 * @param ans Value to be checked.
+	 * @return If ans represents confirmation message.
+	 * @deprecated It's  dublication of {@link Engine#isInputPositive(ShaniString)}. Use it instead
+	 */
+	@Deprecated
 	public static boolean isNegativeAnswer(ShaniString ans) {
-		if(ans.equals("nie"))return true;
-		else return false;
+		Boolean ret=Engine.isInputPositive(ans);
+		if(ret==null)return false;
+		return !ret;
 	}
+	/**Check if ans value stands for confirmation 
+	 * @param ans Value to be checked.
+	 * @return If ans represents confirmation message.
+	 * @deprecated It's  dublication of {@link Engine#isInputPositive(ShaniString)}. Use it instead
+	 */
+	@Deprecated
 	public static boolean isNegativeAnswer(String ans) {
 		return isNegativeAnswer(new ShaniString(ans));
 	}

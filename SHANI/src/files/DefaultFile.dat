@@ -185,6 +185,8 @@
 			<ExecuteOrder>
 				<successfulMessage>Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia</successfulMessage>
 				<notKnowMessage>Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?</notKnowMessage>
+				<unrecognizedMessage>Przykro mi nie potrafię tego włączyć.*Nie wiem gdzie to znaleźć.*nie mam pojęcia jak to włączyć.</unrecognizedMessage>
+				<cantConnectMessage>Wybacz nie wiem co zrobić.*Nie mogę połączyć tych akcji.</cantConnectMessage>
 			</ExecuteOrder>
 			<MasterOrder>
 				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>

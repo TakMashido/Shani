@@ -20,7 +20,8 @@ import shani.orders.templates.KeywordOrder;
 public class ExecuteOrder extends KeywordOrder {
 	private static final ShaniString successfulMessage=ShaniString.loadString("orders.ExecuteOrder.successfulMessage");
 	private static final ShaniString notKnowMessage=ShaniString.loadString("orders.ExecuteOrder.notKnowMessage");
-	public static final ShaniString cantConnectMessage=new ShaniString("Wybacz nie wiem co zrobiæ*Nie mogê po³¹czyæ tych akcji");
+	private static final ShaniString unrecognizedMessage=ShaniString.loadString("orders.ExecuteOrder.unrecognizedMessage");
+	public static final ShaniString cantConnectMessage=ShaniString.loadString("orders.ExecuteOrder.cantConnectMessage");
 	
 	public KeywordAction actionFactory(Element element) {
 		return new ExecuteAction(element);
@@ -46,14 +47,16 @@ public class ExecuteOrder extends KeywordOrder {
 		return index!=-1?(ExecuteAction)actions.get(index):null;
 	}
 	
-	private static final Pattern UriPattern=Pattern.compile("[\\w\\.]+://[\\w/\\\\\\?=& ]+");
-	private static final Pattern StartDirPattern=Pattern.compile("^(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)$");				//group 1- Home dir, 2- fileName
-	private static final Pattern PathPattern=Pattern.compile("\\w:\\\\[\\w\\d \\\\()']+");
+	private static final Pattern UriPattern=Pattern.compile("\"?[\\w\\.]+://[\\w/\\\\\\?=& ]+\"?");
+	private static final Pattern StartDirPattern =Pattern.compile("^\"?(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\"?$");				//group 1- Home dir, 2- fileName
+	private static final Pattern StartDirPattern2=Pattern.compile("^\"(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\" ?(.*)$");				//SAME							, 3- command line arguments
+	private static final Pattern PathPattern=Pattern.compile("\"?\\w:\\\\[\\w\\d \\\\()']+\"?");
 	private boolean isUri(String com) {
 		return UriPattern.matcher(Tools.removeNational(com)).matches();
 	}
 	private boolean isExecutable(String com) {
-		return StartDirPattern.matcher(Tools.removeNational(com)).matches();
+		String path=Tools.removeNational(com);
+		return StartDirPattern.matcher(path).matches()||StartDirPattern2.matcher(path).matches();
 	}
 	private boolean isPath(String com) {
 		return PathPattern.matcher(Tools.removeNational(com)).matches();
@@ -97,12 +100,22 @@ public class ExecuteOrder extends KeywordOrder {
 				Return=execute("cmd /c start \"\" \""+target[0]+'"',0);
 				break;
 			case "startdir":
-				Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+'"',0);
+				if(target.length==2) {
+					Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+'"',0);
+				} else if(target.length==3) {
+					Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+"\" "+target[2],0);
+				} else {
+					Return=false;
+					System.out.println("Failed to execute: shani bug");
+					assert false:"Execute order suports executing only of targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!";
+					System.err.println("Execute order suports executing only of targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!");
+				}
 				break;
 			case "dir":
 				Return=execute("cmd /c explorer "+target[0],1);
 				break;
 			default:
+				System.err.println(targetType+" is not supported execute type");
 				System.out.println(targetType+" is not supported execute type");
 				Return=false;
 			}
@@ -133,26 +146,29 @@ public class ExecuteOrder extends KeywordOrder {
 		public boolean execute() {
 			System.out.println(notKnowMessage);
 			
-			String newCom=Tools.clear(Engine.in.nextLine());
-			if(Tools.isNegativeAnswer(newCom))
+//			String newCom=Tools.clear(Engine.in.nextLine());
+			String newCom=Engine.in.nextLine();
+			Boolean positive=Engine.isInputPositive(new ShaniString(newCom,false));
+			if(positive!=null&&positive==false)
 				return false;
 			if(isPath(newCom)) {
-				createAction(unmatched,"dir",new String[] {newCom});
+				createAction(unmatched,"dir",new String[] {Tools.clear(newCom)});
 				return true;
 			}
 			if(isUri(newCom)) {
-				return createAction(unmatched,"start",new String[] {newCom});
+				return createAction(unmatched,"start",new String[] {Tools.clear(newCom)});
 			}
 			if(isExecutable(newCom)) {
-				if(newCom.endsWith(".bat")) {
-					createAction(unmatched,"call",new String[] {newCom});
-				} else {
-					Matcher mat=StartDirPattern.matcher(newCom);
+				Matcher mat=StartDirPattern.matcher(Tools.clear(newCom));
+				if(!mat.matches()) {
+					mat=StartDirPattern2.matcher(newCom);
 					mat.matches();
-					mat.group();
-					
-					createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
+					createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2),mat.group(3)});
+					return true;
 				}
+				mat.group();
+				
+				createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
 				return true;
 			} else {
 				KeywordAction exec=getAction(newCom);
@@ -161,13 +177,13 @@ public class ExecuteOrder extends KeywordOrder {
 					exec.execute();
 					return true;
 				}
+				unrecognizedMessage.printOut();
 				return false;
 			}
 		}
 		private boolean createAction(String key, String targetType, String[] target) {
 			KeywordAction action=new ExecuteAction(new ShaniString(key),targetType,target);
 			action.execute();
-			
 			return true;
 		}
 		public boolean connectAction(String action) {
@@ -180,10 +196,15 @@ public class ExecuteOrder extends KeywordOrder {
  * uri:
  * com.epicgames.launcher://apps/Jaguar?action=launch&silent=true
  * steam://rungameid/219740
+ * 
  * executable:
  * C:\Program Files (x86)\StarCraft II\StarCraft II.exe
  * C:\Program Files (x86)\GOG Galaxy\Games\The Witcher 3 Wild Hunt GOTY\bin\x64\Witcher3.exe
- * C:\Users\Przemek\Documents\Gry\game launchers\Gaming Mode.bat
+ * C:\Users\TakMashido\Documents\Gry\game launchers\Gaming Mode.bat
+ * 
+ * executableWithArgs:
+ * "C:\Program Files (x86)\GOG Galaxy\GalaxyClient.exe" /command=runGame /gameId=1238653230 /path="C:\Program Files (x86)\GOG Galaxy\Games\Factorio"
+ * 
  * directory:
  * C:\Users\Przemek\Desktop\con
  */

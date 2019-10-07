@@ -437,12 +437,23 @@ public class Engine {
 		Scanner in=new Scanner(System.in);
 		System.out.printf(licenseConfirmationMessage.toString(),name);
 		System.out.println();
-		Boolean confirmed2=isInputPositive(new ShaniString(in.nextLine()));
+		String nextLine;
+		while((nextLine=in.nextLine()).isEmpty());
+		Boolean confirmed2=isInputPositive(new ShaniString(nextLine));
 		if(confirmed2==null)return false;
 		if(confirmed2)Storage.writeUserData("acceptedLicences."+nameToSearch, true);
 		return confirmed2;
 	}
+	/**Checks if input is positive response.
+	 * Return true for positive/agreeding one (yes,youp),
+	 * false for negative/unagriding (no,nope),
+	 * or false for unrecognized one.
+	 * Actual positive/negative pattern depends on value stored in config file(TODO move to mainFile)
+	 * @param input
+	 * @return
+	 */
 	public static Boolean isInputPositive(ShaniString input) {
+		if(input.isEmpty())return null;
 		if(Config.positiveResponeKey.equals(input))return true;
 		if(Config.negativeResponeKey.equals(input))return false;
 		return null;
