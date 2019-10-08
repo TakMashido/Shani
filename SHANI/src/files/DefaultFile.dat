@@ -107,9 +107,9 @@
 				<Mostly_Clear>głównie czyste niebo</Mostly_Clear>
 				<Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
 				<Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
-				<Partly_Cloudy>częściowo zachmurzone</Partly_Cloudy>
+				<Partly_Cloudy>częściowe zachmurzonie</Partly_Cloudy>
 				<Partly_Sunny>lekko słonecznie</Partly_Sunny>
-				<PM_Light_Rain-Wind>popoudniowy deszcz/wiatr</PM_Light_Rain-Wind>
+				<PM_Light_Rain-Wind>popoudniowy lekki deszcz i wiatr</PM_Light_Rain-Wind>
 				<PM_Rain>popoudniowy deszcz</PM_Rain>
 				<PM_Showers>popołudniowe deszcze</PM_Showers>
 				<PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
@@ -169,15 +169,19 @@
                 <template name="power">$power ?power1 $connect ?power2</template>
                 <template name="power">?power1 $power ?power2</template>
                 <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
+                <template name="multiply">$count ?multiply1 $multiply ?multiply2</template>
                 <template name="divide">$divide ?divide1 $connect ?divide2</template>
+                <template name="divide">$count ?divide1 $divide ?divide2</template>
                 <template name="add">$add ?add1 $connect ?add2</template>
+                <template name="add">$count ?add1 $add ?add2</template>
                 <template name="substract">$substract ?substract1 $connect ?substract2</template>
+                <template name="substract">$count ?substract2 $substract ?substract1</template>
                 <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
-                <power>potęga</power>
-                <multiply>pomnórz*iloczyn</multiply>
-                <divide>podziel*iloraz</divide>
-                <add>dodaj*suma</add>
-                <substract>odejmij*różnica</substract>
+                <power>potęga*do*do potęgi</power>
+                <multiply>pomnórz*iloczyn*razy</multiply>s
+                <divide>podziel*iloraz*przez</divide>
+                <add>dodaj*suma*plus</add>
+                <substract>odejmij*różnica*minus</substract>
                 <startword>ile mamy po*podaj*</startword>
                 <connect>przez*od*do*i*na</connect>
             </sentence>
@@ -197,8 +201,10 @@
 			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
 			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
 			<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+			<loadingErrorMessage>Wystpi błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
 			<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
 			<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
+			<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
 		</engine>
 		<orders>
 			<ExecuteOrder>
@@ -209,7 +215,6 @@
 			</ExecuteOrder>
 			<MasterOrder>
 				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
-				<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
 			</MasterOrder>
 			<MergeOrder>
 				<connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>

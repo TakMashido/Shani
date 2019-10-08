@@ -641,7 +641,7 @@ public class ShaniString {
 		 */
 		public ShaniMatcher apply(ShaniString comparable) {
 			assert comparable!=null:"comparable item can't be null";
-			assert comparable.value.length!=0:"compareble item shouldn't be empty";
+			assert comparable.value.length!=0:"comparable item shouldn't be empty";
 			if(comparable==null) {
 				for(int i=0;i<costBias.length;i++) {
 					costBias[i]+=Config.wordInsertionCost;

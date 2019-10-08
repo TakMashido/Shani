@@ -49,7 +49,7 @@ public class ExecuteOrder extends KeywordOrder {
 	
 	private static final Pattern UriPattern=Pattern.compile("\"?[\\w\\.]+://[\\w/\\\\\\?=& ]+\"?");
 	private static final Pattern StartDirPattern =Pattern.compile("^\"?(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\"?$");				//group 1- Home dir, 2- fileName
-	private static final Pattern StartDirPattern2=Pattern.compile("^\"(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\" ?(.*)$");				//SAME							, 3- command line arguments
+	private static final Pattern StartDirPattern2=Pattern.compile("^\"(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\" ?(.*)$");			//SAME							, 3- command line arguments
 	private static final Pattern PathPattern=Pattern.compile("\"?\\w:\\\\[\\w\\d \\\\()']+\"?");
 	private boolean isUri(String com) {
 		return UriPattern.matcher(Tools.removeNational(com)).matches();
@@ -147,7 +147,7 @@ public class ExecuteOrder extends KeywordOrder {
 			System.out.println(notKnowMessage);
 			
 //			String newCom=Tools.clear(Engine.in.nextLine());
-			String newCom=Engine.in.nextLine();
+			String newCom=Engine.in.nextLine().trim();
 			Boolean positive=Engine.isInputPositive(new ShaniString(newCom,false));
 			if(positive!=null&&positive==false)
 				return false;

@@ -48,6 +48,7 @@ public class Engine {
 	private static ShaniString helloMessage;												//Have to be initialzed after loading doc.
 	private static ShaniString notUnderstandMessage;
 	private static ShaniString licenseConfirmationMessage;						//Sentence construction may be very not accurate.
+	private static ShaniString closeMessage;
 	
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
@@ -63,6 +64,7 @@ public class Engine {
 	private static ShaniString lastCommand;
 	
 	private static boolean initialized=false;
+	private static boolean LOADING_ERROR=false;
 	
 	public static void main(String[] args) {
 		initialize(args);
@@ -125,7 +127,7 @@ public class Engine {
 				public void run() {
 					try {
 						Thread.sleep(60*1000*integer);
-						interprete("exit");
+						exit();
 					} catch (InterruptedException e) {}
 				}
 			};
@@ -189,8 +191,10 @@ public class Engine {
 			}
 		}
 		
-		if(Storage.isErrorOccured()) {
-			System.out.println("Error ocured during loading storage data. Please read error log.");
+		if(LOADING_ERROR) {
+			ShaniString loadingErrorMessage=ShaniString.loadString("engine.loadingErrorMessage");
+			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
+			else System.out.println("Error encountered during loading shani. Further info in errors.log file");
 		}
 		
 		if(Config.socksProxyHost!=null) {
@@ -259,6 +263,7 @@ public class Engine {
 		doc.getDocumentElement().normalize();
 		
 		helloMessage=ShaniString.loadString("engine.helloMessage");					
+		closeMessage=ShaniString.loadString("engine.closeMessage");
 		notUnderstandMessage=ShaniString.loadString("engine.notUnderstandMessage");
 		errorMessage=ShaniString.loadString("engine.errorMessage");                
 		licenseConfirmationMessage=ShaniString.loadString("engine.licenseConfirmationMessage");
@@ -457,6 +462,19 @@ public class Engine {
 		if(Config.positiveResponeKey.equals(input))return true;
 		if(Config.negativeResponeKey.equals(input))return false;
 		return null;
+	}
+	
+	public static void exit() {
+		debug.println("exit\n");
+		System.out.println(closeMessage);
+		try {
+			Thread.sleep(700);
+		} catch (InterruptedException e) {}
+		System.exit(0);
+	}
+	/**Call if any error ancountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading erros become send to System.out*/
+	public static void registerLoadException() {
+		LOADING_ERROR=true;
 	}
 	
 	/**

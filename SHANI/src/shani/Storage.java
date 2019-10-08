@@ -27,9 +27,6 @@ public class Storage {
 		userdata=((Element)mainNode).getElementsByTagName("userdata").item(0);
 	}
 	
-	private static boolean isErrorOccured=false;
-	public static boolean isErrorOccured() {return isErrorOccured;}
-	
 	/**Get nodes under given path in Storage part of file.
 	 * @param path Path to super node.
 	 * @return NodeList poinded by given path.
@@ -106,13 +103,13 @@ public class Storage {
 		var nodes=getNodes(where,stringPath);
 		if(nodes==null) {
 			System.err.printf("Can't find \"%s\" in %s.%n",where.getNodeName(),stringPath);
-			isErrorOccured=true;
+			Engine.registerLoadException();
 			return null;
 		}
 		var node=nodes.item(0);
 		if(node==null) {
 			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where.getNodeName());
-			isErrorOccured=true;
+			Engine.registerLoadException();
 			return null;
 		}
 		return new ShaniString(node);
@@ -121,13 +118,13 @@ public class Storage {
 		var nodes=getNodes(where,stringPath);
 		if(nodes==null) {
 			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storage?"storage":"userdata");
-			isErrorOccured=true;
+			Engine.registerLoadException();
 			return null;
 		}
 		var node=nodes.item(0);
 		if(node==null) {
 			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storage?"storage":"userdata");
-			isErrorOccured=true;
+			Engine.registerLoadException();
 			return null;
 		}
 		return node.getTextContent();

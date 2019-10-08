@@ -11,7 +11,13 @@ import org.jsoup.nodes.Element;
 
 import shani.SearchEngine.SearchResoults.SearchResoult;
 
-/**Class automating web search.
+/**<p>Class automating web search.</p>
+ * 
+ * <p>For now uses duckduckgo backend.
+ * Use search syntax to further improve resoults accurency. All of them are listed <a href="https://help.duckduckgo.com/duckduckgo-help-pages/results/syntax/">here</a>.</p>
+ * <p>e.g {@code "query"} will search for resoults exacly matching query word, and {@code site:example.com/resources} to search for resoults only in given website
+ * 
+ * 
  * @author TakMashiddo
  */
 public class SearchEngine {
@@ -54,7 +60,7 @@ public class SearchEngine {
 			try {
 				Return.add(Return.new SearchResoult(entry));
 			} catch(IndexOutOfBoundsException ex) {
-				System.err.printf("Failed to parse element for query %s",query);
+				System.err.printf("Failed to parse element for query \"%s\"",query);
 			}
 		}
 		

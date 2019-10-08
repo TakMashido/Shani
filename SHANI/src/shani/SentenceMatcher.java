@@ -1,19 +1,12 @@
 package shani;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 /**More powerfull matching engine than ShaniMatcher.
  * <pre>
@@ -75,11 +68,26 @@ public class SentenceMatcher {
 			parts.put(nodes.item(i).getNodeName(), nodes.item(i).getTextContent());
 		}
 		
+		boolean error=false;
 		nodes=((Element)node).getElementsByTagName("template");
 		sentences=new Sentence[nodes.getLength()];
 		for(int i=0;i<nodes.getLength();i++) {
 			Node nod=nodes.item(i);
-			sentences[i]=new Sentence(parts,nod.getTextContent(),((Element)nod).getAttribute("name"));
+			try {
+				sentences[i]=new Sentence(parts,nod.getTextContent(),((Element)nod).getAttribute("name"));
+			} catch(ParseException ex) {
+				Engine.registerLoadException();
+				error=true;
+				System.err.println("During parsing \""+((Element)nod).getAttribute("name")+"\" sentence encountered:");
+				ex.printStackTrace();
+			}
+		}
+		if(error) {
+			ArrayList<Sentence> sentencesList=new ArrayList<>(sentences.length);
+			for(Sentence sen:sentences) {
+				if(sen!=null)sentencesList.add(sen);
+			}
+			sentences=sentencesList.toArray(sentences);
 		}
 	}
 	
@@ -133,8 +141,7 @@ public class SentenceMatcher {
 					}
 					System.err.println("Failed to parse SentenceMatcher: group is never closed. SentenceName="+name);
 					return;
-				} else
-					sentenceTemp.add(createNewSentenceElement(parts,next));
+				} else sentenceTemp.add(createNewSentenceElement(parts,next));
 			}
 			sentence=sentenceTemp.toArray(new SentenceElement[0]);
 		}
@@ -170,21 +177,15 @@ public class SentenceMatcher {
 		
 		@Override
 		public short processNext(SentenceResoult resoult,ShaniString[]str,int strIndex,int sentenceIndex) {
-//			System.out.println(strIndex+" "+sentenceIndex);
-//			System.out.println(resoult.data);
 			if(strIndex>=str.length&&sentenceIndex>=sentence.length) {
-//				System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+0);
 				return 0;
 				
 			}
 			if(sentenceIndex>=sentence.length) {
-//				System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+Config.wordDeletionCost*(str.length-strIndex));
 				return (short) (Config.wordDeletionCost*(str.length-strIndex));
 			}
 			
 			var ret=sentence[sentenceIndex].preProcess(resoult, str, strIndex, sentenceIndex,this);
-//			System.out.println(resoult.data);
-//			System.out.println("--------------: "+strIndex+" "+sentenceIndex+" "+ret);
 			return ret;
 		}
 		
@@ -273,6 +274,8 @@ public class SentenceMatcher {
 		private class ShaniStringElement extends SentenceElement{
 			private ShaniString[][] value;
 			private ShaniStringElement(HashMap<String,String> parts,String data) {
+				String str=parts.get(data);
+				if(str==null) throw new ParseException("Failed to parse: can't find \""+data+"\" in parts.");
 				value=new ShaniString(parts.get(data)).split();
 			}
 			@Override
@@ -409,15 +412,11 @@ public class SentenceMatcher {
 			return cost;
 		}
 	}
-	
-	public static void main(String[]args) throws IOException, ParserConfigurationException, SAXException{
-		SentenceMatcher mat=new SentenceMatcher(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml")).getElementsByTagName("sentence").item(0));
-		
-		System.out.println(Arrays.toString(mat.sentences[0].sentence));
-		
-		var res=mat.process("czy w warszawie bêdzie brzydko");
-		System.out.println("\nmatches number: "+res.length);
-		for(int i=0;i<res.length;i++)
-			System.out.println(res[i].cost+" "+res[i].data);
+	private class ParseException extends RuntimeException{
+		private static final long serialVersionUID = -7564692708180202338L;
+
+		ParseException(String message){
+			super(message);
+		}
 	}
 }
