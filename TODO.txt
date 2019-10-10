@@ -25,11 +25,11 @@ Add option of matching sub sentence
 Add return value optional checking by regex/ShaniString.
 Add 'or' option to two or more elements.
 
-Order to add:
-cmd order: Execuses you some app like in normal cmd session, or just one command
+Orders to add:
 storage order
 ConverterOrder-> convert GB,currency.
 AliasOrder: Set up aliases for other commands
+WikipediaOrder: Downloads wikipedia page and prints its content(Base description + Contests and allows also to print their content)
 
 To update:
 Finish weather order.

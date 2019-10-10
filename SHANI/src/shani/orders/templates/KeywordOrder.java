@@ -11,6 +11,16 @@ import shani.Engine;
 import shani.ShaniString;
 import shani.ShaniString.ShaniMatcher;
 
+/**Represents order activated by a single keyword.
+ * Supports creating multiple tergets with it's own keywords represented by {@code KeywordAction} class.
+ * Creation of KeywordAction registers it in inner targets List and mainFile Document object.
+ * <p>
+ * To execute Actions do not having specyfied keywords override {@link UnmatchedAction} class and retrun it from {@link #getUnmatchedAction(ShaniString)} or {@link #getUnmatchedAction()} method. 
+ * <p>
+ * Loading of targets stored in MainFile is done in {@link #actionFactory(Element)}.
+ * 
+ * @author TakMashido
+ */
 public abstract class KeywordOrder extends Order {
 	protected ShaniString keyword;
 	protected ArrayList<KeywordAction> actions=new ArrayList<KeywordAction>();
@@ -35,9 +45,10 @@ public abstract class KeywordOrder extends Order {
 	 * @param element Element containg Action data
 	 * @return Ready to use Action
 	 */
-	public abstract KeywordAction actionFactory(Element element);
+	public KeywordAction actionFactory(Element element) {return null;};
 	public KeywordAction createAction(Element element){
 		KeywordAction action=actionFactory(element);
+		if(action==null)return null;
 		
 		if(action.actionKeyword==null)action.actionKeyword=new ShaniString(element.getElementsByTagName("key").item(0));
 		
@@ -76,10 +87,10 @@ public abstract class KeywordOrder extends Order {
 		
 		return Return;
 	}
-	/**Method for creation of cuscom Executables
+	/**Method for creation of cuscom Executables.
 	 * @param command Command from user
 	 * @param matcher ShaniMatcher created from command with applied keyword
-	 * @return List of addition executables for specyfied command.
+	 * @return List of additional executables for specyfied command.
 	 */
 	protected List<Executable> createExecutables(ShaniString command, ShaniMatcher matcher){
 		return null;
@@ -99,7 +110,8 @@ public abstract class KeywordOrder extends Order {
 		protected ShaniString unmatched;
 		
 		public boolean connectAction(String action) {
-			System.err.println("Connecting actions to "+this.getClass().getName());
+			assert false:"Connecting actions to "+this.getClass().getName()+"is not possible";
+			System.err.println("Connecting actions to "+this.getClass().getName()+"is not possible");
 			return false;
 		}
 		

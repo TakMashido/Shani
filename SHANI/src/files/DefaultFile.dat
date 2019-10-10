@@ -186,6 +186,9 @@
                 <connect>przez*od*do*i*na</connect>
             </sentence>
         </order>
+        <order classname="shani.orders.CMDOrder">
+			<keywords>cmd</keywords>
+		</order>
 	</orders>
 	<storage>
 		<patterns>
@@ -247,6 +250,11 @@
 				<cannotParseDayNumberMessage>Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie.</cannotParseDayNumberMessage>
 				<noForecastFoundMessage>Nie znalazłam prognozy*Pogoda nie znaleziona</noForecastFoundMessage>
 			</WeatherOrder>
+			<CMDOrder>
+				<executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
+				<runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
+				<endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>
+			</CMDOrder>
 		</orders>
 		<misc>
 			<connection>
