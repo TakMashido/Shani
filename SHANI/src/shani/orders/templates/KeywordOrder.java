@@ -25,6 +25,10 @@ public abstract class KeywordOrder extends Order {
 	protected ShaniString keyword;
 	protected ArrayList<KeywordAction> actions=new ArrayList<KeywordAction>();
 	
+	
+	/**If true then exact matching of targets keywords({@link ShaniMatcher#exactApply(ShaniString...)}) is applied, otherwise standard fuzzy ShaniString matching({@link ShaniMatcher#apply(ShaniString...)})*/
+	protected boolean targetExactMatch=false;
+	
 	protected boolean init() {
 		keyword=new ShaniString(orderFile.getElementsByTagName("keywords").item(0));
 		
@@ -55,7 +59,6 @@ public abstract class KeywordOrder extends Order {
 		return action;
 	}
 	
-	
 	public List<Executable> getExecutables(ShaniString command) {
 		ArrayList<Executable> Return=new ArrayList<Executable>();
 		
@@ -63,7 +66,12 @@ public abstract class KeywordOrder extends Order {
 		
 		Engine.info.println('\n'+keyword.toFullString()+"-> "+command.toFullString()+":");
 		for(KeywordAction action:actions) {
-			ShaniMatcher actionMatcher=matcher.clone().apply(action.actionKeyword);
+			ShaniMatcher actionMatcher=matcher.clone();
+			if(targetExactMatch) 
+				actionMatcher.exactApply(action.actionKeyword);
+			else
+				actionMatcher.apply(action.actionKeyword);
+			
 			short cost=actionMatcher.getCost();
 			if(cost<Config.sentenseCompareTreshold) {
 				Return.add(new Executable(action,cost));

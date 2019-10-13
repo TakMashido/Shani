@@ -22,6 +22,7 @@ public class ShaniString {
 	private static byte[][] lookUpTable;				//~140KB of memory
 	
 	private String[] value;
+	private String[][] words;
 	private char[][][] stemmedValue=null;											//[a][b][c]: a->wordsSet, b->word, c->letter
 	/**Node containing this ShaniString data.*/
 	private Node origin;
@@ -266,12 +267,25 @@ public class ShaniString {
 				newVal[stemmedValue.length+1]=stem(wordArray[i]);
 			}
 			stemmedValue=newVal;
+			if(words!=null) {
+				String[][] newWords=new String[words.length+1][];
+				System.arraycopy(words, 0, newWords, 0, words.length);
+				newWords[words.length]=new String[stemmedValue[words.length].length];
+				for(int i=0;i<newWords[words.length].length;i++)
+					newWords[words.length][i]=new String(stemmedValue[words.length][i]);
+				words=newWords;
+			}
 		}
 	}
 	/**Adds new entries.
 	 * @param word ShaniString containig new entries
 	 */
 	public void add(ShaniString word) {
+		if(word.stemmedValue!=null) {						//Prevents from stemming from scrach in next step  
+			stem();
+			if(word.words!=null)generateWords();
+		}
+		
 		String[] newValue=new String[value.length+word.value.length];
 		System.arraycopy(value, 0, newValue, 0, value.length);
 		System.arraycopy(word.value, 0, newValue, value.length, word.value.length);
@@ -280,13 +294,19 @@ public class ShaniString {
 		saveData();
 		
 		if(stemmedValue!=null||word.stemmedValue!=null) {
-			this.stem();
 			word.stem();
 			
 			char[][][] newStemmedValue=new char[stemmedValue.length+word.stemmedValue.length][][];
 			System.arraycopy(stemmedValue, 0, newStemmedValue, 0, stemmedValue.length);
 			System.arraycopy(word.stemmedValue, 0, newStemmedValue, stemmedValue.length, word.stemmedValue.length);
 			stemmedValue=newStemmedValue;
+			if(words!=null||word.words!=null) {
+				word.generateWords();
+				String[][] newWords=new String[stemmedValue.length][];
+				System.arraycopy(words, 0, newWords, 0, words.length);
+				System.arraycopy(word.words, 0, newWords, words.length, word.words.length);
+				words=newWords;
+			}
 		}
 	}
 	
@@ -323,6 +343,19 @@ public class ShaniString {
 		}
 		
 		return words.toArray(new char[0][0]);
+	}
+	
+	private void generateWords() {
+		if(words!=null)return;
+		
+		stem();
+		words=new String[value.length][];
+		for(int i=0;i<stemmedValue.length;i++) {
+			words[i]=new String[stemmedValue[i].length];
+			for(int j=0;j<stemmedValue[i].length;j++) {
+				words[i][j]=new String(stemmedValue[i][j]);
+			}
+		}
 	}
 	
 	/**Get cost of comparing this ShaniString and given String.
@@ -707,7 +740,7 @@ public class ShaniString {
 							setted=true;
 						}
 					}
-					if(!setted) {																		//Can be changed to finding real lowest possible cost
+					if(!setted) {																		//Can be changed to find real lowest possible cost
 						wordsCosts[j][resoults.get(0).index]=resoults.get(0).cost;
 						costBiases[j]+=Config.wordInsertionCost;
 					}
@@ -730,13 +763,71 @@ public class ShaniString {
 			wordCost[index]=wordsCosts[minCostIndex];
 		}
 		
+		/**Do word based exact compare. Search for combination of words which are {@link String#equals(Object)} to given ShaniString.
+		 * <p>
+		 * note: number of white characters is ignored, only the fact they exeist end divide ShaniString value to words metters
+		 * @param comparables ShaniString containing String values to be searchen in underlaying ShaniString.
+		 * @return this ShaniMatcher object.
+		 */
+		public ShaniMatcher exactApply(ShaniString... comparables) {
+			for(ShaniString comparable:comparables) {
+				assert comparable!=null:"comparable item can't be null";
+				assert comparable.value.length!=0:"comparable item shouldn't be empty";
+				if(comparable==null) {
+					for(int i=0;i<costBias.length;i++) {
+						costBias[i]+=Config.wordInsertionCost;
+					}
+					return this;
+				}
+				if(comparable.value.length==0) {
+					return this;
+				}
+				for(String str:comparable.value) {
+					exactApply(str);
+				}
+			}
+			return this;
+		}
+		/**Do word based exact compare. Search for combination of words which are {@link String#equals(Object)} to given ShaniString.
+		 * <p>
+		 * note: number of white spaces is ignored, only the fact they exeist end divide ShaniString value to words metters
+		 * @param comparable String to find in underlaying ShaniString.
+		 * @return this ShaniMatcher object.
+		 */
+		public ShaniMatcher exactApply(String comparable) {
+			data.generateWords();
+			
+			ArrayList<String> comparableWords=new ArrayList<>();
+			@SuppressWarnings("resource")
+			Scanner sc=new Scanner(comparable);
+			while(sc.hasNext())comparableWords.add(sc.next());
+			
+			boolean matched;
+			int comparableIndex=0;
+			for(int i=0;i<data.words.length;i++) {
+				matched=false;
+				for(int j=0;j<data.words[i].length;j++) {
+					if(data.words[i][j].equals(comparableWords.get(comparableIndex))&&wordCost[i][j]>=Config.wordDeletionCost) {
+						comparableIndex++;
+						if(comparableIndex==comparableWords.size()) {
+							matched=true;
+							for(int k=0;k<comparableIndex;k++)
+								wordCost[i][j-k]=0;
+						}
+					} else comparableIndex=0;
+				}
+				if(!matched)costBias[i]+=comparableWords.size()*Config.wordInsertionCost;
+			}
+			return this;
+		}
+		
 		/**Check if cost of compare is smaller then Config.senetenceCompareTreshold.
 		 * @return If underlaying ShaniString is equal to all applied data.
 		 */
 		public boolean isEqual() {
 			return getCost()<Config.sentenseCompareTreshold;
 		}
-		/**Check if appled data are {@link #isEqual() equal} and any word was matched.
+		/**Check if appled data are presented in underlaying ShaniString. Skip unmatched words.
 		 * @return Look above.
 		 */
 		public boolean isSemiEqual() {
