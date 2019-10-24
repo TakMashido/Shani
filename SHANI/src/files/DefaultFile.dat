@@ -95,13 +95,16 @@
 				<weather>Pogoda </weather>
 			</weathersentence>
 			<weatherResponses>
+				<!-- '_' in tag name gets replaced with ' ' and '-' with '/'-->
 				<AM_Clouds-PM_Sun>pochmurny poranek</AM_Clouds-PM_Sun>
+				<AM_Fog-PM_Sun>poranna mgła</AM_Fog-PM_Sun>
 				<AM_Light_Rain>poranny lekki deszcz</AM_Light_Rain>
 				<AM_Rain>poranny deszcz</AM_Rain>
 				<AM_Showers>poranne deszcze</AM_Showers>
 				<Clear>czyste niebo</Clear>
 				<Cloudy>pochmurnie</Cloudy>
 				<Few_Showers>deszczowo</Few_Showers>
+				<Fog_Late>późne mgły</Fog_Late>
 				<Light_Rain>lekki deszcz</Light_Rain>
 				<Isolated_Thunderstorms>samotne burze</Isolated_Thunderstorms>
 				<Mostly_Clear>głównie czyste niebo</Mostly_Clear>
@@ -114,6 +117,7 @@
 				<PM_Showers>popołudniowe deszcze</PM_Showers>
 				<PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
 				<Rain>deszcz</Rain>
+				<Rain-Snow_Showers>śnieg z deszczem</Rain-Snow_Showers>
 				<Rain-Wind>deszczowo i wietrznie</Rain-Wind>
 				<Scattered_Thunderstorms>rozproszone burze</Scattered_Thunderstorms>
 				<Showers>lekki deszcz</Showers>
@@ -249,6 +253,9 @@
 				<cannotProcessDayMessage>Nie wiem o jaki dzień ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
 				<cannotParseDayNumberMessage>Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie.</cannotParseDayNumberMessage>
 				<noForecastFoundMessage>Nie znalazłam prognozy*Pogoda nie znaleziona</noForecastFoundMessage>
+				<whichCityMessage>Które miasto mam wybrać?*Z kąd podać pogodę?*Proszę podaj numer miasta dla którego chcesz uzyskać pogodę.</whichCityMessage>
+				<cityOutOfBoundsMessage>Nieprawidłowy numer miasta.*Wyszedłeś po za listę.</cityOutOfBoundsMessage>
+				<unmatchingCityMessage>Nie wiem które miasto wybrać.*Możesz powtórzyć?</unmatchingCityMessage>
 			</WeatherOrder>
 			<CMDOrder>
 				<executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>

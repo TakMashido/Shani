@@ -17,9 +17,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.w3c.dom.Node;
 
+import shani.Config;
 import shani.Engine;
 import shani.SearchEngine;
-import shani.SearchEngine.SearchResoults;
 import shani.SearchEngine.SearchResoults.SearchResoult;
 import shani.SentenceGenerator;
 import shani.SentenceMatcher;
@@ -32,6 +32,9 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	private static ShaniString cannotProcessDayMessage=ShaniString.loadString("orders.WeatherOrder.cannotProcessDayMessage");
 	private static ShaniString cannotParseDayNumberMessage=ShaniString.loadString("orders.WeatherOrder.cannotParseDayNumberMessage");
 	private static ShaniString noForecastFoundMessage=ShaniString.loadString("orders.WeatherOrder.noForecastFoundMessage");
+	private static ShaniString whichCityMessage=ShaniString.loadString("orders.WeatherOrder.whichCityMessage");
+	private static ShaniString cityOutOfBoundsMessage=ShaniString.loadString("orders.WeatherOrder.cityOutOfBoundsMessage");
+	private static ShaniString unmatchingCityMessage=ShaniString.loadString("orders.WeatherOrder.unmatchingCityMessage");
 	
 	private SentenceGenerator weatherSentence;
 	
@@ -39,7 +42,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	
 	private static final DateFormat websiteDateFormat=new SimpleDateFormat("MMM dd",Locale.ENGLISH);
 	
-	private int badWeatherTemp; 
+	private int badWeatherTemp;
 	private int badWeatherWind;
 	private String[] badWeatherTypes;
 	
@@ -73,8 +76,6 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	}
 	
 	private static class Weather{
-		//To add: PM Showers,AM Showers,Scattered Thunderstorms,Partly Cloudy/Wind,PM Thunderstorms,AM Thunderstorms
-		
 		private final String identifier; 
 		
 		private Weather(String identifier) {
@@ -100,7 +101,9 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	}
 	
 	private static ArrayList<DayWeather> getWeather(String where) throws IOException {					//TODO Cache site-city connection.
-		var sr=SearchEngine.search(where+" forecast site:weather.com/weather/tenday/l");
+		var sr=SearchEngine.search('"'+where+"\" forecast site:weather.com/weather/tenday/l");
+		
+//		var sr=SearchEngine.search(where+" forecast site:weather.com/weather/tenday/l");
 
 //		var sr=SearchEngine.search("weather.com 10 day weather "+where);
 //		sr.selectElementsByDomain("weather.com").selectElementsWithTitleContaining("10-Day Weather Forecast");
@@ -109,8 +112,55 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		
 		var Return=new ArrayList<DayWeather>();
 		
-		System.err.println("Fix city chosing in WeatherOrder.");				//Check in page content name of city(if it do not sunk to much time), add ShaniString matching if multimple matches let user choose wchich of them is correct.
-		Document doc=Jsoup.connect(sr.get(0).url).get();
+		sr.selectElementsWithTitleContaining(where,false);
+		
+		SearchResoult resoult;
+		if(sr.size()>1) {
+			whichCityMessage.printOut();
+			
+			String[] locations=new String[sr.size()];
+			for(int i=0;i<locations.length;i++) {
+				SearchResoult entry=sr.get(i);
+				locations[i]=entry.title.substring(0,entry.title.indexOf("10-Day"));
+				System.out.println(locations[i]);
+			}
+			
+			int index=-1;
+			String response=Engine.in.nextLine();
+			try {
+				index=Integer.parseInt(response);
+				if(index<0||index>=sr.size()) {
+					cityOutOfBoundsMessage.printOut();
+					return null;
+				}
+				
+				index++;
+			} catch(NumberFormatException ex) {
+				ShaniString res=new ShaniString(response,false);
+				short minCost=Short.MAX_VALUE;
+				int minIndex=-1;
+				for(int i=0;i<locations.length;i++) {
+					short cost=new ShaniString(locations[i]).getMatcher().apply(res).getMatchedCost();
+					if(cost<minCost) {
+						minCost=cost;
+						minIndex=i;
+					}
+				}
+				
+				if(minCost>=Config.sentenseCompareTreshold){
+					unmatchingCityMessage.printOut();
+					return null;
+				}
+				index=minIndex;
+			}
+			
+			resoult=sr.get(index);
+		} else {
+			resoult=sr.get(0);
+		}
+		System.out.println(resoult.title);
+		
+		Document doc=Jsoup.connect(resoult.url).get();
 		
 		var elems=doc.getElementsByClass("forecast-fiveday").get(0).getElementsByClass("clickable");
 		for(var elem:elems) {

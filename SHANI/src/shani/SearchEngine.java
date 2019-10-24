@@ -1,8 +1,6 @@
 package shani;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -28,7 +26,6 @@ public class SearchEngine {
 	 * 
 	 */
 	public static final SearchResoults LICENSENOTCONFIRMED=new SearchResoults();
-	public static final SearchResoults EMPTYSEACHRESOULTS = new SearchResoults();
 	
 	/**Private constructor to don't allow to create instances.*/
 	private SearchEngine() {}
@@ -45,22 +42,16 @@ public class SearchEngine {
 		  ||!Engine.getLicenseConfirmation("duckduckgo.com"))
 			return LICENSENOTCONFIRMED;
 		
-		
 		query.replaceAll(":", "%3A");
 		var doc=Jsoup.connect("https://duckduckgo.com/html?q="+query).get();
 		
-		File file=new File("Test.html");
-		file.createNewFile();
-		PrintWriter writer=new PrintWriter(file);
-		writer.print(doc.html());
-		writer.close();
-		
 		var entries=doc.getElementsByClass("result");
 		for(var entry:entries) {
+			if(!entry.getElementsByClass("no-results").isEmpty()) continue;
 			try {
 				Return.add(Return.new SearchResoult(entry));
 			} catch(IndexOutOfBoundsException ex) {
-				System.err.printf("Failed to parse element for query \"%s\"",query);
+				System.err.printf("Failed to parse element for query \"%s\" in Search Engine",query);
 			}
 		}
 		
@@ -118,6 +109,23 @@ public class SearchEngine {
 			}
 			return this;
 		}
+		/**Deletes all elements not containig given string in title.
+		 * @param s String to seach for.
+		 * @param caseSensitive If make searching case sensitive.
+		 * @return this
+		 */
+		public SearchResoults selectElementsWithTitleContaining(String s,boolean caseSensitive) {
+			if(caseSensitive) return selectElementsWithTitleContaining(s);
+			String ls=s.toLowerCase();
+			int length=this.size();
+			for(int i=0;i<length;i++) {
+				if(!this.get(i).title.toLowerCase().contains(ls)) {
+					this.remove(i--);
+					length--;
+				}
+			}
+			return this;
+		}
 		/**Deletes all elements containig given string in title.
 		 * @param s String to seach for.
 		 * @return this
@@ -130,6 +138,23 @@ public class SearchEngine {
 					length--;
 				}
 			}
+			return this;
+		}
+		/**Deletes all elements containig given string in title.
+		 * @param s String to seach for.
+		 * @param caseSensitive If make searching case sensitive.
+		 * @return this
+		 */
+		public SearchResoults removeElementsWithTitleContaining(String s,boolean caseSensitive) {
+			if(caseSensitive)return removeElementsWithTitleContaining(s);
+			String ls=s.toLowerCase();
+			int length=this.size();
+			for(int i=0;i<length;i++) {
+				if(this.get(i).title.toLowerCase().contains(ls)) {
+					this.remove(i--);
+					length--;
+				}
+			}		
 			return this;
 		}
 		
