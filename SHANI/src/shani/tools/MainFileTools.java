@@ -173,7 +173,7 @@ public class MainFileTools {
 			String originName=originNode.getNodeName();
 			for(int j=0;j<targetNames.length;j++) {
 				if(originName.equals(targetNames[j])) {
-					deepCopyNode(originNode,originDoc,targetNL.item(j),targetDoc,"dumpNode",false);
+					deepCopyNode(originNode,originDoc,targetNL.item(j),targetDoc,originName,false);
 					continue originNodes;
 				}
 			}

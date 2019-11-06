@@ -15,7 +15,7 @@ import shani.ShaniString.ShaniMatcher;
  * Supports creating multiple tergets with it's own keywords represented by {@code KeywordAction} class.
  * Creation of KeywordAction registers it in inner targets List and mainFile Document object.
  * <p>
- * To execute Actions do not having specyfied keywords override {@link UnmatchedAction} class and retrun it from {@link #getUnmatchedAction(ShaniString)} or {@link #getUnmatchedAction()} method. 
+ * To execute Actions do not having specyfied keywords override {@link UnmatchedAction} class and return it's instance from {@link #getUnmatchedAction(ShaniString)} or {@link #getUnmatchedAction()} method. 
  * <p>
  * Loading of targets stored in MainFile is done in {@link #actionFactory(Element)}.
  * 

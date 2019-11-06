@@ -1,41 +1,40 @@
-"All you have to do is install the damm java 10 user!"
 To run SHANI you have to have installed java 10 or newer. If you have alredy installed java check if it's 10 not java 8 which is most often installed in personal computers.
 Next download shani latest release and unzip it somewhere. To run just double click on Shani.bat file. New cmd window with SHANI launched should apper.
 
 Unfortunetly it only support Polish language for now. All messages and input patterns are stored in external file so translations can be made quite easy.
 Report to me if you want this in another language.
 
-Just type action which you want to execute in cmd window.
+Now just type action which you want to execute in cmd window.
 It applies heavy Fuzzy string matching(sometimes to heavy) so no need to type everything correctly, it should be able to understand even with lots of literals.
 
 
 Supported actions:
 Launch program, open file/directory:
-Type odpal/w³¹cz/start or something symilar and then name of thing you want to start. First time it'll ask for full path to file/directory. Program do not index files of your divice so it's impossible skip it.
-If you already launched thing with this program will launch it immadiately. You can also create alias for thing just type normal start command but provide one of the previous thing name instead of path.
+Type odpal/włącz/start or something symilar and then name of thing you want to start. First time it'll ask for full path to file/directory. Program do not index files in your divice so it's impossible skip it.
+If you already launched thing with shani after using start command with proper keyword program will be launched immadiately. You can also create alias for thing just type normal start command with alias as name and provide one of the previous things name instead of path.
 
 Calculator:
-Type something like "policz 2+2", "pomnórz trzy i cztery". To get the resoult.
+Type something like "policz 2+2", "pomnórz trzy i cztery", "dodaj dwa do dwóch". To get the resoult.
 
 Timer:
-The most messed/bugged of them all. Use "w³acz timer name", "ile zliczy³ zegar name", "zatrzymaj zegar n".
+To use "włącz timer name", "ile zliczył zegar name", "zatrzymaj zegar n". Timers are created after first invoce of starting command.
 
 Dictionary:
-Type "przet³umacz abcd", "jak jest answer". Tarnslation taken from translatica.pl website translatica.pl webside. Support only english, german and polish words.
+Type "przetłumacz abcd", "jak jest answer". Translation taken from translatica.pl webside. Support only english, german and polish words.
 
 Weather forecast:
-"Jaka jest pogoda/temperatura/... w miasto", "Ile bêdzie stopni za dwa dni w ...". "Czy w xyz jest brzytko".
+"Jaka jest pogoda/temperatura/... w miasto", "Ile będzie stopni za dwa dni w ...". "Czy w xyz jest brzytko".
 
+CMD commands:
+You don't have to start another instance of cmd if you have already shani running for fast execution of couple commands. Just type something like "cmd ping xyz.xyz" to execute one command or "cmd" without any parameters to open new cmd instance inside shani command line with stdout, stdin and stderr piped to default shani streams.
+
+Closing:
+Just type some kind of farewell message. "Żegnaj", "Do widzenia" or similar should work.
 
 How can I check installed java version?
 Option 1: Run cmd(windows + r, write cmd) and write in it "java --version".
 Option 2: Find java control panel(Configure java/About java) in your computer and find version there.
 
-Closing:
-Just type some kind of greedings???? message. "Żegnaj", "Do widzenia" or similar should work.
-
 How to install java 10?
 Write in your browser "java 10" and dowland it from Oracle. Be avare default java dowloand link refers to java 8.
 Now java 10 is outdated but newer version should run it. If no try to find 10 in archive.
-
-Unfortunetly now it's very bugged, I've decided to fix ewerything I was able to found before adding more features.

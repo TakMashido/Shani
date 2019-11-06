@@ -153,6 +153,15 @@ public class Engine {
 			e1.printStackTrace();
 		}
 		
+		if(Config.socksProxyHost!=null) {											//Set up before initializing orders
+			System.setProperty("socksProxyHost", Config.socksProxyHost);
+			System.setProperty("socksProxyPort", Integer.toString(Config.socksProxyPort));
+		}
+		if(Config.HTTPProxyHost!=null) {
+			System.setProperty("http.proxyHost", Config.HTTPProxyHost);
+			System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
+		}
+		
 		if (Config.mainFile.exists()) {
 			try {
 				parseMainFile();
@@ -196,17 +205,6 @@ public class Engine {
 			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
 			else System.out.println("Error encountered during loading shani. Further info in errors.log file");
 		}
-		
-		if(Config.socksProxyHost!=null) {
-//			System.setProperty("proxySet","true");
-			System.setProperty("socksProxyHost", Config.socksProxyHost);
-			System.setProperty("socksProxyPort", Integer.toString(Config.socksProxyPort));
-		}
-		if(Config.HTTPProxyHost!=null) {
-			System.setProperty("http.proxyHost", Config.HTTPProxyHost);
-			System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
-		}
-		
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {

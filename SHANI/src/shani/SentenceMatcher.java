@@ -123,7 +123,6 @@ public class SentenceMatcher {
 			Scanner in=new Scanner(content);
 			this.sentenceName=name;
 			
-			
 			ArrayList<SentenceElement> sentenceTemp=new ArrayList<>();
 			mainloop:
 			while(in.hasNext()) {
@@ -331,7 +330,6 @@ public class SentenceMatcher {
 			private int nextIndex;
 			
 			private GroupElement(HashMap<String,String> parts,String data) {
-				System.out.println(data);
 				data=data.substring(0, data.length()-2);				//remove only cloasing bracked. Opening already removed in createNewSentenceElement method.
 				
 				ArrayList<SentenceElement> elements=new ArrayList<>();

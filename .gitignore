@@ -37,3 +37,6 @@ SHANI/doc
 
 #my personal configurarions
 SHANI/config.properties
+
+#required external liblaries
+!dependencies/*
