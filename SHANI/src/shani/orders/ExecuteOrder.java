@@ -138,6 +138,7 @@ public class ExecuteOrder extends KeywordOrder {
 	}
 	private class AddExecuteAction extends Action{
 		private String unmatched;
+		private KeywordAction readyAction;
 		
 		private AddExecuteAction(ShaniMatcher matcher) {
 			unmatched=matcher.getUnmatched().toString();
@@ -152,8 +153,7 @@ public class ExecuteOrder extends KeywordOrder {
 			if(positive!=null&&positive==false)
 				return false;
 			if(isPath(newCom)) {
-				createAction(unmatched,"dir",new String[] {Tools.clear(newCom)});
-				return true;
+				return createAction(unmatched,"dir",new String[] {Tools.clear(newCom)});
 			}
 			if(isUri(newCom)) {
 				return createAction(unmatched,"start",new String[] {Tools.clear(newCom)});
@@ -163,18 +163,17 @@ public class ExecuteOrder extends KeywordOrder {
 				if(!mat.matches()) {
 					mat=StartDirPattern2.matcher(newCom);
 					mat.matches();
-					createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2),mat.group(3)});
-					return true;
+					return createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2),mat.group(3)});
 				}
 				mat.group();
 				
-				createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
-				return true;
+				return createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
 			} else {
 				KeywordAction exec=getAction(newCom);
 				if(exec!=null) {
 					exec.addKey(new ShaniString(unmatched));
 					exec.execute();
+					readyAction=exec;
 					return true;
 				}
 				unrecognizedMessage.printOut();
@@ -184,10 +183,14 @@ public class ExecuteOrder extends KeywordOrder {
 		private boolean createAction(String key, String targetType, String[] target) {
 			KeywordAction action=new ExecuteAction(new ShaniString(key),targetType,target);
 			action.execute();
+			readyAction=action;
 			return true;
 		}
 		public boolean connectAction(String action) {
-			System.err.println("Can't connect ExecutableOrder.AddExecuteAction action to another");
+			if(readyAction!=null) {
+				return readyAction.connectAction(action);
+			}
+			System.err.println("Can't connect ExecuteOrder.AddExecuteAction action to another if it wasn't created KeywordAction");
 			return false;
 		}
 	}
