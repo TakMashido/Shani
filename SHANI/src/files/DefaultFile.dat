@@ -43,6 +43,10 @@
 			<_2>dwa*dwójka*drugi*dwóch</_2>
 			<_1>jeden*raz*pierwszy</_1>
 		</module>
+		<module classname="shani.modules.WordTrashFilter">
+			<please>proszę*uprzejmie proszę</please>
+			<faster>natychmiast*ale już*w tym momencie*szybko</faster>
+		</module>
 	</modules>
 	<orders>
 		<order classname="shani.orders.WeatherOrder">
