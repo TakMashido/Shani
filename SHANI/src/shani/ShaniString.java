@@ -530,7 +530,7 @@ public class ShaniString {
 				val[x][y]=(short) min(val[x1][y]+Config.characterInsertionCost,
 									  val[x][y-1]+Config.characterDeletionCost,
 									  val[x1][y-1]+compareChar(a[x-1],b[y-1]));
-				if(x>2&&y>2) {
+				if(x>1&&y>1) {
 					short swapCost=(short) (compareChar(a[x-1],b[y-2])+compareChar(a[x-2],b[y-1]));
 					if(swapCost<Config.characterSwapTreshold) {
 						val[x][y]=(short) min(val[x-2][y-2]+swapCost+Config.characterSwapCost,
