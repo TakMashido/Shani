@@ -173,7 +173,6 @@
 		</order>
 		<order classname="shani.orders.CalculateOrder">
             <sentence>
-                <template name="count">$count ?count</template>
                 <template name="power">$power ?power1 $connect ?power2</template>
                 <template name="power">?power1 $power ?power2</template>
                 <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
@@ -184,13 +183,13 @@
                 <template name="add">$count ?add1 $add ?add2</template>
                 <template name="substract">$substract ?substract1 $connect ?substract2</template>
                 <template name="substract">$count ?substract2 $substract ?substract1</template>
+                <template name="count">$count ?count</template>
                 <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
                 <power>potęga*do*do potęgi</power>
-                <multiply>pomnórz*iloczyn*razy</multiply>s
+                <multiply>pomnórz*iloczyn*razy</multiply>
                 <divide>podziel*iloraz*przez</divide>
                 <add>dodaj*suma*plus</add>
                 <substract>odejmij*różnica*minus</substract>
-                <startword>ile mamy po*podaj*</startword>
                 <connect>przez*od*do*i*na</connect>
             </sentence>
         </order>

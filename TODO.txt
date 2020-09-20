@@ -10,7 +10,6 @@ Add loops detection system for MergeOrder
 Make project name a shortcut (Simple Heurestic n a Interpreter)
 Move respones keys from config file to main file. And perform other data movements. (store data of each Order in one xml node, except some data which be changen(user/computer dependet)(this should be in another file))
 Add option of compressing data files.
-Add patterns for 3 razy cztery and similar in CalculateOrder
 
 
 SentenceMatcher:
@@ -28,11 +27,3 @@ WikipediaOrder: Downloads wikipedia page and prints its content(Base description
 To update:
 Finish weather order.
 Let NumberFilter parse queries like "dwatysi¹ce" (no " " beetwen number parts)
-
-
-Space of dreams:
-Add speech recognition layer for input.		!!!!!
-Add speech sytesis layer for output.
-Add NLP layer beetwen program out and user to make sentenses more natural(learn it to put right suffixes of words)
-	+add some random input value for it to increase it's randomness
-Add NLP layer beetwen user input and program to add beter sentense understanding
