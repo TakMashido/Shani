@@ -19,18 +19,35 @@ public abstract class Action{
 	 */
 	public abstract boolean execute();
 	
-	/**Creates executable from this action. Equvialent to {@link Executable#Executable(Action, short) new Executable(thisAction,cost)}.
+	/**Creates executable from this action. Equivalent to {@link Executable#Executable(Action, short) new Executable(thisAction,cost)}.
 	 * @param cost Cost of executing this action.
 	 * @return Executable connected to this action with given cost.
 	 */
 	public final Executable getExecutable(short cost) {
 		return new Executable(this,cost);
 	}
-	/**Creates executable from this action. Equvialent to {@link #getExecutable(short) getExecutable((short)cost)}.
+	/**Creates executable from this action. Equivalent to {@link Executable#Executable(Action, short, short) new Executable(thisAction,cost,importanceBias)}.
+	 * @param cost Cost of executing this action.
+	 * @param importanceBias importance bias of this action.
+	 * @return Executable connected to this action with given cost and importance bias.
+	 */
+	public final Executable getExecutable(short cost, short importanceBias) {
+		return new Executable(this,cost,importanceBias);
+	}
+	
+	/**Creates executable from this action. Equivalent to {@link #getExecutable(short) getExecutable((short)cost)}.
 	 * @param cost Cost of executing this action.
 	 * @return Executable connected to this action with given cost.
 	 */
 	public final Executable getExecutable(int cost) {
 		return getExecutable((short)cost);
+	}
+	/**Creates executable from this action. Equivalent to {@link Executable#Executable(Action, short, short) new Executable(thisAction,(short)cost,(short)importanceBias)}.
+	 * @param cost Cost of executing this action.
+	 * @param importanceBias importance bias of this action.
+	 * @return Executable connected to this action with given cost and importance bias.
+	 */
+	public final Executable getExecutable(int cost, int importanceBias) {
+		return new Executable(this,(short)cost,(short)importanceBias);
 	}
 }

@@ -1,23 +1,34 @@
 package shani.orders.templates;
 
 /**
- *Ready to execute Action with cost beetwen execute pattern and input ShaniString.
+ *Ready to execute Action with cost between execute pattern and input ShaniString.
  * @author TakMashido
  */
 public final class Executable{
-	/**Cost beetwen input and action invoke pattern.*/
+	/**Cost between input and action invoke pattern.*/
 	public final short cost;
+	/***/
+	public final short importanceBias;
 	/**{@link Action} which this Executable represent*/
 	public final Action action;
 	private boolean succesful=false;
 	
-	/**Creates Exetuable.
+	/**Creates Executable.
 	 * @param action Action to be stored.
-	 * @param cost Cost beetwen input and action invoke pattern.
+	 * @param cost Cost between input and action invoke pattern.
 	 */
 	public Executable(Action action, short cost){
+		this(action,cost,(short)0);
+	}
+	/**Creates Executable.
+	 * @param action Action to be stored.
+	 * @param cost Cost between input and action invoke pattern.
+	 * @param importanceBias Executables with bigger importance bias are more likely to execute, even if they sentences comparison cost is bigger than one of other sentence.
+	 */
+	public Executable(Action action, short cost, short importanceBias) {
 		this.action=action;
 		this.cost=cost;
+		this.importanceBias=importanceBias;
 	}
 	
 	/**
@@ -28,8 +39,8 @@ public final class Executable{
 		succesful=action.execute();
 	}
 	
-	/**Check if stored action was succesully executed.
-	 * @return If action succesfully executed or false if not executed.
+	/**Check if stored action was successfully executed.
+	 * @return If action successfully executed or false if not executed.
 	 */
 	public boolean isSuccesful() {
 		return succesful;

@@ -16,8 +16,8 @@ public abstract class SentenceMatcherOrder extends Order{
 		return initialize();
 	}
 	
-	/**Overide to do some initializations in your module.
-	 * @return If succesfuly initializated.
+	/**Override to do some initializations in your module.
+	 * @return If successfully initializeted.
 	 */
 	protected boolean initialize() {return true;}
 	
@@ -29,12 +29,15 @@ public abstract class SentenceMatcherOrder extends Order{
 		for(var resoult:resoults) {
 			var action=actionFactory(resoult.getName(),resoult.data);
 			action.init(resoult.getName(),resoult.data);
-			Return.add(action.getExecutable(resoult.getCost()));
+			Return.add(action.getExecutable(resoult.getCost(),resoult.getImportanceBias()));
 		}
 		
 		return Return;
 	}
 	
+	/**Has to return new Action object used by your Order. It's next initialized by SentenceMatherOrder.
+	 * <code>return new YourActionClass();</code> should be sufficient in most cases.
+	 */
 	protected abstract SentenceMatcherAction actionFactory(String sentenceName, HashMap<String,String> returnValues);
 	
 	protected abstract class SentenceMatcherAction extends Action{

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Scanner;
 
-/**Set of costans for SHANI API.
+/**Set of constants for SHANI API.
  * @author TakMashido
  */
 public class Config {
@@ -71,7 +71,9 @@ public class Config {
 		wordInsertionCost=(short)getIntProperty(props,"wordInsertionCost","300");
 		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost","120");
 		
-		optionalMatchTreshold=(short)getIntProperty(props,"optionalMatchTreshold","200");
+		sentenceMatcherWordReturnImportanceBias=(short)getIntProperty(props, "sentenceMatcherWordReturnImportanceBias", "-5");
+		
+		importanceBiasMultiplier=getFloatProperty(props,"importanceBiasMultiplier",".5");
 		
 		socksProxyHost=getProperty(props,"socksProxyHost",null);
 		socksProxyPort=getIntProperty(props,"socksProxyPort","0");
@@ -94,21 +96,31 @@ public class Config {
 			return Integer.parseInt(defaultVal);
 		}
 	}
+	private static final float getFloatProperty(Properties props[],String key,String defaultVal) {
+		try {
+			return Float.parseFloat(getProperty(props, key, defaultVal));
+		} catch(NumberFormatException ex) {
+			return Float.parseFloat(defaultVal);
+		}
+	}
 	
+	/*Files location*/
 	@SuppressWarnings("unused")
 	private static final File secondConfig;
-	
 	public static final File mainFile;
 	
+	/*Basic responses*/												//TODO move to main file
 	public static final ShaniString positiveResponeKey;
 	public static final ShaniString negativeResponeKey;
 	
+	/*Characters cost*/
 	public static final byte diffrendCharacterCost;
 	public static final byte qwertyNeighbourCost;
 	public static final byte nationalSimilarityCost;						//a,¹||c,æ...
 	
+	
 	public static final short wordCompareTreshold;
-	public static final Multiplier characterCompareCostMultiplier;					//Multiplier of cost for distance beetwen short strings, val[lenght-1]
+	public static final Multiplier characterCompareCostMultiplier;					//Multiplier of cost for distance between short strings, val[length-1]
 	public static final short characterDeletionCost;
 	public static final short characterInsertionCost;
 	public static final short characterSwapTreshold;
@@ -118,11 +130,14 @@ public class Config {
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
 	
-	public static final short optionalMatchTreshold;							//Minimal diffence beetwen cost with skipped and without skipping optional sentence part in SentenceMatcher
+	/*SentenceMatcher*/
+	public static final short sentenceMatcherWordReturnImportanceBias; 
 	
+	public static final float importanceBiasMultiplier;
+	
+	/*Network settings*/
 	public static final String socksProxyHost;
 	public static final int socksProxyPort;
-	
 	public static final String HTTPProxyHost;
 	public static final int HTTPProxyPort;
 	
@@ -154,30 +169,4 @@ public class Config {
 			else return (short)(value*multipliers[multipliers.length-1]);
 		}
 	}
-	
-	/*public static void createConfigFile() throws FileNotFoundException, IOException {
-		var prop=new Properties();
-		
-		prop.setProperty("mainFile", "Shani.dat");
-		
-		prop.setProperty("positiveResponeKey", "youp*tak*yes");
-		prop.setProperty("negaticeResponeKey", "nie*nope*niet*no");
-		
-		prop.setProperty("diffrendCharacterCost", "50");
-		prop.setProperty("qwertyNeighbourCost", "30");
-		prop.setProperty("nationalSimilarityCost", "10");
-		
-		prop.setProperty("wordCompareTreshold", "100");
-		prop.setProperty("characterCompareCostMultiplier", "10,5,2,1.5f,1");
-		prop.setProperty("characterDeletionCost", "50");
-		prop.setProperty("characterInsertionCost", "50");
-		prop.setProperty("characterSwapTreshold", "50");
-		prop.setProperty("characterSwapCost", "30");
-		
-		prop.setProperty("sentenseCompareTreshold", "300");
-		prop.setProperty("wordInsertionCost", "300");
-		prop.setProperty("wordDeletionCost", "120");
-		
-		prop.store(new FileOutputStream("temp.properties"), "");
-	}*/
 }
