@@ -1,19 +1,12 @@
 package shani;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import liblaries.Pair;
 import shani.SentenceMatcher.Tokenizer.SentenceToken;
@@ -134,10 +127,7 @@ public class SentenceMatcher {
 				Optional(false),		//*
 				Or(false),				//|
 				Group(')'),				//()
-				AnyOrderGroup(']'),		//[]
-				
-				//Helper tokens
-				Root;
+				AnyOrderGroup(']');		//[]
 				
 				protected boolean containData=true;				//If search for text based data after occurrence of token start character
 				protected char closingCharacter;
@@ -280,37 +270,49 @@ public class SentenceMatcher {
 			root=decodeGroup(parts, tokens).first;
 			sentenceName=name;
 		}
+		/**Handles creation of elements chain from Group token.
+		 * @param parts Sentence parts, data used by some elements. 
+		 * @param tokens Tokens inside processed group.
+		 * @return Pair containing entry to created Elements graph as {@link Pair#first}, and last, exiting element as {@link Pair#second}.
+		 */
 		protected Pair<SentenceElement,SentenceElement> decodeGroup(HashMap<String,String> parts,List<SentenceToken> tokens) {
 			SentenceElement ret=null;
 			
-			SentenceElement element=null;
+			Pair<SentenceElement,SentenceElement> element=null;
 			SentenceElement current=null;
 			for(SentenceToken token:tokens) {
 				if(token.type==Type.Group)
-					element=decodeGroup(parts, token.subTokens).first;
+					element=decodeGroup(parts, token.subTokens);
 				else
 					element=createElement(parts, token);
 				
 				
 				if(current==null)
-					ret=element;
+					ret=element.first;
 				else
-					current.linkElement(element);
-				current=element;
+					current.linkElement(element.first);
+				current=element.second;
 			}
 			
 			return new Pair<SentenceElement,SentenceElement>(ret,current);
 		}
-		protected SentenceElement createElement(HashMap<String,String> parts, SentenceToken token) {
+		/**Handles creation of Element based on given token.
+		 * @param parts Sentence parts, data used by some elements. 
+		 * @param token Token representing element to create.
+		 * @return Pair containing entry to created Elements graph as {@link Pair#first}, and last, exiting element as {@link Pair#second}.
+		 */
+		protected Pair<SentenceElement,SentenceElement> createElement(HashMap<String,String> parts, SentenceToken token) {
 			switch (token.type) {
 			case ShaniString:
-				return new ShaniStringElement(parts, token);
+				return new Pair<>(new ShaniStringElement(parts, token),true);
 			case DataReturn:
-				return new DataReturnElement(parts, token);
+				return new Pair<>(new DataReturnElement(parts, token),true);
 			case Regex:
-				return new RegexElement(parts, token); 
+				return new Pair<>(new RegexElement(parts, token),true);
 			case Optional:
-				return new OptionalElement(parts, token);
+				return new Pair<>(new OptionalElement(parts, token),true);
+			case Group:
+				return decodeGroup(parts,token.subTokens);
 			default:
 				assert false:"Unknow token type encountered";
 			}
@@ -358,13 +360,8 @@ public class SentenceMatcher {
 					}
 				} else {
 					if(strIndex<str.length)
-						resoult.cost+=Config.wordInsertionCost;
+						resoult.cost+=Config.wordInsertionCost*(str.length-strIndex);
 				}
-			}
-			
-			@Override
-			public String toString() {
-				return getClass().getSimpleName().substring(0,5);
 			}
 		}
 		protected class OptionalElement extends SentenceElement{
@@ -374,13 +371,9 @@ public class SentenceMatcher {
 			protected OptionalElement(HashMap<String,String> parts,SentenceToken data) {
 				SentenceToken optionalToken=data.subTokens.get(0);
 				
-				if(optionalToken.type==Type.Group) {
-					var elems=decodeGroup(parts, optionalToken.subTokens);
-					optionalElement=elems.first;
-					lastOptionalElement=elems.second;
-				} else {
-					optionalElement=lastOptionalElement=createElement(parts, optionalToken);
-				}
+				var elems=createElement(parts, optionalToken);
+				optionalElement=elems.first;
+				lastOptionalElement=elems.second;
 			}
 			
 			@Override
@@ -402,11 +395,6 @@ public class SentenceMatcher {
 					resoult.set(skippedResoult);
 				}
 			}
-			
-			@Override
-			public String toString() {
-				return "Optional:"+optionalElement.toString();
-			}
 		}
 		protected class DataReturnElement extends SentenceElement{
 			private String returnKey;
@@ -418,7 +406,6 @@ public class SentenceMatcher {
 			@Override
 			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
 				assert !(nextElement instanceof DataReturnElement):"Two data return elements shouldn't apper next to each other.";
-				
 				
 				SentenceResoult retResoult=null;
 				int minIndex=-1;
@@ -561,6 +548,20 @@ public class SentenceMatcher {
 				return "Regex:"+returnKey+":"+pattern.pattern();
 			}
 		}
+		
+		protected class OrElement extends SentenceElement{
+			
+			public OrElement(HashMap<String,String> parts,SentenceToken data) {
+				
+			}
+			
+			@Override
+			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		}
 	}
 	
 	/**Object containing result of matching ShaniString by SentenceMatcher.*/
@@ -591,6 +592,9 @@ public class SentenceMatcher {
 		}
 		protected void set(SentenceResoult sr) {
 			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
+			
+			if(sr==this)return;
+			
 			cost=sr.cost;
 			importanceBias=sr.importanceBias;
 			data.clear();
@@ -640,25 +644,6 @@ public class SentenceMatcher {
 	}
 	
 	
-	public static void main(String[]args) throws SAXException, IOException, ParserConfigurationException {
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml"));
-		doc.getDocumentElement().normalize();
-		
-		var matcher=new SentenceMatcher(((Element)doc.getElementsByTagName("sentence").item(0)).getElementsByTagName("calculate").item(0));
-		var resoults=matcher.process(new ShaniString("dodaj 2 do 2"));
-		for(var res:resoults) {
-			System.out.println(res);
-		}
-		
-	}
-	
-	public static void tokenizerTest() {
-		List<SentenceToken> tokens=new Tokenizer().tokenize("$ShaniString *(^another [$any|($order ?token) ^group])");
-		
-		if(tokens!=null)
-			printTokens(tokens,0);
-		System.out.println("\n---End---");
-	}
 	public static void printTokens(List<SentenceToken> tokens, int depth) {
 		String depthMarker="";
 		for(int i=0;i<depth;i++)depthMarker+="\t";

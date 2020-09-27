@@ -391,22 +391,27 @@ public class Engine {
 	}
 	public static Executable getExecutable(ShaniString command) {
 		Executable Return=null;
-		short minCost=Config.sentenseCompareTreshold;
+		float minCost=Short.MAX_VALUE;
 		
 		for (Order order : orders) {
 			List<Executable> execs=order.getExecutables(command);
 			if(execs==null)continue;
 			for(Executable exec:execs) {
 				if(Config.verbose)
-					commands.println(exec.action.getClass().toString()+" "+exec.cost);
-				if(exec.cost<minCost) {
-					minCost=exec.cost;
+					commands.println(exec.action.getClass().toString()+" "+exec.cost+":"+exec.importanceBias);
+				
+				if(exec.cost>Config.sentenseCompareTreshold)
+					continue;
+				
+				short cost=(short)(exec.cost-exec.importanceBias*Config.importanceBiasMultiplier);
+				if(cost<minCost) {
+					minCost=cost;
 					Return=exec;
 				}
 			}
 		}
 		
-		return Return!=null&&Return.cost<Config.sentenseCompareTreshold?Return:null;
+		return Return;
 	}
 	
 	public static Executable getLastExecuted() {
