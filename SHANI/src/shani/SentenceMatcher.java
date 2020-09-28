@@ -14,19 +14,19 @@ import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
 
 /**More powerful matching engine than ShaniMatcher.
  * <pre>
- * Match whole sentence and get data out of it.
+ * Matches whole sentence and get data out of it.
  * 
- * It gets data directly from one xml node.
+ * Data for it are loaded from xml Node.
  * 
  * Subnodes named "sentence" are sentence templates.
- * You can specify "name" attribute in it for further recognizing which sentence was matched by matcher.
+ * You can specify "name" attribute in it for further recognizing which sentence given best match.
  * 
  * It's text content contain words representing Sentence Elements with additional special characters at from of each word to choose their type. Following word is name of sentence element.
- * If it's start with '*' character, could be skipped during sentence matching.
  * $ means ShaniString. It'll perform normal ShaniStrig Matching with this element.
- * ^ means regex. It'll try to match content with regex.
  * ? means return value. It'll store corresponding value from processed String in HashMap under given keyword.
- * You can take part of sentence into brackets to make group it. Placing * before it means optional match of sentence inside.
+ * ^ means regex. It'll try to match content with regex, works only for single words, additionally puts it's matched word into dataReturn HashMap.
+ * * means optional match. Matching is with and without that element and better match is chosen.  
+ * You can also group elements with (). Optional match character * apply to whole group.
  * 
  * Subnodes with other names are used to provide additional data for sentence elements.
  * E.g. element "$foo" will compare input value with ShaniString stored under "foo" subnode. This also apply for regex matching.
@@ -41,7 +41,7 @@ import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
  * <node>}
  * Will match sentence "good morning mister" with element "mister" under "who" key in returned HashMap. Name of matched sentence is "morning".
  * Sentence "good afternoon foo" results: name=afternoon, Return Map: {who=foo}
- * Sentence "good morning" aren't have any match.
+ * Sentence "good morning" is not matched.
  * Sentence "good night bar" will not be matched(depends on values in Config file).
  * 
  * {@code<template>*$bar</template>}
@@ -50,7 +50,7 @@ import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
  * {@code<template>$foo *(^regex ?return)</template>}
  * Assume ShaniString stored under foo is already matched. Next it tries to match sentence in brackets. If fail try to match with this part skipped.
  * 
- * Sentences are evaluated in order in which they appear inside xml node possibly causing invoking action marked by first one if compare costs are equal.
+ * Sentences are evaluated in order in which they appear inside xml node possibly causing invoking action marked by first one if compare costs and importance bias are equal.
  * </pre>
  * 
  * @author TakMashido
@@ -92,27 +92,55 @@ public class SentenceMatcher {
 		}
 	}
 	
+	public SentenceResult processBest(String string) {
+		return processBest(new ShaniString(string,false));
+	}
+	public SentenceResult processBest(ShaniString string) {
+		return getBestMatch(process(string));
+	}
+	
 	/**Process given String.
 	 * @param string String in which engine search for matches.
-	 * @return Array of {@code SentenceResoult} object representing resoults of successful matching.
+	 * @return Array of {@code Sentenceresult} object representing results of successful matching.
 	 */
-	public SentenceResoult[] process(String string) {
+	public SentenceResult[] process(String string) {
 		return process(new ShaniString(string,false));
 	}
 	/**Process given ShaniString.
 	 * @param string {@code ShaniString} in which engine search for matches.
-	 * @return Array of {@code SentenceResoult} object representing results of successful matching.
+	 * @return Array of {@code Sentenceresult} object representing results of successful matching.
 	 */
-	public synchronized SentenceResoult[] process(ShaniString string) {
+	public synchronized SentenceResult[] process(ShaniString string) {
 		var str=string.split(false);
 		
-		ArrayList<SentenceResoult> Return=new ArrayList<>();
+		ArrayList<SentenceResult> Return=new ArrayList<>();
 		for(Sentence sen:sentences) {
-			SentenceResoult sr=sen.process(str);
+			SentenceResult sr=sen.process(str);
 			if(sr!=null&&sr.cost<Config.sentenseCompareTreshold)Return.add(sr);
 		}
 		
-		return Return.toArray(new SentenceResoult[Return.size()]);
+		return Return.toArray(new SentenceResult[Return.size()]);
+	}
+	
+	/**Get best {@link SentenceResult} from given set, taking into account comparison cost and importance bias.
+	 * @param results Set of result to choose from.
+	 * @return {@link SentenceResult} which is most accurate from ones in the set. 
+	 */
+	public SentenceResult getBestMatch(SentenceResult[] results) {
+		SentenceResult ret=null;
+		short minCost=Short.MAX_VALUE;
+		
+		for(var res:results) {
+			if(res.cost<Config.sentenseCompareTreshold) {
+				short tmpCost=res.getCombinedCost();
+				if(tmpCost<minCost) {
+					minCost=tmpCost;
+					ret=res;
+				}
+			}
+		}
+		
+		return ret;
 	}
 	
 	/**Tokenizer for parsing sentence templates.
@@ -320,11 +348,11 @@ public class SentenceMatcher {
 			return null;
 		}
 		
-		protected SentenceResoult process(ShaniString[][] str){
-			var Return=new SentenceResoult[str.length];
+		protected SentenceResult process(ShaniString[][] str){
+			var Return=new SentenceResult[str.length];
 			
 			for(int i=0;i<str.length;i++)
-				root.process((Return[i]=new SentenceResoult(sentenceName)),str[i],0);
+				root.process((Return[i]=new SentenceResult(sentenceName)),str[i],0);
 			
 			int minIndex=-1;
 			short minCost=Short.MAX_VALUE;
@@ -349,18 +377,18 @@ public class SentenceMatcher {
 			}
 			
 			/**Individual processing handling*/
-			protected abstract void process(SentenceResoult resoult, ShaniString[] str, int strIndex);
+			protected abstract void process(SentenceResult result, ShaniString[] str, int strIndex);
 			/**Process next element and handles end of matched string or end of sentence pattern.*/
-			protected void processNext(SentenceResoult resoult, ShaniString[] str, int strIndex) {
+			protected void processNext(SentenceResult result, ShaniString[] str, int strIndex) {
 				if(nextElement!=null) {
 					if(strIndex<str.length) {
-						nextElement.process(resoult, str, strIndex);
+						nextElement.process(result, str, strIndex);
 					} else {
-						resoult.cost+=Config.wordDeletionCost*(strIndex-str.length+1);
+						result.cost+=Config.wordDeletionCost*(strIndex-str.length+1);
 					}
 				} else {
 					if(strIndex<str.length)
-						resoult.cost+=Config.wordInsertionCost*(str.length-strIndex);
+						result.cost+=Config.wordInsertionCost*(str.length-strIndex);
 				}
 			}
 		}
@@ -384,15 +412,15 @@ public class SentenceMatcher {
 			}
 			
 			@Override
-			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
-				SentenceResoult skippedResoult=resoult.makeCopy();
+			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
+				SentenceResult skippedresult=result.makeCopy();
 				if(nextElement!=null)
-					nextElement.process(skippedResoult, str, strIndex);
+					nextElement.process(skippedresult, str, strIndex);
 				
-				optionalElement.process(resoult, str, strIndex);
+				optionalElement.process(result, str, strIndex);
 				
-				if(skippedResoult.getCombinedCost()<=resoult.getCombinedCost()) {
-					resoult.set(skippedResoult);
+				if(skippedresult.getCombinedCost()<=result.getCombinedCost()) {
+					result.set(skippedresult);
 				}
 			}
 		}
@@ -404,27 +432,27 @@ public class SentenceMatcher {
 			}
 			
 			@Override
-			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
+			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
 				assert !(nextElement instanceof DataReturnElement):"Two data return elements shouldn't apper next to each other.";
 				
-				SentenceResoult retResoult=null;
+				SentenceResult retresult=null;
 				int minIndex=-1;
 				if(nextElement==null) {			//last element of sentence
 					minIndex=str.length;
-					retResoult=resoult;
+					retresult=result;
 				} else {
 					short minCost=Short.MAX_VALUE;
 					for(int i=strIndex+1;i<=str.length;i++) {
-						var tempResoult=resoult.makeCopy();
-						processNext(tempResoult,str,i);
+						var tempresult=result.makeCopy();
+						processNext(tempresult,str,i);
 						
-						if(tempResoult.cost>=Config.sentenseCompareTreshold)continue;
-						short tempCost=tempResoult.getCombinedCost();
+						if(tempresult.cost>=Config.sentenseCompareTreshold)continue;
+						short tempCost=tempresult.getCombinedCost();
 						
 						if(tempCost<minCost) {
 							minCost=tempCost;
 							minIndex=i;
-							retResoult=tempResoult;
+							retresult=tempresult;
 						}
 					}
 				}
@@ -435,11 +463,11 @@ public class SentenceMatcher {
 					for(int i=strIndex+1;i<minIndex;i++) {
 						strBuf.append(' ').append(str[i]);
 					}
-					resoult.set(retResoult);
-					resoult.data.put(returnKey, strBuf.toString());
-					resoult.importanceBias+=Config.sentenceMatcherWordReturnImportanceBias*(minIndex-strIndex);
+					result.set(retresult);
+					result.data.put(returnKey, strBuf.toString());
+					result.importanceBias+=Config.sentenceMatcherWordReturnImportanceBias*(minIndex-strIndex);
 				} else
-					resoult.cost+=Config.sentenseCompareTreshold;				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later  
+					result.cost+=Config.sentenseCompareTreshold;				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later  
 			}
 			
 			@Override
@@ -457,13 +485,13 @@ public class SentenceMatcher {
 			}
 			
 			@Override
-			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
-				var sr=new SentenceResoult[value.length];
+			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
+				var sr=new SentenceResult[value.length];
 				
 				for(int i=0;i<value.length;i++) {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
 					if(ret.cost<Config.wordCompareTreshold) {
-						processNext((sr[i]=resoult.makeCopy()),str,ret.endIndex);						//TODO not check same sentenceIndex and String index multiple times. Store it somewhere.
+						processNext((sr[i]=result.makeCopy()),str,ret.endIndex);						//TODO not check same sentenceIndex and String index multiple times. Store it somewhere.
 						sr[i].cost+=ret.cost;
 					}
 				}
@@ -481,14 +509,14 @@ public class SentenceMatcher {
 				}
 				
 				if(minIndex==-1) {
-					resoult.cost+=Config.wordInsertionCost;
-					if(resoult.cost<Config.sentenseCompareTreshold)
-						processNext(resoult, str, strIndex);
+					result.cost+=Config.wordInsertionCost;
+					if(result.cost<Config.sentenseCompareTreshold)
+						processNext(result, str, strIndex);
 					return;
 				}
 				
 				
-				resoult.set(sr[minIndex]);
+				result.set(sr[minIndex]);
 			}
 			
 			@Override
@@ -523,14 +551,14 @@ public class SentenceMatcher {
 			}
 			
 			@Override
-			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
+			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
 				int tempStrIndex;
 				short deleteCost=0;
 				for(tempStrIndex=strIndex;tempStrIndex<str.length;tempStrIndex++) {
 					if(str[tempStrIndex].isEquals(pattern)) {
-						resoult.cost+=deleteCost;
-						resoult.data.put(returnKey, str[tempStrIndex].toString());
-						processNext(resoult, str, tempStrIndex+1);
+						result.cost+=deleteCost;
+						result.data.put(returnKey, str[tempStrIndex].toString());
+						processNext(result, str, tempStrIndex+1);
 						return;
 					}
 					
@@ -539,8 +567,8 @@ public class SentenceMatcher {
 						break;
 				}
 				
-				resoult.cost+=Config.wordInsertionCost;
-				processNext(resoult, str, strIndex);
+				result.cost+=Config.wordInsertionCost;
+				processNext(result, str, strIndex);
 			}
 			
 			@Override
@@ -556,7 +584,7 @@ public class SentenceMatcher {
 			}
 			
 			@Override
-			protected void process(SentenceResoult resoult, ShaniString[] str, int strIndex) {
+			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
 				// TODO Auto-generated method stub
 				
 			}
@@ -565,7 +593,7 @@ public class SentenceMatcher {
 	}
 	
 	/**Object containing result of matching ShaniString by SentenceMatcher.*/
-	public static class SentenceResoult{
+	public static class SentenceResult{
 		/**Map containing words appeared in return node position.*/
 		public final HashMap<String,String> data=new HashMap<String,String>();
 		protected short cost;
@@ -574,23 +602,23 @@ public class SentenceMatcher {
 		 */
 		public final String name;
 		
-		protected SentenceResoult() {name=null;}
-		protected SentenceResoult(String name) {
+		protected SentenceResult() {name=null;}
+		protected SentenceResult(String name) {
 			this.name=name;
 		}
 		
 		/**Performs deep copy of this object. It not make copy of underlying String, but there are immutable so no sense to doing it.
 		 * @return Deep copy of this object.
 		 */
-		public SentenceResoult makeCopy() {
-			var copy=new SentenceResoult(name);
+		public SentenceResult makeCopy() {
+			var copy=new SentenceResult(name);
 			copy.data.putAll(data);
 			copy.cost=cost;
 			copy.importanceBias=importanceBias;
 			
 			return copy;
 		}
-		protected void set(SentenceResoult sr) {
+		protected void set(SentenceResult sr) {
 			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
 			
 			if(sr==this)return;
@@ -600,21 +628,21 @@ public class SentenceMatcher {
 			data.clear();
 			data.putAll(sr.data);
 		}
-		protected void add(SentenceResoult sr) {
+		protected void add(SentenceResult sr) {
 			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
 			this.cost+=sr.cost;
 			this.importanceBias+=sr.importanceBias;
 			data.putAll(sr.data);
 		}
 		
-		/**Return's {@link SentenceResoult#data data} Map.
-		 * @return {@link SentenceResoult#data data} Map.
+		/**Return's {@link SentenceResult#data data} Map.
+		 * @return {@link SentenceResult#data data} Map.
 		 */
 		public HashMap<String,String> getData(){
 			return data;
 		}
-		/**Return's {@link SentenceResoult#name} of matched sentence result.
-		 * @return {@link SentenceResoult#name} of matched sentence resoult.
+		/**Return's {@link SentenceResult#name} of matched sentence result.
+		 * @return {@link SentenceResult#name} of matched sentence result.
 		 */
 		public String getName() {
 			return name;
