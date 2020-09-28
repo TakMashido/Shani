@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<tests>
+	<sentenceMatcher>
+		<test>
+			<template name="1">*^regex ?data</template>
+			<shani>temporary*syntetic</shani>
+			<string>word*sentence</string>
+			<regex>[jm]?ust</regex>
+		</test>
+	</sentenceMatcher>
+</tests>

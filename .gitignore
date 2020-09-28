@@ -29,9 +29,6 @@ bin/
 #SHANI data files
 SHANI/*.dat
 
-#test files
-*test*
-
 #temp javadoc files
 SHANI/doc
 
