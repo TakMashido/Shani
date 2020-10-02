@@ -72,6 +72,7 @@ public class Config {
 		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost","120");
 		
 		sentenceMatcherWordReturnImportanceBias=(short)getIntProperty(props, "sentenceMatcherWordReturnImportanceBias", "-5");
+		sentenceMatcherRegexImportanceBias=(short)getIntProperty(props, "sentenceMatcherRegexImportanceBias", "5");
 		
 		importanceBiasMultiplier=getFloatProperty(props,"importanceBiasMultiplier",".5");
 		
@@ -132,6 +133,7 @@ public class Config {
 	
 	/*SentenceMatcher*/
 	public static final short sentenceMatcherWordReturnImportanceBias; 
+	public static final short sentenceMatcherRegexImportanceBias;
 	
 	public static final float importanceBiasMultiplier;
 	

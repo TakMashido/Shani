@@ -74,17 +74,22 @@ public class Test {
 		
 		var matcher=new SentenceMatcher(DOMWalker.walk(doc, "tests/sentenceMatcher/test"));
 		
-		String[] data=new String[] {"just data","must work","temporayr sentence","hog sentente"};
+		String[] data=new String[] {"just data log","must work hog","temporayr sentence","hog sentente"};
 		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.diffrendCharacterCost};
-		short[] importanceBias=new short[] {Config.sentenceMatcherWordReturnImportanceBias,Config.sentenceMatcherWordReturnImportanceBias,0,0};
+		short[] importanceBias=new short[] {
+				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
+				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
+				0,
+				Config.sentenceMatcherRegexImportanceBias};
 		String[] name=new String[] {"1","1","or","or"};
 		String[][][] dataReturn=new String[][][] {
-			{{"regex","just"},{"data","data"}},
-			{{"regex","must"},{"data","work"}},
+			{{"regex","just"},{"data","data"},{"regex2","log"}},
+			{{"regex","must"},{"data","work"},{"regex2","hog"}},
 			{},
 			{{"regex2","hog"}}
 		};
 		
+		@SuppressWarnings("unchecked")
 		HashMap<String,String>[] dataReturnMap=new HashMap[dataReturn.length];
 		for(int i=0;i<dataReturn.length;i++) {
 			dataReturnMap[i]=new HashMap<String,String>();
@@ -100,7 +105,7 @@ public class Test {
 			if(!good)errors++;
 			
 			System.out.printf("%s:\t\"%s\":%d:%d:%s\t%s%n", data[i], result.name, result.cost, result.importanceBias, result.data, good?passed:notPassed);
-//			System.out.printf("%s %s %s %s%n",result.cost==cost[i],result.importanceBias==importanceBias[i],result.name.contentEquals(name[i]),result.data.equals(dataReturnMap[i]));
+			System.out.printf("tests: %s %s %s %s%n",result.name.contentEquals(name[i]),result.cost==cost[i],result.importanceBias==importanceBias[i],result.data.equals(dataReturnMap[i]));
 		}
 		
 		return errors;

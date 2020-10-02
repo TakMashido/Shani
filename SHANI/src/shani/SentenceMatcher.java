@@ -633,6 +633,41 @@ public class SentenceMatcher {
 			}
 			
 		}
+		/*Finite state machine used to determine which element process next.*/
+		protected class AnyOrderGroup extends SentenceElement{
+			private SentenceElement[] optionalElements;
+			private SentenceElement[] optionalElementsEnd;
+			
+			private int actualIndex=0;
+			private int[] indexes;
+			
+			protected AnyOrderGroup(HashMap<String,String> parts, SentenceToken token) {
+				indexes=new int[token.subTokens.size()];
+				
+				optionalElements=new SentenceElement[token.subTokens.size()];
+				optionalElementsEnd=new SentenceElement[optionalElements.length];
+				
+				for(int i=0;i<optionalElements.length;i++) {
+					var dat=createElement(parts, token.subTokens.get(i));
+					
+					optionalElements[i]=dat.first;
+					optionalElementsEnd[i]=dat.second;
+				}
+			}
+			
+			@Override
+			protected void linkElement(SentenceElement nextElement) {
+				if(indexes[actualIndex]<optionalElements.length-1) {
+					
+				}
+			}
+			
+			@Override
+			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
+				
+				
+			}
+		}
 	}
 	
 	/**Object containing result of matching ShaniString by SentenceMatcher.*/
