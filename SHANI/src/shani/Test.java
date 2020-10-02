@@ -32,7 +32,7 @@ public class Test {
 			globalErrors+=errors;
 		}
 		
-		System.out.println("All tests finished"+(globalErrors!=0?". Found "+globalErrors+" errros.":" successfully - no errros found."));
+		System.out.println("\nAll tests finished"+(globalErrors!=0?". Found "+globalErrors+" errros.":" successfully - no errros found."));
 	}
 	
 	public static int shaniStringComparingTest() {
@@ -74,13 +74,15 @@ public class Test {
 		
 		var matcher=new SentenceMatcher(DOMWalker.walk(doc, "tests/sentenceMatcher/test"));
 		
-		String[] data=new String[] {"just word","must work"};
-		short[] cost=new short[] {0,0};
-		short[] importanceBias=new short[] {Config.sentenceMatcherWordReturnImportanceBias,Config.sentenceMatcherWordReturnImportanceBias};
-		String[] name=new String[] {"1","1"};
+		String[] data=new String[] {"just data","must work","temporayr sentence","hog sentente"};
+		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.diffrendCharacterCost};
+		short[] importanceBias=new short[] {Config.sentenceMatcherWordReturnImportanceBias,Config.sentenceMatcherWordReturnImportanceBias,0,0};
+		String[] name=new String[] {"1","1","or","or"};
 		String[][][] dataReturn=new String[][][] {
-			{{"regex","just"},{"data","word"}},
-			{{"regex","must"},{"data","work"}}
+			{{"regex","just"},{"data","data"}},
+			{{"regex","must"},{"data","work"}},
+			{},
+			{{"regex2","hog"}}
 		};
 		
 		HashMap<String,String>[] dataReturnMap=new HashMap[dataReturn.length];
@@ -98,6 +100,7 @@ public class Test {
 			if(!good)errors++;
 			
 			System.out.printf("%s:\t\"%s\":%d:%d:%s\t%s%n", data[i], result.name, result.cost, result.importanceBias, result.data, good?passed:notPassed);
+//			System.out.printf("%s %s %s %s%n",result.cost==cost[i],result.importanceBias==importanceBias[i],result.name.contentEquals(name[i]),result.data.equals(dataReturnMap[i]));
 		}
 		
 		return errors;

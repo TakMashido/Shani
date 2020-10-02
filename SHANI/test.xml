@@ -3,9 +3,11 @@
 	<sentenceMatcher>
 		<test>
 			<template name="1">*^regex ?data</template>
+			<template name="or">$shani|^regex2 $string</template>
 			<shani>temporary*syntetic</shani>
 			<string>word*sentence</string>
 			<regex>[jm]?ust</regex>
+			<regex2>[dhl]og</regex2>
 		</test>
 	</sentenceMatcher>
 </tests>

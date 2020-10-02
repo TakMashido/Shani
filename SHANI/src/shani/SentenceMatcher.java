@@ -26,6 +26,7 @@ import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
  * ? means return value. It'll store corresponding value from processed String in HashMap under given keyword.
  * ^ means regex. It'll try to match content with regex, works only for single words, additionally puts it's matched word into dataReturn HashMap.
  * * means optional match. Matching is with and without that element and better match is chosen.  
+ * | is or element. Uses it's neighbor elements and chooses which one use during matching.
  * You can also group elements with (). Optional match character * apply to whole group.
  * 
  * Subnodes with other names are used to provide additional data for sentence elements.
@@ -49,6 +50,9 @@ import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
  * 
  * {@code<template>$foo *(^regex ?return)</template>}
  * Assume ShaniString stored under foo is already matched. Next it tries to match sentence in brackets. If fail try to match with this part skipped.
+ * 
+ * {@code<template>$foo|^bar ?data</template>}
+ * Match either foo or bar and next match data.
  * 
  * Sentences are evaluated in order in which they appear inside xml node possibly causing invoking action marked by first one if compare costs and importance bias are equal.
  * </pre>
@@ -341,6 +345,8 @@ public class SentenceMatcher {
 				return new Pair<>(new OptionalElement(parts, token),true);
 			case Group:
 				return decodeGroup(parts,token.subTokens);
+			case Or:
+				return new Pair<>(new OrElement(parts, token),true);
 			default:
 				assert false:"Unknow token type encountered";
 			}
@@ -578,15 +584,52 @@ public class SentenceMatcher {
 		}
 		
 		protected class OrElement extends SentenceElement{
+			private SentenceElement firstChoice;
+			private SentenceElement firstChoiceEnd;
+			
+			private SentenceElement secondChoice;
+			private SentenceElement secondChoiceEnd;
 			
 			public OrElement(HashMap<String,String> parts,SentenceToken data) {
+				var pair=createElement(parts, data.subTokens.get(0));
+				firstChoice=pair.first;
+				firstChoiceEnd=pair.second;
 				
+				pair=createElement(parts, data.subTokens.get(1));
+				secondChoice=pair.first;
+				secondChoiceEnd=pair.second;
+			}
+			
+			@Override
+			protected void linkElement(SentenceElement nextElement) {
+				firstChoiceEnd.linkElement(nextElement);
+				secondChoiceEnd.linkElement(nextElement);
 			}
 			
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
-				// TODO Auto-generated method stub
+				if(strIndex>=str.length) {
+					result.cost+=Config.wordDeletionCost;
+					return;
+				}
 				
+				var secondResult=result.makeCopy();
+				secondChoice.process(secondResult, str, strIndex);
+				
+				firstChoice.process(result, str, strIndex);
+				
+				if(secondResult.cost>Config.sentenseCompareTreshold) {
+					if(result.cost<Config.sentenseCompareTreshold) {
+						return;
+					}
+				}
+				if(result.cost>Config.sentenseCompareTreshold) {
+					result.set(secondResult);
+					return;
+				}
+				if(secondResult.getCombinedCost()<result.getCombinedCost()) {
+					result.set(secondResult);
+				}
 			}
 			
 		}
