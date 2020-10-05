@@ -13,6 +13,7 @@ public class Pair<K,V> {
 	 * @param singleEntry if true assign first into {@link #second}.
 	 * @throws ClassCastException if K and V types do not match.
 	 */
+	@SuppressWarnings("unchecked")
 	public Pair(K first, boolean singleEntry) {
 		this.first=first;
 		if(singleEntry)
@@ -24,5 +25,10 @@ public class Pair<K,V> {
 	public Pair(K first, V second) {
 		this.first=first;
 		this.second=second;
+	}
+
+	@Override
+	public String toString() {
+		return "Pair: "+first+":"+second;
 	}
 }
