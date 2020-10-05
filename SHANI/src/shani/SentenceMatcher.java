@@ -1,13 +1,22 @@
 package shani;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import liblaries.DOMWalker;
 import liblaries.Pair;
 import shani.SentenceMatcher.Tokenizer.SentenceToken;
 import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
@@ -130,7 +139,7 @@ public class SentenceMatcher {
 	 * @param results Set of result to choose from.
 	 * @return {@link SentenceResult} which is most accurate from ones in the set. 
 	 */
-	public SentenceResult getBestMatch(SentenceResult[] results) {
+	public static SentenceResult getBestMatch(SentenceResult[] results) {
 		SentenceResult ret=null;
 		short minCost=Short.MAX_VALUE;
 		
@@ -294,7 +303,7 @@ public class SentenceMatcher {
 			return tokens;
 		}
 	}
-	protected class Sentence{
+	protected static class Sentence{
 		private SentenceElement root;
 		private String sentenceName;
 		
@@ -307,7 +316,7 @@ public class SentenceMatcher {
 		 * @param tokens Tokens inside processed group.
 		 * @return Pair containing entry to created Elements graph as {@link Pair#first}, and last, exiting element as {@link Pair#second}.
 		 */
-		protected Pair<SentenceElement,SentenceElement> decodeGroup(HashMap<String,String> parts,List<SentenceToken> tokens) {
+		protected static Pair<SentenceElement,SentenceElement> decodeGroup(HashMap<String,String> parts,List<SentenceToken> tokens) {
 			SentenceElement ret=null;
 			
 			Pair<SentenceElement,SentenceElement> element=null;
@@ -333,7 +342,7 @@ public class SentenceMatcher {
 		 * @param token Token representing element to create.
 		 * @return Pair containing entry to created Elements graph as {@link Pair#first}, and last, exiting element as {@link Pair#second}.
 		 */
-		protected Pair<SentenceElement,SentenceElement> createElement(HashMap<String,String> parts, SentenceToken token) {
+		protected static Pair<SentenceElement,SentenceElement> createElement(HashMap<String,String> parts, SentenceToken token) {
 			switch (token.type) {
 			case ShaniString:
 				return new Pair<>(new ShaniStringElement(parts, token),true);
@@ -347,6 +356,8 @@ public class SentenceMatcher {
 				return decodeGroup(parts,token.subTokens);
 			case Or:
 				return new Pair<>(new OrElement(parts, token),true);
+			case AnyOrderGroup:
+				return new Pair<>(new AnyOrderGroup(parts, token),true);
 			default:
 				assert false:"Unknow token type encountered";
 			}
@@ -375,7 +386,7 @@ public class SentenceMatcher {
 			return minIndex!=-1?Return[minIndex]:null;
 		}
 		
-		protected abstract class SentenceElement{
+		protected static abstract class SentenceElement{
 			protected SentenceElement nextElement;
 			
 			protected void linkElement(SentenceElement nextElement) {
@@ -397,8 +408,14 @@ public class SentenceMatcher {
 						result.cost+=Config.wordInsertionCost*(str.length-strIndex);
 				}
 			}
+			
+			protected void getInsertionCost(SentenceResult result) {
+				result.cost+=Config.wordInsertionCost;
+				if(nextElement!=null)
+					nextElement.getInsertionCost(result);
+			}
 		}
-		protected class OptionalElement extends SentenceElement{
+		protected static class OptionalElement extends SentenceElement{
 			private SentenceElement optionalElement;
 			private SentenceElement lastOptionalElement;					//Last element being optional, used to link it to the following element
 			
@@ -425,12 +442,17 @@ public class SentenceMatcher {
 				
 				optionalElement.process(result, str, strIndex);
 				
-				if(skippedresult.getCombinedCost()<=result.getCombinedCost()) {
-					result.set(skippedresult);
-				}
+				result.setIfBetter(skippedresult);
+			}
+			
+			@Override
+			protected void getInsertionCost(SentenceResult result) {
+				//result.cost+=0;
+				if(lastOptionalElement.nextElement!=null)
+					lastOptionalElement.getInsertionCost(result);
 			}
 		}
-		protected class DataReturnElement extends SentenceElement{
+		protected static class DataReturnElement extends SentenceElement{
 			private String returnKey;
 			
 			protected DataReturnElement(HashMap<String,String> parts,SentenceToken data) {
@@ -477,17 +499,34 @@ public class SentenceMatcher {
 			}
 			
 			@Override
+			protected void getInsertionCost(SentenceResult result) {
+				result.cost+=Config.sentenseCompareTreshold;
+			}
+			
+			@Override
 			public String toString() {
 				return "DataReturn:"+returnKey;
 			}
 		}
-		protected class ShaniStringElement extends SentenceElement{
+		protected static class ShaniStringElement extends SentenceElement{
 			private ShaniString[][] value;
-
+			private short insertionCost;
+			
 			protected ShaniStringElement(HashMap<String,String> parts,SentenceToken data) {
 				String str=parts.get(data.content);
-				if(str==null) throw new ParseException("Failed to parse: can't find \""+data+"\" in parts.");
+				if(str==null) throw new ParseException("Failed to parse: can't find \""+data.content+"\" in parts.");
 				value=new ShaniString(str).split();
+				
+				insertionCost=Short.MAX_VALUE;
+				for(var sstr:value) {
+					if(sstr.length<insertionCost)
+						insertionCost=(short)sstr.length;
+				}
+				
+				if(insertionCost==Short.MAX_VALUE) {
+					insertionCost=0;
+				} else
+					insertionCost*=Config.wordInsertionCost;
 			}
 			
 			@Override
@@ -497,8 +536,9 @@ public class SentenceMatcher {
 				for(int i=0;i<value.length;i++) {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
 					if(ret.cost<Config.wordCompareTreshold) {
-						processNext((sr[i]=result.makeCopy()),str,ret.endIndex);						//TODO not check same sentenceIndex and String index multiple times. Store it somewhere.
+						sr[i]=result.makeCopy();
 						sr[i].cost+=ret.cost;
+						processNext(sr[i],str,ret.endIndex);						//TODO do not check same sentenceIndex and String index multiple times. Store it somewhere.
 					}
 				}
 				
@@ -521,8 +561,14 @@ public class SentenceMatcher {
 					return;
 				}
 				
-				
 				result.set(sr[minIndex]);
+			}
+			
+			@Override
+			protected void getInsertionCost(SentenceResult result) {
+				result.cost+=insertionCost;
+				if(nextElement!=null)
+					nextElement.getInsertionCost(result);
 			}
 			
 			@Override
@@ -544,7 +590,7 @@ public class SentenceMatcher {
 				return ret.toString();
 			}
 		}
-		protected class RegexElement extends SentenceElement{
+		protected static class RegexElement extends SentenceElement{
 			private Pattern pattern;
 			private String returnKey;
 			
@@ -563,6 +609,7 @@ public class SentenceMatcher {
 				for(tempStrIndex=strIndex;tempStrIndex<str.length;tempStrIndex++) {
 					if(str[tempStrIndex].isEquals(pattern)) {
 						result.cost+=deleteCost;
+						result.importanceBias+=Config.sentenceMatcherRegexImportanceBias;
 						result.data.put(returnKey, str[tempStrIndex].toString());
 						processNext(result, str, tempStrIndex+1);
 						return;
@@ -582,8 +629,7 @@ public class SentenceMatcher {
 				return "Regex:"+returnKey+":"+pattern.pattern();
 			}
 		}
-		
-		protected class OrElement extends SentenceElement{
+		protected static class OrElement extends SentenceElement{
 			private SentenceElement firstChoice;
 			private SentenceElement firstChoiceEnd;
 			
@@ -618,23 +664,19 @@ public class SentenceMatcher {
 				
 				firstChoice.process(result, str, strIndex);
 				
-				if(secondResult.cost>Config.sentenseCompareTreshold) {
-					if(result.cost<Config.sentenseCompareTreshold) {
-						return;
-					}
-				}
-				if(result.cost>Config.sentenseCompareTreshold) {
-					result.set(secondResult);
-					return;
-				}
-				if(secondResult.getCombinedCost()<result.getCombinedCost()) {
-					result.set(secondResult);
-				}
+				result.setIfBetter(secondResult);
 			}
 			
+			@Override
+			protected void getInsertionCost(SentenceResult result) {
+				var secondResult=result.makeCopy();
+				secondChoice.getInsertionCost(secondResult);
+				
+				firstChoice.getInsertionCost(result);
+				
+				result.setIfBetter(secondResult);
+			}
 		}
-		/*Finite state machine used to determine which element process next.*/
-		protected class AnyOrderGroup extends SentenceElement{
 			private SentenceElement[] optionalElements;
 			private SentenceElement[] optionalElementsEnd;
 			
@@ -706,6 +748,20 @@ public class SentenceMatcher {
 			data.clear();
 			data.putAll(sr.data);
 		}
+		protected void setIfBetter(SentenceResult sr) {
+			if(sr.cost>=Config.sentenseCompareTreshold) {
+				if(cost<Config.sentenseCompareTreshold) {
+					return;
+				}
+			} else if(cost>=Config.sentenseCompareTreshold) {
+				set(sr);
+				return;
+			}
+			if(sr.getCombinedCost()<getCombinedCost()) {
+				set(sr);
+			}
+		}
+		
 		protected void add(SentenceResult sr) {
 			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
 			this.cost+=sr.cost;
@@ -741,14 +797,13 @@ public class SentenceMatcher {
 			return "SentenceResult: "+name+':'+cost+':'+importanceBias+" "+data;
 		}
 	}
-	protected class ParseException extends RuntimeException{
+	protected static class ParseException extends RuntimeException{
 		private static final long serialVersionUID = -7564692708180202338L;
 
 		ParseException(String message){
 			super(message);
 		}
 	}
-	
 	
 	public static void printTokens(List<SentenceToken> tokens, int depth) {
 		String depthMarker="";
