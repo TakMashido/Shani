@@ -3,7 +3,6 @@ package shani;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -37,6 +36,7 @@ import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
  * * means optional match. Matching is with and without that element and better match is chosen.  
  * | is or element. Uses it's neighbor elements and chooses which one use during matching.
  * You can also group elements with (). Optional match character * apply to whole group.
+ * [] is AnyOrder group. Elements inside it can be applied in any order by matcher.
  * 
  * Subnodes with other names are used to provide additional data for sentence elements.
  * E.g. element "$foo" will compare input value with ShaniString stored under "foo" subnode. This also apply for regex matching.
@@ -144,7 +144,7 @@ public class SentenceMatcher {
 		short minCost=Short.MAX_VALUE;
 		
 		for(var res:results) {
-			if(res.cost<Config.sentenseCompareTreshold) {
+			if(res!=null&&res.cost<Config.sentenseCompareTreshold) {
 				short tmpCost=res.getCombinedCost();
 				if(tmpCost<minCost) {
 					minCost=tmpCost;
@@ -155,6 +155,27 @@ public class SentenceMatcher {
 		
 		return ret;
 	}
+	/**Get best {@link SentenceResult} from given set, taking into account comparison cost and importance bias.
+	 * @param results Set of result to choose from.
+	 * @return {@link SentenceResult} which is most accurate from ones in the set. 
+	 */
+	public static SentenceResult getBestMatch(List<SentenceResult> results) {
+		SentenceResult ret=null;
+		short minCost=Short.MAX_VALUE;
+		
+		for(var res:results) {
+			if(res!=null&&res.cost<Config.sentenseCompareTreshold) {
+				short tmpCost=res.getCombinedCost();
+				if(tmpCost<minCost) {
+					minCost=tmpCost;
+					ret=res;
+				}
+			}
+		}
+		
+		return ret;
+	}
+	
 	
 	/**Tokenizer for parsing sentence templates.
 	 * Not thread save, can parse only one at time.*/
@@ -389,6 +410,7 @@ public class SentenceMatcher {
 		protected static abstract class SentenceElement{
 			protected SentenceElement nextElement;
 			
+			@SuppressWarnings("hiding")
 			protected void linkElement(SentenceElement nextElement) {
 				this.nextElement=nextElement;
 			}
@@ -401,11 +423,11 @@ public class SentenceMatcher {
 					if(strIndex<str.length) {
 						nextElement.process(result, str, strIndex);
 					} else {
-						result.cost+=Config.wordDeletionCost*(strIndex-str.length+1);
+						nextElement.getInsertionCost(result);
 					}
 				} else {
 					if(strIndex<str.length)
-						result.cost+=Config.wordInsertionCost*(str.length-strIndex);
+						result.cost+=Config.wordDeletionCost*(str.length-strIndex);
 				}
 			}
 			
@@ -427,6 +449,7 @@ public class SentenceMatcher {
 				lastOptionalElement=elems.second;
 			}
 			
+			@SuppressWarnings("hiding")
 			@Override
 			protected void linkElement(SentenceElement nextElement) {
 				super.linkElement(nextElement);
@@ -646,6 +669,7 @@ public class SentenceMatcher {
 				secondChoiceEnd=pair.second;
 			}
 			
+			@SuppressWarnings("hiding")
 			@Override
 			protected void linkElement(SentenceElement nextElement) {
 				firstChoiceEnd.linkElement(nextElement);
@@ -677,37 +701,93 @@ public class SentenceMatcher {
 				result.setIfBetter(secondResult);
 			}
 		}
+		protected static class AnyOrderGroup extends SentenceElement{
 			private SentenceElement[] optionalElements;
-			private SentenceElement[] optionalElementsEnd;
 			
-			private int actualIndex=0;
-			private int[] indexes;
+			private boolean[] usedElements;
+			private int treeLevel=0;								//Amount of currently used elements/how deep in processing tree process is
+			
+//			private ArrayList<SentenceResult> endResults=new ArrayList<SentenceMatcher.SentenceResult>();
 			
 			protected AnyOrderGroup(HashMap<String,String> parts, SentenceToken token) {
-				indexes=new int[token.subTokens.size()];
-				
 				optionalElements=new SentenceElement[token.subTokens.size()];
-				optionalElementsEnd=new SentenceElement[optionalElements.length];
 				
 				for(int i=0;i<optionalElements.length;i++) {
 					var dat=createElement(parts, token.subTokens.get(i));
 					
 					optionalElements[i]=dat.first;
-					optionalElementsEnd[i]=dat.second;
+					dat.second.linkElement(this);
 				}
-			}
-			
-			@Override
-			protected void linkElement(SentenceElement nextElement) {
-				if(indexes[actualIndex]<optionalElements.length-1) {
-					
-				}
+				
+				usedElements=new boolean[optionalElements.length];
 			}
 			
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
+				if(result.cost>Config.sentenseCompareTreshold)
+					return;
 				
+				if(treeLevel<optionalElements.length) {
+					SentenceResult[] sr=new SentenceResult[optionalElements.length];
+					SentenceResult[] srInsertion=null;
+					if(Config.wordInsertionCost<Config.sentenseCompareTreshold)
+						srInsertion=new SentenceResult[optionalElements.length];
+					
+					for(int i=0;i<optionalElements.length;i++) {
+						if(!usedElements[i]) {
+							usedElements[i]=true;
+							treeLevel++;					//FIXME move outside for loop after debug ended 
+							
+							if(Config.wordInsertionCost<Config.sentenseCompareTreshold) {
+								srInsertion[i]=result.makeCopy();
+								srInsertion[i].cost+=Config.wordInsertionCost;
+								process(srInsertion[i], str, strIndex);
+							}
+							optionalElements[i].process((sr[i]=result.makeCopy()), str, strIndex);
+							
+							treeLevel--;
+							usedElements[i]=false;
+						}
+					}
+					
+					SentenceResult best=getBestMatch(sr);
+					if(Config.wordInsertionCost<Config.sentenseCompareTreshold) {
+						SentenceResult best2=getBestMatch(srInsertion);
+						if(best2!=null&&best2.cost<Config.sentenseCompareTreshold&&best2.getCombinedCost()<best.getCombinedCost())
+							best=best2;
+					}
+					
+					if(best!=null)
+						result.set(best);
+					else
+						getInsertionCost(result);
+				} else {
+					processNext(result, str, strIndex);
+				}
+			}
+			
+			private boolean insertionInProgress=false;				//Guard to invoke insertion cost calculating only once
+			@Override
+			protected void getInsertionCost(SentenceResult result) {
+				if(treeLevel!=optionalElements.length) {
+					if(insertionInProgress)
+						return;
+					insertionInProgress=true;
+					try {
+						for(int i=0;i<usedElements.length;i++) {
+							if(!usedElements[i]) {
+								optionalElements[i].getInsertionCost(result);
+								if(result.getCost()>Config.sentenseCompareTreshold) {
+									return;
+								}
+							}
+						}
+					} finally {
+						insertionInProgress=false;
+					}
+				}
 				
+				if(nextElement!=null)
 			}
 		}
 	}
@@ -818,5 +898,13 @@ public class SentenceMatcher {
 			if(token.subTokens!=null)
 				printTokens(token.subTokens, depth+1);
 		}
+	}
+		
+//		var reses=matcher.process("witam pana gneera�a pu�kownika");
+		var reses=matcher.process("must mork hog");
+		System.out.println("\nfinal resoults:");
+		for(var res:reses)
+			System.out.println(res);
+		System.out.println("End");
 	}
 }

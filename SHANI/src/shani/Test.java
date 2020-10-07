@@ -74,20 +74,49 @@ public class Test {
 		
 		var matcher=new SentenceMatcher(DOMWalker.walk(doc, "tests/sentenceMatcher/test"));
 		
-		String[] data=new String[] {"just data log","must work hog","temporayr sentence","hog sentente"};
-		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.diffrendCharacterCost};
+		String[] data=new String[] {
+				"just data log",
+				"must work hog",
+				"temporayr sentence",
+				"hog sentente",
+				"witam pana genera³a pu³kownika",
+				"must kolege piotra rybê hello world"};
+		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.diffrendCharacterCost,0,(short)(Config.nationalSimilarityCost)};
 		short[] importanceBias=new short[] {
 				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
 				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
 				0,
-				Config.sentenceMatcherRegexImportanceBias};
-		String[] name=new String[] {"1","1","or","or"};
+				Config.sentenceMatcherRegexImportanceBias,
+				Config.sentenceMatcherWordReturnImportanceBias,
+				(short) (2*Config.sentenceMatcherWordReturnImportanceBias+Config.sentenceMatcherRegexImportanceBias),
+				};
+		String[] name=new String[] {"1","1","or","or","anyOrder","anyOrder"};
 		String[][][] dataReturn=new String[][][] {
 			{{"regex","just"},{"data","data"},{"regex2","log"}},
 			{{"regex","must"},{"data","work"},{"regex2","hog"}},
 			{},
-			{{"regex2","hog"}}
+			{{"regex2","hog"}},
+			{{"data","pu³kownika"}},
+			{{"regex","must"},{"data","piotra rybê"}}
 		};
+		
+		int length=data.length;
+		if(cost.length!=length) {
+			System.out.println("Corrupted test, wrong amount of costs provided.");
+			return -1;
+		}
+		if(importanceBias.length!=length) {
+			System.out.println("Corrupted test, wrong amount of importanceBias'es provided.");
+			return -1;
+		}
+		if(name.length!=length) {
+			System.out.println("Corrupted test, wrong amount of names provided.");
+			return -1;
+		}
+		if(dataReturn.length!=length) {
+			System.out.println("Corrupted test, wrong amount of dataReturn's provided.");
+			return -1;
+		}
 		
 		@SuppressWarnings("unchecked")
 		HashMap<String,String>[] dataReturnMap=new HashMap[dataReturn.length];
@@ -99,12 +128,21 @@ public class Test {
 		}
 		
 		for(int i=0;i<data.length;i++) {
-			var result=matcher.processBest(data[i]);
+			System.out.println();
+			var results=matcher.process(data[i]);
+			for(var res:results) System.out.println(res);
+			
+			var result=SentenceMatcher.getBestMatch(results);
+			if(result==null) {
+				System.out.printf("\"%s\": match not found.\t%s%n", data[i], notPassed);
+				errors++;
+				continue;
+			}
 			
 			boolean good=result.cost==cost[i]&&result.importanceBias==importanceBias[i]&&result.name.contentEquals(name[i])&&result.data.equals(dataReturnMap[i]);
 			if(!good)errors++;
 			
-			System.out.printf("%s:\t\"%s\":%d:%d:%s\t%s%n", data[i], result.name, result.cost, result.importanceBias, result.data, good?passed:notPassed);
+			System.out.printf("\"%s\":\t\"%s\":%d:%d:%s\t%s%n", data[i], result.name, result.cost, result.importanceBias, result.data, good?passed:notPassed);
 			System.out.printf("tests: %s %s %s %s%n",result.name.contentEquals(name[i]),result.cost==cost[i],result.importanceBias==importanceBias[i],result.data.equals(dataReturnMap[i]));
 		}
 		
