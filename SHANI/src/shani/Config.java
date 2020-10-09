@@ -13,6 +13,9 @@ import java.util.Scanner;
 public class Config {
 	private Config() {}
 	
+	private static boolean ignoreMissingPropertyErrors=false;
+	private static final ArrayList<String> errors=new ArrayList<>();
+	
 	static {
 		var prop=new Properties();
 		try {
@@ -53,56 +56,76 @@ public class Config {
 		
 		mainFile=new File(prop.getProperty("mainFile","Shani.dat"));									//If failed to load properties from file dedfault onw will be used
 		
-		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey","failed to load positiveResponeKey"));
-		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey","failed to load negaticeResponeKey"));
+		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey"));
+		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey"));
 		
-		diffrendCharacterCost=(byte)getIntProperty(props,"diffrendCharacterCost","50");
-		qwertyNeighbourCost=(byte)getIntProperty(props,"qwertyNeighbourCost","30");
-		nationalSimilarityCost=(byte)getIntProperty(props,"nationalSimilarityCost","10");
+		diffrendCharacterCost=(byte)getIntProperty(props,"diffrendCharacterCost");
+		qwertyNeighbourCost=(byte)getIntProperty(props,"qwertyNeighbourCost");
+		nationalSimilarityCost=(byte)getIntProperty(props,"nationalSimilarityCost");
 		
-		wordCompareTreshold=(short)getIntProperty(props,"wordCompareTreshold","100");
-		characterCompareCostMultiplier=new Multiplier(getProperty(props,"characterCompareCostMultiplier","10,5,2,1.2f,1"));
-		characterDeletionCost=(short)getIntProperty(props,"characterDeletionCost","50");
-		characterInsertionCost=(short)getIntProperty(props,"characterInsertionCost","50");
-		characterSwapTreshold=(short)getIntProperty(props,"characterSwapTreshold","50");
-		characterSwapCost=(short)getIntProperty(props,"characterSwapCost","30");
+		wordCompareTreshold=(short)getIntProperty(props,"wordCompareTreshold");
+		characterCompareCostMultiplier=new Multiplier(getProperty(props,"characterCompareCostMultiplier"));
+		characterDeletionCost=(short)getIntProperty(props,"characterDeletionCost");
+		characterInsertionCost=(short)getIntProperty(props,"characterInsertionCost");
+		characterSwapTreshold=(short)getIntProperty(props,"characterSwapTreshold");
+		characterSwapCost=(short)getIntProperty(props,"characterSwapCost");
 		
-		sentenseCompareTreshold=(short)getIntProperty(props,"sentenseCompareTreshold","300");
-		wordInsertionCost=(short)getIntProperty(props,"wordInsertionCost","300");
-		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost","120");
+		sentenseCompareTreshold=(short)getIntProperty(props,"sentenseCompareTreshold");
+		wordInsertionCost=(short)getIntProperty(props,"wordInsertionCost");
+		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost");
 		
-		sentenceMatcherWordReturnImportanceBias=(short)getIntProperty(props, "sentenceMatcherWordReturnImportanceBias", "-5");
-		sentenceMatcherRegexImportanceBias=(short)getIntProperty(props, "sentenceMatcherRegexImportanceBias", "5");
+		sentenceMatcherWordReturnImportanceBias=(short)getIntProperty(props, "sentenceMatcherWordReturnImportanceBias");
+		sentenceMatcherRegexImportanceBias=(short)getIntProperty(props, "sentenceMatcherRegexImportanceBias");
 		
-		importanceBiasMultiplier=getFloatProperty(props,"importanceBiasMultiplier",".5");
+		importanceBiasMultiplier=getFloatProperty(props,"importanceBiasMultiplier");
 		
-		socksProxyHost=getProperty(props,"socksProxyHost",null);
-		socksProxyPort=getIntProperty(props,"socksProxyPort","0");
+		ignoreMissingPropertyErrors=true;
+		socksProxyHost=getProperty(props,"socksProxyHost");
+		socksProxyPort=getIntProperty(props,"socksProxyPort");
 		
-		HTTPProxyHost=getProperty(props,"HTTPProxyHost",null);
-		HTTPProxyPort=getIntProperty(props,"HTTPProxyPort","0");
+		HTTPProxyHost=getProperty(props,"HTTPProxyHost");
+		HTTPProxyPort=getIntProperty(props,"HTTPProxyPort");
+		ignoreMissingPropertyErrors=false;
+		
+		if(!errors.isEmpty()) {
+			Engine.registerLoadException();
+			System.err.println("Config file is corrupted:");
+			for(String str:errors) {
+				System.err.println("\t"+str);
+			}
+		}
 	}
-	private static final String getProperty(Properties props[], String key, String defaultVal) {
+	private static final String getProperty(Properties props[], String key) {
 		for(int i=0;i<props.length;i++) {
 			String val=props[i].getProperty(key);
 			if(val!=null)return val;
 		}
 		
-		return defaultVal;
+		if(!ignoreMissingPropertyErrors)
+			errors.add("Can't find property \""+key+"\" in config files.");
+		
+		return null;
 	}
-	private static final int getIntProperty(Properties props[],String key,String defaultVal) {
+	
+	private static final int getIntProperty(Properties props[],String key) {
+		String str=getProperty(props, key);
+		if(str==null)return 0;
 		try {
-			return Integer.parseInt(getProperty(props, key, defaultVal));
-		} catch(NumberFormatException ex) {
-			return Integer.parseInt(defaultVal);
+			return Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			errors.add('"'+str+"\" in property \""+key+"\" is not valid integer.");
 		}
+		return 0;
 	}
-	private static final float getFloatProperty(Properties props[],String key,String defaultVal) {
+	private static final float getFloatProperty(Properties props[],String key) {
+		String str=getProperty(props, key);
+		if(str==null)return 0;
 		try {
-			return Float.parseFloat(getProperty(props, key, defaultVal));
-		} catch(NumberFormatException ex) {
-			return Float.parseFloat(defaultVal);
+			return Float.parseFloat(str);
+		} catch (NumberFormatException e) {
+			errors.add('"'+str+"\" in property \""+key+"\" is not valid float.");
 		}
+		return 0;
 	}
 	
 	/*Files location*/
