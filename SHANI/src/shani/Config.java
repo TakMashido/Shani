@@ -119,35 +119,37 @@ public class Config {
 				prop.load(stream);
 				ret.add(prop);
 				
-				String configDir=prop.getProperty("configLocation");
+				String configDirs=prop.getProperty("configLocation");
 				
-				if(configDir!=null) {
-					File file=new File(configDir);
-					
-					if(file.isDirectory()||configDir.endsWith("/")) {
-						if(!file.exists()) {
-							if(!file.mkdirs()) {
-								Engine.registerLoadException();
-								System.err.println("Failed to create config directory: "+file);
-							}
-							continue;
-						}
+				if(configDirs!=null) {
+					for(String configDir:configDirs.split("\\*")) {
+						File file=new File(configDir);
 						
-						String[] files=file.list();
-						Arrays.sort(files);
-						
-						for(String str:files) {
-							toProcess.add(new File(str).toURI().toURL());
-						}
-					} else {
-						if(!file.exists()) {
-							if(!(file.getParentFile().mkdir()&&file.createNewFile())) {
-								Engine.registerLoadException();
-								System.err.println("Failed to create config file: "+file);
+						if(file.isDirectory()||configDir.endsWith("/")) {
+							if(!file.exists()) {
+								if(!file.mkdirs()) {
+									Engine.registerLoadException();
+									System.err.println("Failed to create config directory: "+file);
+								}
+								continue;
 							}
-							continue;
+							
+							String[] files=file.list();
+							Arrays.sort(files);
+							
+							for(String str:files) {
+								toProcess.add(new File(str).toURI().toURL());
+							}
+						} else {
+							if(!file.exists()) {
+								if(!(file.getParentFile().mkdir()&&file.createNewFile())) {
+									Engine.registerLoadException();
+									System.err.println("Failed to create config file: "+file);
+								}
+								continue;
+							}
+							toProcess.add(file.toURI().toURL());
 						}
-						toProcess.add(file.toURI().toURL());
 					}
 				}
 			}
