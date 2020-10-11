@@ -1,10 +1,14 @@
 package shani;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Scanner;
 
 /**Set of constants for SHANI API.
@@ -17,44 +21,17 @@ public class Config {
 	private static final ArrayList<String> errors=new ArrayList<>();
 	
 	static {
-		var prop=new Properties();
+		Properties[] props=null;
+		
 		try {
-			prop.load(Config.class.getResourceAsStream("/files/config.properties"));
-		} catch (IOException e) {
-			System.err.println("Can't find properties file. Initializing with default values.");
-			System.out.println("Config file not found.");
-			e.printStackTrace();
+			props=getProperties(Config.class.getResource("/files/config.properties"));
+		} catch(IOException ex) {
+			System.out.println("Error during parsing configuration files.");
+			ex.printStackTrace();
+			System.exit(-1);
 		}
 		
-		String config2Name=prop.getProperty("secondConfig");
-		File config2;
-		if(config2Name!=null) {
-			File preConfig=new File(prop.getProperty("secondConfig"));
-			if(preConfig.exists())
-				config2=new File(prop.getProperty("secondConfig"));
-			else config2=null;
-		} else config2=null;
-		
-		secondConfig=config2;
-		
-		Properties prop2=null;
-		try {
-			if(config2!=null) {
-				prop2=new Properties();
-				prop2.load(new FileInputStream(config2));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		Properties[] props;
-		if(prop2!=null) {
-			props=new Properties[] {prop2,prop};
-		} else {
-			props=new Properties[] {prop};
-		}
-		
-		mainFile=new File(prop.getProperty("mainFile","Shani.dat"));									//If failed to load properties from file dedfault onw will be used
+		mainFile=new File(getProperty(props,"mainFile"));
 		
 		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey"));
 		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey"));
@@ -128,9 +105,57 @@ public class Config {
 		return 0;
 	}
 	
-	/*Files location*/
-	@SuppressWarnings("unused")
-	private static final File secondConfig;
+	private static final Properties[] getProperties(URL resource) throws IOException {
+		ArrayList<Properties> ret=new ArrayList<>();
+		
+		Queue<URL> toProcess=new LinkedList<>();
+		toProcess.add(resource);
+		
+		while(!toProcess.isEmpty()) {
+			URL source=toProcess.poll();
+			
+			try(InputStream stream=source.openStream()){
+				Properties prop=new Properties();
+				prop.load(stream);
+				ret.add(prop);
+				
+				String configDir=prop.getProperty("configLocation");
+				
+				if(configDir!=null) {
+					File file=new File(configDir);
+					
+					if(file.isDirectory()||configDir.endsWith("/")) {
+						if(!file.exists()) {
+							if(!file.mkdirs()) {
+								Engine.registerLoadException();
+								System.err.println("Failed to create config directory: "+file);
+							}
+							continue;
+						}
+						
+						String[] files=file.list();
+						Arrays.sort(files);
+						
+						for(String str:files) {
+							toProcess.add(new File(str).toURI().toURL());
+						}
+					} else {
+						if(!file.exists()) {
+							if(!(file.getParentFile().mkdir()&&file.createNewFile())) {
+								Engine.registerLoadException();
+								System.err.println("Failed to create config file: "+file);
+							}
+							continue;
+						}
+						toProcess.add(file.toURI().toURL());
+					}
+				}
+			}
+		}
+		
+		return ret.toArray(new Properties[ret.size()]);
+	}
+	
 	public static final File mainFile;
 	
 	/*Basic responses*/												//TODO move to main file
@@ -190,7 +215,8 @@ public class Config {
 		
 		public short multiple(short value, int length) {
 			assert length>0;
-			if(--length<multipliers.length)return (short)(value*multipliers[length]);
+			int l=length;
+			if(--l<multipliers.length)return (short)(value*multipliers[l]);
 			else return (short)(value*multipliers[multipliers.length-1]);
 		}
 	}
