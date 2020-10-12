@@ -31,7 +31,11 @@ public class Config {
 			System.exit(-1);
 		}
 		
-		mainFile=new File(getProperty(props,"mainFile"));
+		mainFile=getFileProperty(props,"mainFile");
+		
+		errorsLogFileLocation=getFileProperty(props, "errorsLogFileLocation");
+		debugLogFileLocation=getFileProperty(props, "debugLogFileLocation");
+		commandsLogFileLocation=getFileProperty(props, "commandsLogFileLocation");
 		
 		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey"));
 		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey"));
@@ -84,6 +88,19 @@ public class Config {
 		return null;
 	}
 	
+	private static final File getFileProperty(Properties props[], String key) {
+		String source=getProperty(props, key);
+		if(source==null)
+			return null;			//Error already handled in getProperty(...) and end of static initializer block
+		
+		File ret = new File(source);
+		File parent=ret.getParentFile();
+		if(parent!=null&&!parent.exists()) {
+			parent.mkdirs();
+		}
+		
+		return ret;
+	}
 	private static final int getIntProperty(Properties props[],String key) {
 		String str=getProperty(props, key);
 		if(str==null)return 0;
@@ -159,6 +176,11 @@ public class Config {
 	}
 	
 	public static final File mainFile;
+	
+	/*Log files location*/
+	public static final File errorsLogFileLocation;
+	public static final File debugLogFileLocation;
+	public static final File commandsLogFileLocation;
 	
 	/*Basic responses*/												//TODO move to main file
 	public static final ShaniString positiveResponeKey;

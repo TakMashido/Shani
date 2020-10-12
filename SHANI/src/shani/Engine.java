@@ -98,13 +98,13 @@ public class Engine {
 			commands=System.out;
 		} else {
 			try {
-				System.setErr(new PrintStream(new FileOutputStream("Errors.log",true)));
+				System.setErr(new PrintStream(new FileOutputStream(Config.errorsLogFileLocation,true)));
 			} catch (FileNotFoundException e1) {
 				System.out.println("Failed to set err file");
 				e1.printStackTrace();
 			}
 			try {
-				debug=new PrintStream(new BufferedOutputStream(new FileOutputStream("Debug.log"),1024));
+				debug=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.debugLogFileLocation),1024));
 			} catch (FileNotFoundException e1) {
 				System.out.println("Failed to set debug file");
 				e1.printStackTrace();
@@ -193,7 +193,7 @@ public class Engine {
 		
 		if(commands==null) {
 			try {
-				commands=new PrintStream(new BufferedOutputStream(new FileOutputStream("Commands.log",true)));
+				commands=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.commandsLogFileLocation,true)));
 			} catch (FileNotFoundException e) {
 				System.out.println("Failed to set commands file");
 				e.printStackTrace();
