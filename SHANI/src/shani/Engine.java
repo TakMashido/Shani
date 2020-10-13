@@ -42,6 +42,8 @@ import shani.tools.MainFileTools;
 
 public class Engine {
 	public static PrintStream debug;
+	/**Use {@link #debug instead}*/
+	@Deprecated
 	public static PrintStream info;
 	private static PrintStream commands;
 	
@@ -146,11 +148,20 @@ public class Engine {
 		}
 		
 		try {
-			new File("info.txt").delete();
+			new File("info.log").delete();
 			info=new PrintStream(new BufferedOutputStream(new FileOutputStream("Info.log"),1024));
 		} catch (FileNotFoundException e1) {
 			System.out.println("Failed to set info file");
 			e1.printStackTrace();
+		}
+		
+		if(commands==null) {
+			try {
+				commands=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.commandsLogFileLocation,true)));
+			} catch (FileNotFoundException e) {
+				System.out.println("Failed to set commands file");
+				e.printStackTrace();
+			}
 		}
 		
 		if(Config.socksProxyHost!=null) {											//Set up before initializing orders
@@ -162,6 +173,7 @@ public class Engine {
 			System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
 		}
 		
+		commands.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<startup>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");				//Make startup place visible inside commands file
 		if (Config.mainFile.exists()) {
 			try {
 				parseMainFile();
@@ -191,15 +203,6 @@ public class Engine {
 			}
 		}
 		
-		if(commands==null) {
-			try {
-				commands=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.commandsLogFileLocation,true)));
-			} catch (FileNotFoundException e) {
-				System.out.println("Failed to set commands file");
-				e.printStackTrace();
-			}
-		}
-		
 		if(LOADING_ERROR) {
 			ShaniString loadingErrorMessage=ShaniString.loadString("engine.loadingErrorMessage");
 			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
@@ -212,7 +215,9 @@ public class Engine {
 			}
 		});
 		
-		commands.println("Startup time: "+(System.currentTimeMillis()-time)+"ms");
+		commands.println("\nStartup time: "+(System.currentTimeMillis()-time)+"ms");
+		
+		commands.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<go>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 	}
 	/**Runs Shani on current thread */
 	public static void start() {
@@ -223,6 +228,7 @@ public class Engine {
 		System.out.println(helloMessage);
 		while (in.hasNextLine()) {
 			String str=in.nextLine().trim().toLowerCase();
+			
 			if(str.length()==0)continue;
 			long time=System.nanoTime();
 			ShaniString command=new ShaniString(str,false);
@@ -230,10 +236,12 @@ public class Engine {
 			
 			if (exec==null) {
 				System.out.println(notUnderstandMessage);
-				commands.print('!');
-			} else if(exec.isSuccesful()) lastExecuted=exec;
-			commands.print(str);
-			commands.println(" -> "+(System.nanoTime()-time)/1000/1000f+" ms");
+				commands.println("Can't execute");
+			} else {
+				commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms");
+				
+				if(exec.isSuccesful()) lastExecuted=exec;
+			}
 		}
 	}
 	
@@ -267,6 +275,8 @@ public class Engine {
 		licenseConfirmationMessage=ShaniString.loadString("engine.licenseConfirmationMessage");
 		licensesNotConfirmedMessage=ShaniString.loadString("engine.licensesNotConfirmedMessage");
 		
+		long bigTime=System.nanoTime();
+		commands.println();
 		NodeList ordersNode = ((Element)doc.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
 		for (int i = 0; i < ordersNode.getLength(); i++) {
 			Node node = ordersNode.item(i);
@@ -280,18 +290,21 @@ public class Engine {
 						System.err.println("Classname of an order is not specyfied.");
 						continue;
 					}
-					info.printf("Loading \"%s\" order%n",className);
+					long time=System.nanoTime();
 					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
-					info.println("Order loaded");
+					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 					order.init(e);
 					orders.add(order);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-					System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
+					Engine.registerLoadException();
+					System.err.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
 					ex.printStackTrace();
 				}
 			}
 		}
+		commands.printf("Orders loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 		
+		bigTime=System.nanoTime();
 		NodeList moduleNodes=((Element)doc.getElementsByTagName("modules").item(0)).getElementsByTagName("module");
 		for(int i=0;i<moduleNodes.getLength();i++) {
 			Element e=(Element)moduleNodes.item(i);
@@ -302,8 +315,9 @@ public class Engine {
 					System.err.println("Classname of an order is not specyfied.");
 					continue;
 				}
-				info.printf("Loading \"%s\" module%n",className);
+				long time=System.nanoTime();
 				ShaniModule module=(ShaniModule) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+				commands.printf("Module %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 				
 				if(module instanceof FilterModule) {
 					filterModules.add((FilterModule)module);
@@ -315,6 +329,7 @@ public class Engine {
 				ex.printStackTrace();
 			}
 		}
+		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 	}
 	public static void saveMainFile(){										//TODO fix xml parsing. It throws new lines everywhere. Curretly cleaned after output creation
 		for(var order:orders)order.save();
@@ -359,9 +374,9 @@ public class Engine {
 	public static Executable interprete(ShaniString command) {
 		if(command.isEmpty())return null;
 		
-		info.print(command.toFullString()+" --> ");
+		commands.println("\n"+command.toFullString()+':');
 		for(FilterModule filter:filterModules)command=filter.filter(command);
-		info.println(command.toFullString());
+		commands.println("\t"+command.toFullString());
 		
 		lastCommand=command;
 		Executable toExec=getExecutable(command);
@@ -393,6 +408,8 @@ public class Engine {
 		Executable Return=null;
 		float minCost=Short.MAX_VALUE;
 		
+		long time=System.nanoTime();
+		
 		for (Order order : orders) {
 			List<Executable> execs=order.getExecutables(command);
 			if(execs==null)continue;
@@ -409,6 +426,11 @@ public class Engine {
 					Return=exec;
 				}
 			}
+		}
+		
+		commands.printf("Search time: %.3f ms%n",(System.nanoTime()-time)/1000000f);
+		if(Return!=null) {
+			commands.println("Executing "+Return.action.getClass().toString()+" "+Return.cost+":"+Return.importanceBias);
 		}
 		
 		return Return;
