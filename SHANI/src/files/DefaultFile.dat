@@ -141,7 +141,7 @@
 		<order classname="shani.orders.MasterOrder">
 			<exit>exit*żegnam*do widzenia*wyłącz się</exit>
 			<autosave>autosavetime</autosave>
-			<save>save*zapisz*zabezpiecz się</save>
+			<save>save*zapisz*zabezpiecz się*zapisz pliki*flush buffers</save>
 		</order>
 		<order classname="shani.orders.MergeOrder">
 			<key>i</key>
@@ -187,7 +187,7 @@
                 <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
                 <power>potęga*do*do potęgi</power>
                 <multiply>pomnórz*iloczyn*razy</multiply>
-                <divide>podziel*iloraz*przez</divide>
+                <divide>podziel*iloraz*przez*na</divide>
                 <add>dodaj*suma*plus</add>
                 <substract>odejmij*różnica*minus</substract>
                 <connect>przez*od*do*i*na</connect>

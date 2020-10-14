@@ -10,6 +10,8 @@ import shani.ShaniString;
  * @author TakMashido
  */
 public abstract class Order {
+	/**Source of data for shani.*/
+	@Deprecated
 	protected Element orderFile;
 	
 	/**Main method for initilaizating module.
@@ -20,17 +22,17 @@ public abstract class Order {
 		orderFile=e;
 		return init();
 	}
-	/**Method for doing cuscom initalizations. Override if you want do do some.
-	 * @return If successully initializeted.
+	/**Method for doing custom initalizations. Override if you want do do some.
+	 * @return If successfully initializeted.
 	 */
 	protected abstract boolean init();
 	
 	/**Prepares list of executables which are respond for given command query.
-	 * @param command Command to interprete.
-	 * @return Exectuable list matching given command or null.
+	 * @param command Command to interpret.
+	 * @return Executable list matching given command or null.
 	 */
 	public abstract List<Executable> getExecutables(ShaniString command);
 	
-	/**Invoced before saving shani mainFile.*/
+	/**Invoked before saving shani mainFile.*/
 	public void save() {};
 }

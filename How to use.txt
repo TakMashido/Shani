@@ -1,12 +1,8 @@
 To run SHANI you have to have installed java 10 or newer. If you have alredy installed java check if it's 10 not java 8 which is most often installed in personal computers.
 Next download shani latest release and unzip it somewhere. To run just double click on Shani.bat file. New cmd window with SHANI launched should apper.
 
-Unfortunetly it only support Polish language for now. All messages and input patterns are stored in external file so translations can be made quite easy.
-Report to me if you want this in another language.
-
 Now just type action which you want to execute in cmd window.
 It applies heavy Fuzzy string matching(sometimes to heavy) so no need to type everything correctly, it should be able to understand even with lots of literals.
-
 
 Supported actions:
 Launch program, open file/directory:
@@ -17,7 +13,7 @@ Calculator:
 Type something like "policz 2+2", "pomnórz trzy i cztery", "dodaj dwa do dwóch". To get the resoult.
 
 Timer:
-To use "włącz timer name", "ile zliczył zegar name", "zatrzymaj zegar n". Timers are created after first invoce of starting command.
+To use "włącz timer name", "ile zliczył zegar name", "zatrzymaj zegar name". Timers are created after first invoce of starting command.
 
 Dictionary:
 Type "przetłumacz abcd", "jak jest answer". Translation taken from translatica.pl webside. Support only english, german and polish words.
@@ -38,3 +34,7 @@ Option 2: Find java control panel(Configure java/About java) in your computer an
 How to install java 10?
 Write in your browser "java 10" and dowland it from Oracle. Be avare default java dowloand link refers to java 8.
 Now java 10 is outdated but newer version should run it. If no try to find 10 in archive.
+
+What languages it supports?
+Unfortunetly it only support Polish language for now. All messages and input patterns are stored in external file so translations can be made quite easy.
+Report to me if you want this in another language.

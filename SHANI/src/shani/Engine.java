@@ -73,9 +73,9 @@ public class Engine {
 		start();
 	}
 	public static void initialize(String[]args) {
-		new ShaniString();								//FIXME becouse of some strange reason something go wrong and ShaniString matching don't work properly.
+		new ShaniString();								//FIXME because of some strange reason something go wrong and ShaniString matching don't work properly without this.
 		if(initialized)
-			throw new RuntimeException("Engine already initialized");					//Can make problems. Throw not visible.
+			throw new RuntimeException("Engine already initialized");					//Can make problems - Throw not visible.
 //			return;
 		long time=System.currentTimeMillis();
 		
@@ -126,6 +126,7 @@ public class Engine {
 		Integer integer;
 		if((integer=argsDec.getInt("-cl","--close"))!=null) {
 			Thread closingThread=new Thread("CloserThread") {
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(60*1000*integer);
@@ -210,6 +211,7 @@ public class Engine {
 		}
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
 			public void run() {
 				shutdownHook();
 			}
@@ -223,8 +225,6 @@ public class Engine {
 	public static void start() {
 		if(!initialized) initialize(new String[0]);
 		
-		@SuppressWarnings("resource")
-		Scanner in=new Scanner(System.in);
 		System.out.println(helloMessage);
 		while (in.hasNextLine()) {
 			String str=in.nextLine().trim().toLowerCase();
@@ -245,24 +245,22 @@ public class Engine {
 		}
 	}
 	
-	/**Copy file from "/files/DefaultFile.dat" in jar as mainFile specyfied in config
+	/**Copy file from "/files/DefaultFile.dat" in jar as mainFile specified in config
 	 * @throws IOException when failed to create mainFile
 	 * @throws NullPointerException when failed to read file inside jar
 	 */
 	private static void createMainFile() throws IOException{
 		Config.mainFile.createNewFile();
 		
-		InputStream in=Engine.class.getResourceAsStream("/files/DefaultFile.dat");
-		OutputStream out=new FileOutputStream(Config.mainFile);
-		
-		byte[] buf=new byte[1024];
-		int toCopy;
-		while((toCopy=in.read(buf))>0) {
-			out.write(buf, 0, toCopy);
+		try(InputStream in=Engine.class.getResourceAsStream("/files/DefaultFile.dat");
+				OutputStream out=new FileOutputStream(Config.mainFile)){
+			
+			byte[] buf=new byte[1024];
+			int toCopy;
+			while((toCopy=in.read(buf))>0) {
+				out.write(buf, 0, toCopy);
+			}
 		}
-		
-		in.close();
-		out.close();
 	}
 	private static void parseMainFile() throws SAXException, IOException, ParserConfigurationException {
 		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.mainFile);
@@ -331,7 +329,7 @@ public class Engine {
 		}
 		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 	}
-	public static void saveMainFile(){										//TODO fix xml parsing. It throws new lines everywhere. Curretly cleaned after output creation
+	public static void saveMainFile(){										//TODO fix xml parsing. It throws new lines everywhere. Currently cleaned after output creation
 		for(var order:orders)order.save();
 		try {
 			if(doc==null)return;
@@ -345,17 +343,18 @@ public class Engine {
 			
 			var string=new StringWriter();
 			transformer.transform(new DOMSource(doc), new StreamResult(string));
-			Scanner output=new Scanner(string.toString());
-			var fileOut=new OutputStreamWriter(new FileOutputStream(Config.mainFile),StandardCharsets.UTF_8);
-			while(output.hasNextLine()) {
-				String line=output.nextLine();
-				if(!line.trim().isEmpty()) {
-					fileOut.write(line);
-					fileOut.write("\r\n");
+			
+			try(Scanner output=new Scanner(string.toString());
+					var fileOut=new OutputStreamWriter(new FileOutputStream(Config.mainFile),StandardCharsets.UTF_8)){
+				
+				while(output.hasNextLine()) {
+					String line=output.nextLine();
+					if(!line.trim().isEmpty()) {
+						fileOut.write(line);
+						fileOut.write("\r\n");
+					}
 				}
 			}
-			output.close();
-			fileOut.close();
 		} catch(TransformerException|IOException ex) {
 			ex.printStackTrace();
 		}
@@ -464,7 +463,7 @@ public class Engine {
 		if(!displayConfirmation)return false;
 		
 		@SuppressWarnings("resource")
-		Scanner in=new Scanner(System.in);
+		Scanner in=new Scanner(System.in);													//TODO check if can use Engine.in there
 		System.out.printf(licenseConfirmationMessage.toString(),name);
 		System.out.println();
 		String nextLine;
@@ -497,15 +496,15 @@ public class Engine {
 		} catch (InterruptedException e) {}
 		System.exit(0);
 	}
-	/**Call if any error ancountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading erros become send to System.out*/
+	/**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out*/
 	public static void registerLoadException() {
 		LOADING_ERROR=true;
 	}
 	
 	/**
-	 * Invoced on application close
+	 * Invoked on application close
 	 */
-	private static void shutdownHook() {
+	protected static void shutdownHook() {
 		saveMainFile();
 		flushBuffers();
 	}

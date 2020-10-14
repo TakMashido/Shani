@@ -40,7 +40,10 @@ public class Tools {
 	 * Removes national characters from given string and repleace them with english representatives.
 	 * @param com String being procesed
 	 * @return com without national specyfic characters
+	 * Deprecated.
+	 * Config.nationalSimilarityCost allows ShaniMatching to handle this without problems. 
 	 */
+	@Deprecated
 	public static String removeNational(String com) {
 		com.replaceAll("¹", "a");
 		com.replaceAll("æ", "c");

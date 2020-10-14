@@ -1,21 +1,13 @@
 package shani;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
-import liblaries.DOMWalker;
 import liblaries.Pair;
 import shani.SentenceMatcher.Tokenizer.SentenceToken;
 import shani.SentenceMatcher.Tokenizer.SentenceToken.Type;
@@ -733,10 +725,10 @@ public class SentenceMatcher {
 					if(Config.wordInsertionCost<Config.sentenseCompareTreshold)
 						srInsertion=new SentenceResult[optionalElements.length];
 					
+					treeLevel++; 
 					for(int i=0;i<optionalElements.length;i++) {
 						if(!usedElements[i]) {
 							usedElements[i]=true;
-							treeLevel++;					//FIXME move outside for loop after debug ended 
 							
 							if(Config.wordInsertionCost<Config.sentenseCompareTreshold) {
 								srInsertion[i]=result.makeCopy();
@@ -745,10 +737,10 @@ public class SentenceMatcher {
 							}
 							optionalElements[i].process((sr[i]=result.makeCopy()), str, strIndex);
 							
-							treeLevel--;
 							usedElements[i]=false;
 						}
 					}
+					treeLevel--;
 					
 					SentenceResult best=getBestMatch(sr);
 					if(Config.wordInsertionCost<Config.sentenseCompareTreshold) {
@@ -788,6 +780,7 @@ public class SentenceMatcher {
 				}
 				
 				if(nextElement!=null)
+					nextElement.getInsertionCost(result);
 			}
 		}
 	}
@@ -899,12 +892,18 @@ public class SentenceMatcher {
 				printTokens(token.subTokens, depth+1);
 		}
 	}
+
+	/*public static void main(String[]args) throws SAXException, IOException, ParserConfigurationException {
+		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml"));
+		doc.getDocumentElement().normalize();
 		
-//		var reses=matcher.process("witam pana gneeraï¿½a puï¿½kownika");
+		var matcher=new SentenceMatcher(DOMWalker.walk(doc, "tests/sentenceMatcher/test"));
+		
+//		var reses=matcher.process("witam pana gneera³a pu³kownika");
 		var reses=matcher.process("must mork hog");
 		System.out.println("\nfinal resoults:");
 		for(var res:reses)
 			System.out.println(res);
 		System.out.println("End");
-	}
+	}*/
 }

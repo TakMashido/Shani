@@ -11,7 +11,7 @@ import org.w3c.dom.Node;
 
 /**Object used to represent string values in SHANI.
  * 
- * It is optymalized for fuzzy string matching and have some methods allowing it.
+ * It is optimized for fuzzy string matching and have some methods allowing it.
  * Also can contain one or more String for printing or used as keywords to search in other ShaniString objects.
  * 
  * @author TakMashido
@@ -21,9 +21,9 @@ public class ShaniString {
 	private static final Pattern stringDivider=Pattern.compile("(?:\\*)+");
 	private static byte[][] lookUpTable;				//~140KB of memory
 	
-	private String[] value;
-	private String[][] words;
-	private char[][][] stemmedValue=null;											//[a][b][c]: a->wordsSet, b->word, c->letter
+	protected String[] value;
+	protected String[][] words;
+	protected char[][][] stemmedValue=null;											//[a][b][c]: a->wordsSet, b->word, c->letter
 	/**Node containing this ShaniString data.*/
 	private Node origin;
 	
@@ -119,7 +119,7 @@ public class ShaniString {
 		this("");
 	}
 	/**Creates new ShaniString.
-	 * @param origin String containing ShaniString data. Will be cuttend on '*' occurences.
+	 * @param origin String containing ShaniString data. Will be cutted on '*' occurrences.
 	 */
 	public ShaniString(String origin) {
 		this(origin,true);
@@ -133,7 +133,7 @@ public class ShaniString {
 		else value=new String[] {origin};
 	}
 	/**Creates new ShaniString.
-	 * @param origin Strings constaining data. All of them will be cutted on '*' occurences.
+	 * @param origin Strings containing data. All of them will be cutted on '*' occurrences.
 	 */
 	public ShaniString(String... origin) {
 		this(true,origin);
@@ -156,7 +156,15 @@ public class ShaniString {
 	 */
 	public ShaniString(Node origin) {
 		assert origin!=null:"Origin node can't be null. Propably node is missing in shani main file.";
-		value=processString(origin.getTextContent());
+		try {
+			value=processString(origin.getTextContent());
+		} catch(NullPointerException ex) {
+			assert false:"Passed empty/nonexisting node. Propably node is missing in shani main file.";
+			//Will crash only if this shani (string|module|filter) is used, otherwise later, otherwise will run fine.
+			Engine.registerLoadException();
+			ex.printStackTrace();
+		}
+		
 		this.origin=origin;
 	}
 	/**Load ShaniString from xml node. Any change done to this object will also be pushed to given node.
@@ -187,10 +195,10 @@ public class ShaniString {
 		return split(true);
 	}
 	/**Splits ShaniString to words group and each to single words.
-	 * @param cut If cut given ShaniString on each occurence of '*'
+	 * @param cut If cut given ShaniString on each occurrence of '*'
 	 * @return Array[][] of words. Each entry is single word.
 	 */
-	public ShaniString[][] split(boolean cut){										//For further optymalization can store once splitted val somewhere. It needs changes in ShaniString to make inmutable. Any change on it have to be applied on new object like in original string.
+	public ShaniString[][] split(boolean cut){										//For further optimalization can store once splitted val somewhere. It needs changes in ShaniString to make immutable. Any change on it have to be applied on new object like in original string.
 		var Return=new ShaniString[value.length][];
 		
 		for(int i=0;i<value.length;i++) {
@@ -220,7 +228,7 @@ public class ShaniString {
 	}
 	
 	/**Loads string from storage section.
-	 * @param path Path to String represetation of ShaniString in storage.
+	 * @param path Path to String representation of ShaniString in storage.
 	 * @return New ShaniString object containing data pointed by path.
 	 */
 	public static ShaniString loadString(String path) {
@@ -241,13 +249,13 @@ public class ShaniString {
 	}
 	
 	/**Adds new entries.
-	 * @param word String containig new entries.
+	 * @param word String containing new entries.
 	 */
 	public void add(String word) {
 		add(word,true);
 	}
 	/**Adds new entries.
-	 * @param word String containig new entries.
+	 * @param word String containing new entries.
 	 * @param cut If cut based on '*' location.
 	 */
 	public void add(String word,boolean cut) {
@@ -278,10 +286,10 @@ public class ShaniString {
 		}
 	}
 	/**Adds new entries.
-	 * @param word ShaniString containig new entries
+	 * @param word ShaniString containing new entries
 	 */
 	public void add(ShaniString word) {
-		if(word.stemmedValue!=null) {						//Prevents from stemming from scrach in next step  
+		if(word.stemmedValue!=null) {						//Prevents from stemming from scratch in next step  
 			stem();
 			if(word.words!=null)generateWords();
 		}
@@ -310,7 +318,7 @@ public class ShaniString {
 		}
 	}
 	
-	private void stem() {
+	protected void stem() {
 		if(stemmedValue==null) {
 			stemmedValue=new char[value.length][][];
 			for(int i=0;i<value.length;i++) {
@@ -345,7 +353,7 @@ public class ShaniString {
 		return words.toArray(new char[0][0]);
 	}
 	
-	private void generateWords() {
+	protected void generateWords() {
 		if(words!=null)return;
 		
 		stem();
@@ -360,14 +368,14 @@ public class ShaniString {
 	
 	/**Get cost of comparing this ShaniString and given String.
 	 * @param str String to compare
-	 * @return Cost of comapring this ShaniString and given String.
+	 * @return Cost of comparing this ShaniString and given String.
 	 */
 	public short getCompareCost(String str) {
 		return getCompareCost(new ShaniString(str));
 	}
 	/**Get cost of comparing two ShaniStrings.
 	 * @param str ShaniString to compare
-	 * @return Cost of comapring this ShaniString and given ShaniString.
+	 * @return Cost of comparing this ShaniString and given ShaniString.
 	 */
 	public short getCompareCost(ShaniString str) {
 		return getMatcher().apply(str).getCost();
@@ -382,7 +390,7 @@ public class ShaniString {
 		if(str.length()==0)return false;
 		return equals(new ShaniString(str));
 	}
-	/**Check if this is equal to this. It don't check if two ShaniString are same, but perform fuzzy String Maptching.
+	/**Check if this is equal to this. It don't check if two ShaniString are same, but perform fuzzy String Matching.
 	 * @param str ShaniString to Check.
 	 * @return If given shaniString is equal to this.
 	 */
@@ -393,8 +401,8 @@ public class ShaniString {
 		return getCompareCost(str)<Config.sentenseCompareTreshold;
 	}
 	
-	/**Tries to find optimal match beetwen two {@linkplain ShaniString} arrays using dtw algorithm.
-	 * @param data Array of ShaniString where search will be porformed.
+	/**Tries to find optimal match between two {@linkplain ShaniString} arrays using dtw algorithm.
+	 * @param data Array of ShaniString where search will be performed.
 	 * @param dataIndex Index on which matching will start. Data before it are skipped.
 	 * @param str Acts like regex Pattern. Contain keywords which will be applied on data arg.
 	 * @return {@link ArraysMatchingResoult} object containing cost of optimal match and index of last matched word in data array.
@@ -434,9 +442,9 @@ public class ShaniString {
 //		System.out.println(Arrays.toString(data)+" "+Arrays.toString(str)+" "+costs[minIndex][endIndex]);
 		return new ArraysMatchingResoult(costs[minIndex][endIndex],dataIndex,minIndex);
 	}
-	/**Tries to find optimal match beetwen two {@linkplain ShaniString} arrays using dtw algorithm.
-	 * Starting point of match can be on any point greater then dataIndex. Thet is only diffrence beetwen this and {@link #getMatchingIndex(ShaniString[], int, ShaniString[]) getMatchingIndex} method.
-	 * @param data Array of ShaniString where search will be porformed.
+	/**Tries to find optimal match between two {@linkplain ShaniString} arrays using dtw algorithm.
+	 * Starting point of match can be on any point greater then dataIndex. That is only difference between this and {@link #getMatchingIndex(ShaniString[], int, ShaniString[]) getMatchingIndex} method.
+	 * @param data Array of ShaniString where search will be performed.
 	 * @param dataIndex Index on which matching will start. Data before it are skipped.
 	 * @param str Acts like regex Pattern. Contain keywords which will be applied on data arg.
 	 * @return {@link ArraysMatchingResoult} object containing cost of optimal match, index of first and last matched word in data array.
@@ -489,20 +497,21 @@ public class ShaniString {
 		public final short cost;
 		public final int startIndex;
 		public final int endIndex;
-		private ArraysMatchingResoult(short cost,int startIndex,int endIndex) {
+		protected ArraysMatchingResoult(short cost,int startIndex,int endIndex) {
 			this.cost=cost;
 			this.startIndex=startIndex;
 			this.endIndex=endIndex;
 		}
 		
+		@Override
 		public String toString() {
 			return startIndex+":"+endIndex+"->"+cost;
 		}
 	}
 	
-	/**Check if one of underlaying strings matches given regex Pattern.
+	/**Check if one of underlying strings matches given regex Pattern.
 	 * @param pattern Patter used to check equality.
-	 * @return If one of underlaying strings matches given regex Pattern.
+	 * @return If one of underlying strings matches given regex Pattern.
 	 */
 	public boolean isEquals(Pattern pattern) {
 		for(String str:value) {
@@ -512,12 +521,12 @@ public class ShaniString {
 	}
 	
 	/**
-	 * Compare to char arrays using Damerau–Levenshtein algoritm.
+	 * Compare to char arrays using Damerau–Levenshtein algorithm.
 	 * @param a model
 	 * @param b compared number
-	 * @return DTW distance beetwen two char[]
+	 * @return DTW distance between two char[]
 	 */
-	private static short charCompare(char[]a, char[]b) {
+	protected static short charCompare(char[]a, char[]b) {
 		final short max=Short.MAX_VALUE-1000;
 		
 		short[][] val=new short[a.length+1][b.length+1];
@@ -563,7 +572,7 @@ public class ShaniString {
 		return lookUpTable[a][b];
 	}
 	
-	/**Retruns array of String containig each underlaying String.
+	/**Returns array of String containing each underlying String.
 	 * @return Look above.
 	 */
 	public String[] getArray() {
@@ -578,7 +587,7 @@ public class ShaniString {
 		System.out.println(toString());
 	}
 	
-	/**Returns full String represetation. Contain each underlaying String splitted with '*' character.
+	/**Returns full String representation. Contain each underlying String splitted with '*' character.
 	 * new ShaniString(oldShaniString.toFullString()) should give object identical to oldShaniString.
 	 * @return String representing this ShaniString.
 	 */
@@ -592,6 +601,7 @@ public class ShaniString {
 	/* Return one random String from inner String set.
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		if(value.length<=0)return "EMPTY_SHANI_STRING";
 		return value[random.nextInt(value.length)];
@@ -603,7 +613,7 @@ public class ShaniString {
 		return new ShaniString(value);
 	}
 	
-	/**Check if contain any not empty String(cotaing any character except white characters).
+	/**Check if contain any not empty String(containing any character except white characters).
 	 * @return If this Shani String contain no data.
 	 */
 	public boolean isEmpty() {
@@ -626,14 +636,14 @@ public class ShaniString {
 		return min;
 	}
  	
-	/**Return char array ready for fuzy string matching.
+	/**Return char array ready for fuzzy string matching.
 	 * @return Look above.
 	 */
 	public char[][][] getStemmendValue(){
 		if(stemmedValue==null)stem();
 		return stemmedValue;
 	}
-	/**Creates and retruns new ({@link ShaniMatcher}.
+	/**Creates and returns new ({@link ShaniMatcher}.
 	 * @return Look above.
 	 */
 	public ShaniMatcher getMatcher() {
@@ -649,7 +659,7 @@ public class ShaniString {
 		private short[][] wordCost;					//minCost of each word
 		private short[] costBias;					//cost bias
 		
-		private ShaniMatcher(ShaniString origin) {
+		protected ShaniMatcher(ShaniString origin) {
 			origin.stem();
 			data=origin;
 			wordCost=new short[data.stemmedValue.length][];
@@ -660,7 +670,7 @@ public class ShaniString {
 			costBias=new short[data.stemmedValue.length];
 		}
 		
-		/**Match given ShaniString[]. Equivalent to invoce apply(ShaniString) with each array element.
+		/**Match given ShaniString[]. Equivalent to invoke apply(ShaniString) with each array element.
 		 * @param comparables Array of ShaniString data which will be applied.
 		 * @return this
 		 */
@@ -711,6 +721,7 @@ public class ShaniString {
 					this.index=index;
 				}
 				
+				@Override
 				public int compare(CompareResoult o1, CompareResoult o2) {
 					return o1.cost-o2.cost;
 				}
@@ -765,8 +776,8 @@ public class ShaniString {
 		
 		/**Do word based exact compare. Search for combination of words which are {@link String#equals(Object)} to given ShaniString.
 		 * <p>
-		 * note: number of white characters is ignored, only the fact they exeist end divide ShaniString value to words metters
-		 * @param comparables ShaniString containing String values to be searchen in underlaying ShaniString.
+		 * note: number of white characters is ignored, only the fact they exist end divide ShaniString value to words matters
+		 * @param comparables ShaniString containing String values to be searched in underlying ShaniString.
 		 * @return this ShaniMatcher object.
 		 */
 		public ShaniMatcher exactApply(ShaniString... comparables) {
@@ -790,8 +801,8 @@ public class ShaniString {
 		}
 		/**Do word based exact compare. Search for combination of words which are {@link String#equals(Object)} to given ShaniString.
 		 * <p>
-		 * note: number of white spaces is ignored, only the fact they exeist end divide ShaniString value to words metters
-		 * @param comparable String to find in underlaying ShaniString.
+		 * note: number of white spaces is ignored, only the fact they exist end divide ShaniString value to words matters
+		 * @param comparable String to find in underlying ShaniString.
 		 * @return this ShaniMatcher object.
 		 */
 		public ShaniMatcher exactApply(String comparable) {
@@ -822,19 +833,19 @@ public class ShaniString {
 		}
 		
 		/**Check if cost of compare is smaller then Config.senetenceCompareTreshold.
-		 * @return If underlaying ShaniString is equal to all applied data.
+		 * @return If underlying ShaniString is equal to all applied data.
 		 */
 		public boolean isEqual() {
 			return getCost()<Config.sentenseCompareTreshold;
 		}
-		/**Check if appled data are presented in underlaying ShaniString. Skip unmatched words.
+		/**Check if applied data are presented in underlying ShaniString. Skip unmatched words.
 		 * @return Look above.
 		 */
 		public boolean isSemiEqual() {
 			return getMatchedCost()<Config.sentenseCompareTreshold&&getMatchedNumber()>0;
 		}
 		
-		/**Returns ShaniString containig all unmatched data.
+		/**Returns ShaniString containing all unmatched data.
 		 * @return Look above.
 		 */
 		public ShaniString getUnmatched() {
@@ -901,9 +912,10 @@ public class ShaniString {
 			return Return;
 		}
 		
-		/**Creates semi-deep copy of Object. State of Mathig(cost, lastPosition) are copied, but base ShaniString object stays the same.
+		/**Creates semi-deep copy of Object. State of Matching(cost, lastPosition) are copied, but base ShaniString object stays the same.
 		 * @return Semi-deep copy of object;
 		 */
+		@Override
 		public ShaniMatcher clone() {
 			ShaniMatcher Return=new ShaniMatcher(data);
 			Return.wordCost=wordCost.clone();
