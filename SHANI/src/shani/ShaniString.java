@@ -230,6 +230,7 @@ public class ShaniString {
 	/**Loads string from storage section.
 	 * @param path Path to String representation of ShaniString in storage.
 	 * @return New ShaniString object containing data pointed by path.
+	 * @deprecated MainFile and it's storage node is now deprecated. Use {@link Storage#getShaniString(Node, String)} instead. ShaniString responses should be stored directly inside order template node.
 	 */
 	public static ShaniString loadString(String path) {
 		return Storage.getString(path);

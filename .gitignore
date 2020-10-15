@@ -37,3 +37,6 @@ SHANI/config.properties
 
 #required external liblaries
 !dependencies/*
+
+#Shani runtime file
+shaniData/

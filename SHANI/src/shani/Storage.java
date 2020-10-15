@@ -1,11 +1,17 @@
 package shani;
 
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**Class for getting and saving data in Shani data files.
  * 
@@ -99,7 +105,7 @@ public class Storage {
 		}
 		return Return;
 	}
-	private static ShaniString getShaniString(Node where, String stringPath) {			//All changes here have to be made also in getString(Node,String). This methods do the same but output is diffrend.
+	public static ShaniString getShaniString(Node where, String stringPath) {			//All changes here have to be made also in getString(Node,String). This methods do the same but output is different.
 		var nodes=getNodes(where,stringPath);
 		if(nodes==null) {
 			System.err.printf("Can't find \"%s\" in %s.%n",where.getNodeName(),stringPath);
@@ -114,7 +120,7 @@ public class Storage {
 		}
 		return new ShaniString(node);
 	}
-	private static String getString(Node where, String stringPath) {					//All changes here have to be made also in getShaniString(Node,String). This methods do the same but output is diffrend.
+	public static String getString(Node where, String stringPath) {					//All changes here have to be made also in getShaniString(Node,String). This methods do the same but output is different.
 		var nodes=getNodes(where,stringPath);
 		if(nodes==null) {
 			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storage?"storage":"userdata");
@@ -178,5 +184,31 @@ public class Storage {
 			}
 		}
 		return Return;
+	}
+	
+	//<new><version><new><version><new><version><new><version><new><version><new><version>
+	static {
+		Document doc=null;
+		Node shaniDataNode=null;
+				
+		try {
+			doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.dataFile);
+			
+			shaniDataNode=doc.getElementsByTagName("shaniData").item(0);
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			e.printStackTrace();
+			Engine.registerLoadException();
+		}
+		
+		shaniDataDoc=doc;
+		shaniData=shaniDataNode;
+		
+	}
+	
+	private static final Document shaniDataDoc;
+	public static final Node shaniData;
+	
+	public static final void save() {
+		Engine.saveDocument(shaniDataDoc, Config.dataFile);
 	}
 }

@@ -1,0 +1,17 @@
+All external files and directories used by shani:
+
+
+Shani.jar - main executable
+Shani.bat - "launcher" for shani
+Shani.dat - Contain order templates end their data. DEPRECATED, order templates taken from .jar inside, data from ShaniData.dat file
+info.log - Old log file, now deprecated soon will be removed
+
+shaniData/shaniData.dat - Contain data saved by Order's.
+
+shaniData/config - directory for all user defined config files.
+
+shaniData/log/commands.log - contain commands and profiling info
+shaniData/log/debug.log - contain varius debug invormation
+shaniData/log/errors.log - contain errors, System.err stream target
+
+Shani_lib - Directory containing all third party liblaries.

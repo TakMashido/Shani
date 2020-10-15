@@ -328,12 +328,77 @@ public class Engine {
 			}
 		}
 		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
+		
+		//<refactored><storage><refactored><storage><refactored><storage><refactored><storage>
+		Document templateDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.mainFile);
+		templateDocument.getDocumentElement().normalize();
+		
+		bigTime=System.nanoTime();
+		commands.println();
+		ordersNode = ((Element)templateDocument.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
+		for (int i = 0; i < ordersNode.getLength(); i++) {
+			Node node = ordersNode.item(i);
+			
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				Element e = (Element) node;
+				try {
+					String className=e.getAttribute("classname");
+					if(className.equals("")) {
+						System.out.println("Error in mainfile found");
+						System.err.println("Classname of an order is not specyfied.");
+						continue;
+					}
+					long time=System.nanoTime();
+					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
+					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+					order.initialize(e);
+					orders.add(order);
+				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+					Engine.registerLoadException();
+					System.err.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
+					ex.printStackTrace();
+				}
+			}
+		}
+		commands.printf("Orders loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
+		
+		bigTime=System.nanoTime();
+		moduleNodes=((Element)templateDocument.getElementsByTagName("modules").item(0)).getElementsByTagName("module");
+		for(int i=0;i<moduleNodes.getLength();i++) {
+			Element e=(Element)moduleNodes.item(i);
+			try {
+				String className=e.getAttribute("classname");
+				if(className.equals("")) {
+					System.out.println("Error in mainfile found");
+					System.err.println("Classname of an order is not specyfied.");
+					continue;
+				}
+				long time=System.nanoTime();
+				ShaniModule module=(ShaniModule) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+				commands.printf("Module %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+				
+				if(module instanceof FilterModule) {
+					filterModules.add((FilterModule)module);
+				} else {
+					System.out.println("Unrecognized module \""+className+"\".");
+				}
+			} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" module from main file.");
+				ex.printStackTrace();
+			}
+		}
+		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 	}
 	public static void saveMainFile(){										//TODO fix xml parsing. It throws new lines everywhere. Currently cleaned after output creation
-		for(var order:orders)order.save();
+		for(var order:orders)order.save();									//Flush all orders save data
+		Storage.save();														//Save data file
+		
+		saveDocument(doc, Config.mainFile);
+	}
+	public static void saveDocument(Document document, File targetFile) {
 		try {
-			if(doc==null)return;
-			doc.normalize();
+			if(document==null)return;
+			document.normalize();
 			var transformerFactory=TransformerFactory.newInstance();
 			transformerFactory.setAttribute("indent-number", 4);
 			Transformer transformer = transformerFactory.newTransformer();
@@ -342,10 +407,10 @@ public class Engine {
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			
 			var string=new StringWriter();
-			transformer.transform(new DOMSource(doc), new StreamResult(string));
+			transformer.transform(new DOMSource(document), new StreamResult(string));
 			
 			try(Scanner output=new Scanner(string.toString());
-					var fileOut=new OutputStreamWriter(new FileOutputStream(Config.mainFile),StandardCharsets.UTF_8)){
+					var fileOut=new OutputStreamWriter(new FileOutputStream(targetFile),StandardCharsets.UTF_8)){
 				
 				while(output.hasNextLine()) {
 					String line=output.nextLine();
