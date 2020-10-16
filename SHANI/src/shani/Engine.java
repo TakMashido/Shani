@@ -328,66 +328,6 @@ public class Engine {
 			}
 		}
 		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
-		
-		//<refactored><storage><refactored><storage><refactored><storage><refactored><storage>
-		Document templateDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.mainFile);
-		templateDocument.getDocumentElement().normalize();
-		
-		bigTime=System.nanoTime();
-		commands.println();
-		ordersNode = ((Element)templateDocument.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
-		for (int i = 0; i < ordersNode.getLength(); i++) {
-			Node node = ordersNode.item(i);
-			
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				Element e = (Element) node;
-				try {
-					String className=e.getAttribute("classname");
-					if(className.equals("")) {
-						System.out.println("Error in mainfile found");
-						System.err.println("Classname of an order is not specyfied.");
-						continue;
-					}
-					long time=System.nanoTime();
-					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
-					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-					order.initialize(e);
-					orders.add(order);
-				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-					Engine.registerLoadException();
-					System.err.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
-					ex.printStackTrace();
-				}
-			}
-		}
-		commands.printf("Orders loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
-		
-		bigTime=System.nanoTime();
-		moduleNodes=((Element)templateDocument.getElementsByTagName("modules").item(0)).getElementsByTagName("module");
-		for(int i=0;i<moduleNodes.getLength();i++) {
-			Element e=(Element)moduleNodes.item(i);
-			try {
-				String className=e.getAttribute("classname");
-				if(className.equals("")) {
-					System.out.println("Error in mainfile found");
-					System.err.println("Classname of an order is not specyfied.");
-					continue;
-				}
-				long time=System.nanoTime();
-				ShaniModule module=(ShaniModule) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
-				commands.printf("Module %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-				
-				if(module instanceof FilterModule) {
-					filterModules.add((FilterModule)module);
-				} else {
-					System.out.println("Unrecognized module \""+className+"\".");
-				}
-			} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" module from main file.");
-				ex.printStackTrace();
-			}
-		}
-		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 	}
 	public static void saveMainFile(){										//TODO fix xml parsing. It throws new lines everywhere. Currently cleaned after output creation
 		for(var order:orders)order.save();									//Flush all orders save data

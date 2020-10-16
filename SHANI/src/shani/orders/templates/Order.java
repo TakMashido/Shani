@@ -21,7 +21,6 @@ public abstract class Order {
 	/**Main method for initializing module.
 	 * @param e XML Element representing this order Object.
 	 * @return If successfully initialized.
-	 * @deprecated {@link #initialize(Element)} taken it's place.
 	 */
 	public final boolean init(Element e) {
 		orderFile=e;
@@ -29,12 +28,10 @@ public abstract class Order {
 	}
 	/**Method for doing custom initializations. Override if you want do do some.
 	 * @return If successfully initialized.
+	 * @deprecated use {@link #init(Element)} instead.
 	 */
-	protected abstract boolean init();
+	protected boolean init() {return false;}
 	
-	/**Main method for initializing object.
-	 * @param e XML element being root of this Order template.*/
-	public void initialize(Element e) {};					//TODO make abstract when dadta storage refactored 
 	
 	/**Prepares list of executables which are respond for given command query.
 	 * @param command Command to interpret.
