@@ -3,6 +3,8 @@ package shani.orders;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import shani.Config;
 import shani.Engine;
 import shani.ShaniString;
@@ -11,17 +13,22 @@ import shani.orders.templates.Executable;
 import shani.orders.templates.Order;
 
 public class MergeOrder extends Order{
-	private static ShaniString connectSuccessfulMessage=ShaniString.loadString("orders.MergeOrder.connectSuccessfulMessage");
-	private static ShaniString cantConnectMessage=ShaniString.loadString("orders.MergeOrder.connectSuccessfulMessage");
+	protected static ShaniString connectSuccessfulMessage;
+	public static ShaniString cantConnectMessage;
 	
 	private ShaniString connectKey;
 	
-	public boolean init() {
-		connectKey=new ShaniString(orderFile.getElementsByTagName("key").item(0));
+	@Override
+	public boolean init(Element e) {
+		connectKey=ShaniString.loadString(e, "key");
+		
+		connectSuccessfulMessage=ShaniString.loadString(e,"connectSuccessfulMessage");
+		cantConnectMessage=ShaniString.loadString(e,"connectSuccessfulMessage");
 		
 		return true;
 	}
 	
+	@Override
 	public List<Executable> getExecutables(ShaniString command) {
 		var matcher=command.getMatcher().apply(connectKey);
 		//System.out.println("a");
@@ -39,23 +46,25 @@ public class MergeOrder extends Order{
 		return null;
 	}
 	
-	private class MergeAction extends Action{
+	protected class MergeAction extends Action{
 		private Executable old;
 		private Executable newO;
 		private String command;
 		
-		private MergeAction(ShaniString data, Executable forConnect, Executable whereConnect) {
+		protected MergeAction(ShaniString data, Executable forConnect, Executable whereConnect) {
 			command=data.toString();
 			newO=forConnect;
 			old=whereConnect;
 		}
 		
+		@Override
 		public boolean connectAction(String action) {
 			assert false:"Can't connect action to shani.orders.MergeOrder.MergeAction";
 			System.err.println("Can't connect action to shani.orders.MergeOrder.MergeAction");
 			return false;
 		}
-
+		
+		@Override
 		public boolean execute() {
 			if(old.action.connectAction(command))
 				System.out.println(connectSuccessfulMessage);

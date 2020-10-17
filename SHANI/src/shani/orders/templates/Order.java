@@ -22,7 +22,7 @@ public abstract class Order {
 	 * @param e XML Element representing this order Object.
 	 * @return If successfully initialized.
 	 */
-	public final boolean init(Element e) {
+	public boolean init(Element e) {
 		orderFile=e;
 		return init();
 	}
