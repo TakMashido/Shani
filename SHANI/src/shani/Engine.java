@@ -57,6 +57,7 @@ public class Engine {
 	
 	public static final Scanner in=new Scanner(System.in);
 	
+	/**Main document of templateFile*/
 	public static Document doc;
 	private static ArrayList<Order> orders = new ArrayList<Order>();
 	private static ArrayList<FilterModule> filterModules = new ArrayList<>();
@@ -142,7 +143,7 @@ public class Engine {
 		}
 		
 		if(!argsDec.isProcesed()) {														//End of args processing
-			System.out.println("Program input contain un recognized parameters:");
+			System.out.println("Program input contain unrecognized parameters:");
 			var unmatched=argsDec.getUnprocesed();
 			for(var un:unmatched)System.out.println(un);
 			System.exit(0);
@@ -205,7 +206,7 @@ public class Engine {
 		}
 		
 		if(LOADING_ERROR) {
-			ShaniString loadingErrorMessage=ShaniString.loadString("engine.loadingErrorMessage");
+			ShaniString loadingErrorMessage=ShaniString.loadString(doc,"engine.loadingErrorMessage");
 			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
 			else System.out.println("Error encountered during loading shani. Further info in errors.log file");
 		}
@@ -266,12 +267,14 @@ public class Engine {
 		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.mainFile);
 		doc.getDocumentElement().normalize();
 		
-		helloMessage=ShaniString.loadString("engine.helloMessage");					
-		closeMessage=ShaniString.loadString("engine.closeMessage");
-		notUnderstandMessage=ShaniString.loadString("engine.notUnderstandMessage");
-		errorMessage=ShaniString.loadString("engine.errorMessage");                
-		licenseConfirmationMessage=ShaniString.loadString("engine.licenseConfirmationMessage");
-		licensesNotConfirmedMessage=ShaniString.loadString("engine.licensesNotConfirmedMessage");
+		Node engineNode=doc.getElementsByTagName("engine").item(0);
+		
+		helloMessage=ShaniString.loadString(engineNode, "helloMessage");
+		closeMessage=ShaniString.loadString(engineNode, "closeMessage");
+		notUnderstandMessage=ShaniString.loadString(engineNode, "notUnderstandMessage");
+		errorMessage=ShaniString.loadString(engineNode, "errorMessage");
+		licenseConfirmationMessage=ShaniString.loadString(engineNode, "licenseConfirmationMessage");
+		licensesNotConfirmedMessage=ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
 		
 		long bigTime=System.nanoTime();
 		commands.println();
@@ -291,7 +294,7 @@ public class Engine {
 					long time=System.nanoTime();
 					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
 					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-					order.init(e);
+					order.init(e);									//TODO add test if loaded successfully
 					orders.add(order);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 					Engine.registerLoadException();

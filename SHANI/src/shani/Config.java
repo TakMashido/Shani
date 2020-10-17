@@ -1,8 +1,10 @@
 package shani;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +34,8 @@ public class Config {
 		}
 		
 		mainFile=getFileProperty(props,"mainFile");
+		
+		dataFile=getFileProperty(props, "dataFile", Config.class.getResourceAsStream("/files/templates/shaniData.dat"));
 		
 		errorsLogFileLocation=getFileProperty(props, "errorsLogFileLocation");
 		debugLogFileLocation=getFileProperty(props, "debugLogFileLocation");
@@ -70,7 +74,7 @@ public class Config {
 		
 		if(!errors.isEmpty()) {
 			Engine.registerLoadException();
-			System.err.println("Config file is corrupted:");
+			System.err.println("Error during parsing config file:");
 			for(String str:errors) {
 				System.err.println("\t"+str);
 			}
@@ -89,6 +93,9 @@ public class Config {
 	}
 	
 	private static final File getFileProperty(Properties props[], String key) {
+		return getFileProperty(props, key, null);
+	}
+	private static final File getFileProperty(Properties props[], String key, InputStream defaultFileContent) {
 		String source=getProperty(props, key);
 		if(source==null)
 			return null;			//Error already handled in getProperty(...) and end of static initializer block
@@ -98,6 +105,23 @@ public class Config {
 		if(parent!=null&&!parent.exists()) {
 			parent.mkdirs();
 		}
+		
+		if(defaultFileContent!=null&&!ret.exists()) {
+			try(OutputStream out=new FileOutputStream(ret)){
+				ret.createNewFile();
+				
+				byte[] buf=new byte[1024];
+				int toCopy;
+				while((toCopy=defaultFileContent.read(buf))>0) {
+					out.write(buf, 0, toCopy);
+				}
+			} catch (IOException e) {
+				errors.add("Error encountered during data file creation.");
+				e.printStackTrace();
+			}
+			
+		}
+		
 		
 		return ret;
 	}
@@ -176,6 +200,8 @@ public class Config {
 	}
 	
 	public static final File mainFile;
+	
+	public static final File dataFile;
 	
 	/*Log files location*/
 	public static final File errorsLogFileLocation;

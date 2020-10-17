@@ -15,38 +15,41 @@ import org.xml.sax.SAXException;
 
 /**Class for getting and saving data in Shani data files.
  * 
- * Access to data is done by String containg path to it.
+ * Access to data is done by String containing path to it.
  * It's form is standard java path. Names of nodes/elements divided with '.' Character.
  * 
  * @author TakMashido
  */
 public class Storage {
-	private static final Node mainNode;
-	private static final Node storage;
-	private static final Node userdata;
+	@Deprecated
+	private static final Node mainNodeOld;
+	@Deprecated
+	private static final Node storageOld;
+	@Deprecated
+	private static final Node userdataOld;
 	
 	private static final Pattern divider=Pattern.compile("(?:\\s*\\.\\s*)+");
 	
 	static {
-		mainNode=Engine.doc.getElementsByTagName("shani").item(0);
-		storage=((Element)mainNode).getElementsByTagName("storage").item(0);						//Can throw error if initialized before invocing Engin.initialize
-		userdata=((Element)mainNode).getElementsByTagName("userdata").item(0);
+		mainNodeOld=Engine.doc.getElementsByTagName("shani").item(0);
+		storageOld=((Element)mainNodeOld).getElementsByTagName("storage").item(0);						//Can throw error if initialized before invocing Engin.initialize
+		userdataOld=((Element)mainNodeOld).getElementsByTagName("userdata").item(0);
 	}
 	
 	/**Get nodes under given path in Storage part of file.
 	 * @param path Path to super node.
-	 * @return NodeList poinded by given path.
+	 * @return NodeList pointed by given path.
 	 */
 	public static NodeList getNodes(String path) {
-		return getNodes(storage,path);
+		return getNodes(storageOld,path);
 	}
 	
 	/**Get ShaniString under given path in Storage part of file.
-	 * @param stringPath Path to Node conataing wanted ShaniString.
+	 * @param stringPath Path to Node containing wanted ShaniString.
 	 * @return ShaniString pointed by path.
 	 */
 	public static ShaniString getString(String stringPath) {
-		return getShaniString(storage,stringPath);
+		return getShaniString(storageOld,stringPath);
 	}
 	
 	/**Returns node from "shani" node from mainFile pointed by provided path.
@@ -54,7 +57,7 @@ public class Storage {
 	 * @return Node from given path or null if not found.
 	 */
 	public static Node readNodeBase(String path) {
-		NodeList nodes=getNodes(mainNode,path);
+		NodeList nodes=getNodes(mainNodeOld,path);
 		if(nodes!=null)return nodes.item(0);
 		return null;
 	}
@@ -63,39 +66,63 @@ public class Storage {
 	 * @return String from node under provided path.
 	 */
 	public static String readStringBase(String path) {
-		return getString(mainNode,path);
+		return getString(mainNodeOld,path);
 	}
 	/**Read data from directly from "shani" node in mainFile. 
 	 * @param path Path to data in xml file.
 	 * @return ShaniString from node under provided path.
 	 */
 	public static ShaniString readShaniStringBase(String path) {
-		return getShaniString(mainNode,path);
+		return getShaniString(mainNodeOld,path);
 	}
 	
 	/**Get nodes under given path in UserData part of file.
 	 * @param path Path to super node.
-	 * @return NodeList poinded by given path.
+	 * @return NodeList pointed by given path.
 	 */
 	public static NodeList getUserNodes(String path) {
-		return getNodes(userdata,path);
+		return getNodes(userdataOld,path);
 	}
 	/**Get ShaniString under given path in UserData part of file.
-	 * @param stringPath Path to Node conataing wanted ShaniString.
+	 * @param stringPath Path to Node containing wanted ShaniString.
 	 * @return ShaniString pointed by path.
 	 */
 	public static ShaniString getUserShaniString(String stringPath) {
-		return getShaniString(userdata,stringPath);
+		var ret=getShaniString(userdataOld,stringPath);
+		if(ret==null)
+			return getShaniString(userData,stringPath);
+		return ret;
 	}
+	/**Get Boolean stored under userData node.
+	 * @param path Where to search for boolean.
+	 * @return Stored value or false if not found.
+	 */
 	public static boolean getUserBoolean(String path) {
-		return Boolean.parseBoolean(getString(userdata,path));
+		var ret=getUserBool(path);
+		
+		if(ret==null)
+			return false;
+		return ret;
+	}
+	/**Get Boolean stored under userData node, or null if not found.
+	 * @param path Where to search for boolean.
+	 * @return Stored value or null if not found.
+	 */
+	public static Boolean getUserBool(String path) {
+		var ret=getString(userdataOld,path);
+		if(ret==null)
+			ret=getString(userData,path);
+		
+		if(ret==null)
+			return null;
+		return Boolean.parseBoolean(ret);
 	}
 	public static int getUserInt(String path) {
-		return Integer.parseInt(getString(userdata,path));
+		return Integer.parseInt(getString(userdataOld,path));
 	}
 	
+	@SuppressWarnings("resource")
 	private static NodeList getNodes(Node where, String path) {
-		@SuppressWarnings("resource")
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
 		NodeList Return=((Element)where).getElementsByTagName(scanner.next());
 		while(scanner.hasNext()) {
@@ -123,13 +150,13 @@ public class Storage {
 	public static String getString(Node where, String stringPath) {					//All changes here have to be made also in getShaniString(Node,String). This methods do the same but output is different.
 		var nodes=getNodes(where,stringPath);
 		if(nodes==null) {
-			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storage?"storage":"userdata");
+			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storageOld?"storage":"userdata");
 			Engine.registerLoadException();
 			return null;
 		}
 		var node=nodes.item(0);
 		if(node==null) {
-			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storage?"storage":"userdata");
+			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where==storageOld?"storage":"userdata");
 			Engine.registerLoadException();
 			return null;
 		}
@@ -147,20 +174,23 @@ public class Storage {
 	 * @param data Data to store.
 	 */
 	public static void writeUserData(String path,ShaniString data) {
-		Node stor=createDirectory(userdata,path);
-		stor.setTextContent(data.toFullString());
+		writeUserData(path, data.toFullString());
 	}
 	/**Writes given String under path in UserData part of file.
 	 * @param path Path pointing to location in which data will be stored.
 	 * @param data Data to store.
 	 */
 	public static void writeUserData(String path,String data) {
-		Node stor=createDirectory(userdata,path);
+		//Write to both storages for now. After removing original one it will be written to one again.
+		Node stor=createDirectory(Engine.doc,userdataOld,path);
+		stor.setTextContent(data);
+		
+		stor=createDirectory(shaniDataDoc,shaniData,path);
 		stor.setTextContent(data);
 	}
 	
-	private static Node createDirectory(Node where,String path) {
-		@SuppressWarnings("resource")
+	@SuppressWarnings("resource")
+	private static Node createDirectory(Document doc, Node where,String path) {
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
 		String nodeName;
 		Node parentNode=where;
@@ -169,12 +199,12 @@ public class Storage {
 			nodeName=scanner.next();
 			Return=((Element)where).getElementsByTagName(nodeName).item(0);
 			if(Return==null) {
-				Return=Engine.doc.createElement(nodeName);
+				Return=doc.createElement(nodeName);
 				parentNode.appendChild(Return);
 				parentNode=Return;
 				while(scanner.hasNext()) {
 					nodeName=scanner.next();
-					Return=Engine.doc.createElement(nodeName);
+					Return=doc.createElement(nodeName);
 					parentNode.appendChild(Return);
 					parentNode=Return;
 				}
@@ -190,11 +220,15 @@ public class Storage {
 	static {
 		Document doc=null;
 		Node shaniDataNode=null;
-				
+		Node storageNode=null;
+		Node userDataNode=null;
+		
 		try {
 			doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.dataFile);
 			
 			shaniDataNode=doc.getElementsByTagName("shaniData").item(0);
+			storageNode=((Element)shaniDataNode).getElementsByTagName("storage").item(0);
+			userDataNode=((Element)shaniDataNode).getElementsByTagName("userdata").item(0);
 		} catch (SAXException | IOException | ParserConfigurationException e) {
 			e.printStackTrace();
 			Engine.registerLoadException();
@@ -202,11 +236,14 @@ public class Storage {
 		
 		shaniDataDoc=doc;
 		shaniData=shaniDataNode;
-		
+		storage=storageNode;
+		userData=userDataNode;
 	}
 	
 	private static final Document shaniDataDoc;
 	public static final Node shaniData;
+	public static final Node storage;
+	public static final Node userData;
 	
 	public static final void save() {
 		Engine.saveDocument(shaniDataDoc, Config.dataFile);
