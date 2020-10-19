@@ -145,6 +145,8 @@
 		</order>
 		<order classname="shani.orders.MergeOrder">
 			<key>i</key>
+			<connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
+			<cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
 		</order>
 		<order classname="shani.orders.TimerOrder">
 			<keyword>timer*zegar</keyword>
@@ -226,10 +228,6 @@
 			<MasterOrder>
 				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
 			</MasterOrder>
-			<MergeOrder>
-				<connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
-				<cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
-			</MergeOrder>
 			<TimerOrder>
 				<startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
 				<alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
