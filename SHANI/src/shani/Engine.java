@@ -42,8 +42,6 @@ import shani.tools.MainFileTools;
 
 public class Engine {
 	public static PrintStream debug;
-	/**Use {@link #debug instead}*/
-	@Deprecated
 	public static PrintStream info;
 	private static PrintStream commands;
 	
@@ -150,8 +148,8 @@ public class Engine {
 		}
 		
 		try {
-			new File("info.log").delete();
-			info=new PrintStream(new BufferedOutputStream(new FileOutputStream("Info.log"),1024));
+			Config.infoLogFileLocation.delete();
+			info=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.infoLogFileLocation),1024));
 		} catch (FileNotFoundException e1) {
 			System.out.println("Failed to set info file");
 			e1.printStackTrace();
@@ -382,14 +380,18 @@ public class Engine {
 		if(command.isEmpty())return null;
 		
 		commands.println("\n"+command.toFullString()+':');
+		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+command.toFullString()+':');
 		for(FilterModule filter:filterModules)command=filter.filter(command);
 		commands.println("\t"+command.toFullString());
+		info.println("\t"+command.toFullString());
 		
 		lastCommand=command;
 		Executable toExec=getExecutable(command);
 		
 		if(toExec!=null&&toExec.cost<=Config.sentenseCompareTreshold) {
+			info.println("<Execution><Excution><Execution><Execution>");
 			toExec.execute();
+			info.println("<End><End><End><End><End><End><End><End><End>");
 			System.gc();
 			return toExec;
 		} else {

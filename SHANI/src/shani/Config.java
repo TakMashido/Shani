@@ -40,6 +40,7 @@ public class Config {
 		errorsLogFileLocation=getFileProperty(props, "errorsLogFileLocation");
 		debugLogFileLocation=getFileProperty(props, "debugLogFileLocation");
 		commandsLogFileLocation=getFileProperty(props, "commandsLogFileLocation");
+		infoLogFileLocation=getFileProperty(props, "infoLogFileLocation");
 		
 		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey"));
 		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey"));
@@ -207,6 +208,7 @@ public class Config {
 	public static final File errorsLogFileLocation;
 	public static final File debugLogFileLocation;
 	public static final File commandsLogFileLocation;
+	public static final File infoLogFileLocation;
 	
 	/*Basic responses*/												//TODO move to main file
 	public static final ShaniString positiveResponeKey;
