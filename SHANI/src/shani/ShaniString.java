@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**Object used to represent string values in SHANI.
@@ -155,15 +156,16 @@ public class ShaniString {
 	 * @param origin XML Node storing ShaniString data.
 	 */
 	public ShaniString(Node origin) {
-		assert origin!=null:"Origin node can't be null. Propably node is missing in shani main file.";
-		try {
-			value=processString(origin.getTextContent());
-		} catch(NullPointerException ex) {
-			assert false:"Passed empty/nonexisting node. Propably node is missing in shani main file.";
-			//Will crash only if this shani (string|module|filter) is used, otherwise later, otherwise will run fine.
-			Engine.registerLoadException();
-			ex.printStackTrace();
+		if(origin==null) {
+			assert false:"Origin node can't be null. Propably node is missing in shani main file.";
+			value=new String[] {"MISSING_SHANI_STRING"};
 		}
+		
+		Node nd=origin.getAttributes().getNamedItem("val");
+		if(nd!=null)
+			value=processString(nd.getNodeValue());
+		else
+			value=processString(origin.getTextContent());
 		
 		this.origin=origin;
 	}
@@ -236,6 +238,13 @@ public class ShaniString {
 		return Storage.getString(path);
 	}
 	
+	/**Load ShaniString from xml node.
+	 * Equivalent to {@link Storage#getShaniString(Node, String)}.
+	 * @param where Base node for search.
+	 * @param path Path to ShaniString inside node.*/
+	public static ShaniString loadString(Document doc,String path) {
+		return Storage.getShaniString(doc.getDocumentElement(), path);
+	}
 	/**Load ShaniString from xml node.
 	 * Equivalent to {@link Storage#getShaniString(Node, String)}.
 	 * @param where Base node for search.
