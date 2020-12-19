@@ -28,13 +28,13 @@ import shani.Tools;
 import shani.orders.templates.SentenceMatcherOrder;
 
 public class WeatherOrder extends SentenceMatcherOrder {
-	private static ShaniString notKnowLocationMessage=ShaniString.loadString("orders.WeatherOrder.notKnowLocationMessage");
-	private static ShaniString cannotProcessDayMessage=ShaniString.loadString("orders.WeatherOrder.cannotProcessDayMessage");
-	private static ShaniString cannotParseDayNumberMessage=ShaniString.loadString("orders.WeatherOrder.cannotParseDayNumberMessage");
-	private static ShaniString noForecastFoundMessage=ShaniString.loadString("orders.WeatherOrder.noForecastFoundMessage");
-	private static ShaniString whichCityMessage=ShaniString.loadString("orders.WeatherOrder.whichCityMessage");
-	private static ShaniString cityOutOfBoundsMessage=ShaniString.loadString("orders.WeatherOrder.cityOutOfBoundsMessage");
-	private static ShaniString unmatchingCityMessage=ShaniString.loadString("orders.WeatherOrder.unmatchingCityMessage");
+	private static ShaniString notKnowLocationMessage;
+	private static ShaniString cannotProcessDayMessage;
+	private static ShaniString cannotParseDayNumberMessage;
+	private static ShaniString noForecastFoundMessage;
+	private static ShaniString whichCityMessage;
+	private static ShaniString cityOutOfBoundsMessage;
+	private static ShaniString unmatchingCityMessage;
 	
 	private SentenceGenerator weatherSentence;
 	
@@ -47,11 +47,19 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	private String[] badWeatherTypes;
 	
 	@Override
-	protected boolean initialize() {
-		weatherSentence=new SentenceGenerator(orderFile.getElementsByTagName("weathersentence").item(0));
-		dayChooser=new SentenceMatcher(orderFile.getElementsByTagName("daychooser").item(0));
+	protected boolean initialize(org.w3c.dom.Element e) {
+		notKnowLocationMessage=ShaniString.loadString(e,"orders.WeatherOrder.notKnowLocationMessage");          
+		cannotProcessDayMessage=ShaniString.loadString(e,"orders.WeatherOrder.cannotProcessDayMessage");        
+		cannotParseDayNumberMessage=ShaniString.loadString(e,"orders.WeatherOrder.cannotParseDayNumberMessage");
+		noForecastFoundMessage=ShaniString.loadString(e,"orders.WeatherOrder.noForecastFoundMessage");          
+		whichCityMessage=ShaniString.loadString(e,"orders.WeatherOrder.whichCityMessage");                      
+		cityOutOfBoundsMessage=ShaniString.loadString(e,"orders.WeatherOrder.cityOutOfBoundsMessage");          
+		unmatchingCityMessage=ShaniString.loadString(e,"orders.WeatherOrder.unmatchingCityMessage");            
 		
-		var elems=orderFile.getElementsByTagName("weatherResponses").item(0).getChildNodes();			//Initialize weather identifiers in Weather class
+		weatherSentence=new SentenceGenerator(e.getElementsByTagName("weathersentence").item(0));
+		dayChooser=new SentenceMatcher(e.getElementsByTagName("daychooser").item(0));
+		
+		var elems=e.getElementsByTagName("weatherResponses").item(0).getChildNodes();			//Initialize weather identifiers in Weather class
 		for(int i=0;i<elems.getLength();i++) {
 			var node=elems.item(i);
 			if(node.getNodeType()==Node.ELEMENT_NODE) {
@@ -59,7 +67,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 			}
 		}
 		
-		elems=orderFile.getChildNodes();
+		elems=e.getChildNodes();
 		for(int i=0;i<elems.getLength();i++) {
 			var node=elems.item(i);
 			if(node.getNodeName().equals("badWeather")) {
@@ -89,6 +97,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		public ShaniString toShaniString() {
 			return responses.get(identifier);
 		}
+		@Override
 		public String toString() {
 			ShaniString Return=toShaniString();
 			if(Return==null)return identifier;
@@ -96,6 +105,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		}
 	}
 	
+	@Override
 	protected SentenceMatcherAction actionFactory(String sentenceName, HashMap<String, String> returnValues) {
 		return new WeatherAction();
 	}
@@ -178,6 +188,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	}
 	
 	private class WeatherAction extends SentenceMatcherAction{
+		@Override
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			if(!Engine.getLicenseConfirmation("weather.com")) {
 				Engine.licensesNotConfirmedMessage.printOut();
@@ -314,6 +325,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 			return Return;
 		}
 		
+		@Override
 		public String toString() {
 			return getParamsMap().toString();
 		}

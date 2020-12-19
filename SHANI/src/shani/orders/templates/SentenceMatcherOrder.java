@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import shani.SentenceMatcher;
 import shani.ShaniString;
 
@@ -11,14 +13,21 @@ public abstract class SentenceMatcherOrder extends Order{
 	protected SentenceMatcher matcher;
 	
 	@Override
-	protected boolean init() {
-		matcher=new SentenceMatcher(orderFile.getElementsByTagName("sentence").item(0));
-		return initialize();
+	public boolean init(Element e) {
+		matcher=new SentenceMatcher(e.getElementsByTagName("sentence").item(0));
+		return initialize(e);
 	}
 	
 	/**Override to do some initializations in your module.
-	 * @return If successfully initializeted.
+	 * @return If successfully initialized.
 	 */
+	protected boolean initialize(Element e) {return true;}
+	
+	/**Override to do some initializations in your module.
+	 * @return If successfully initialized.
+	 * @deprecated Use initialize(Element) instead.
+	 */
+	@Deprecated
 	protected boolean initialize() {return true;}
 	
 	@Override

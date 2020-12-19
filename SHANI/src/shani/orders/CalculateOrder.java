@@ -3,13 +3,24 @@ package shani.orders;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.w3c.dom.Element;
+
 import shani.Engine;
 import shani.ShaniString;
+import shani.Storage;
 import shani.orders.templates.SentenceMatcherOrder;
 
 public class CalculateOrder extends SentenceMatcherOrder {
-	private static ShaniString calculationResoultMessage=ShaniString.loadString("orders.CalculateOrder.calculationResoultMessage");
-	private static ShaniString calculationFailedMessage=ShaniString.loadString("orders.CalculateOrder.calculationFailedMessage");
+	private static ShaniString calculationResoultMessage;
+	private static ShaniString calculationFailedMessage;
+	
+	@Override
+	protected boolean initialize(Element e) {
+		calculationResoultMessage=ShaniString.loadString(e, "calculationResoultMessage");
+		calculationFailedMessage=ShaniString.loadString(e, "calculationFailedMessage");
+		
+		return true;
+	}
 	
 	@Override
 	protected SentenceMatcherAction actionFactory(String sentenceName, HashMap<String, String> returnValues) {
@@ -17,7 +28,6 @@ public class CalculateOrder extends SentenceMatcherOrder {
 	}
 	
 	public class CalculateAction extends SentenceMatcherAction{
-
 		@Override
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			try {
@@ -201,8 +211,8 @@ public class CalculateOrder extends SentenceMatcherOrder {
 		double resoult=0;
 		for(int i=0;i<elements.size();i++) {
 			Object el=elements.get(i);
-			if(el instanceof Operation|el2 instanceof Operation)throw new Exception("CalculateOrder Error during parsing \""+expresion+'"');					//Operation stored in el/el2 is unnsupported
 			assert el instanceof Value&&el2 instanceof Value:"elements list should contain only Value and Operation objects";
+			if(el instanceof Operation|el2 instanceof Operation)throw new Exception("CalculateOrder Error during parsing \""+expresion+"\" unrecognized token found.");					//Operation stored in el/el2 is unnsupported
 			resoult+=((Value)el).value;
 		}
 		
