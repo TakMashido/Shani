@@ -171,7 +171,7 @@ public class Config {
 							if(!file.exists()) {
 								if(!file.mkdirs()) {
 									Engine.registerLoadException();
-									System.err.println("Failed to create config directory: "+file);
+									System.err.println("Failed to create config directory: "+file.getCanonicalPath());
 								}
 								continue;
 							}
@@ -184,9 +184,13 @@ public class Config {
 							}
 						} else {
 							if(!file.exists()) {
-								if(!(file.getParentFile().mkdir()&&file.createNewFile())) {
+								if(file.getParentFile()!=null&&file.getParentFile().mkdirs()){						//File inside shani file system root
 									Engine.registerLoadException();
-									System.err.println("Failed to create config file: "+file);
+									System.out.println(file.getParentFile());
+									System.err.println("Failed to create config file: "+file.getCanonicalPath()+" cannot create parent directory.");
+								} else if(!file.createNewFile()) {
+									Engine.registerLoadException();
+									System.err.println("Failed to create config file: "+file.getCanonicalPath()+".");
 								}
 								continue;
 							}
