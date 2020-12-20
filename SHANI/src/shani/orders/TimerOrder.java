@@ -1,65 +1,140 @@
 package shani.orders;
 
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import shani.Config;
 import shani.Engine;
 import shani.ShaniString;
-import shani.orders.templates.MultipleKeywordOrder;
+import shani.Storage;
+import shani.orders.templates.SentenceMatcherOrder;
 import shani.tools.Parsers;
 
-public class TimerOrder extends MultipleKeywordOrder{
-//	private ShaniString startMessage=new ShaniString("Timer %s wystartowa³.*Zegar w³¹czony.*Timer %s dzia³a.*W³¹czy³am timer %s.");
-//	private ShaniString alreadyRunningMessage=new ShaniString("Timer %s ju¿ dzia³a*Zegar %s ju¿ chodzi.*Zegar %s ca³y czas dzia³a.*Nie mogê w³¹czyæ timera %s. Ju¿ dzia³a.");
-//	private ShaniString stopMessage=new ShaniString("Zatrzyma³am timer %s.*Timer %s zosta³ zatrzymany");
-//	private ShaniString alreadyStoppedMessage=new ShaniString("Timer %s ju¿ stoi.");
-//	private ShaniString resetMessage=new ShaniString("Resetujê timer %s.*Ju¿ zerujê timer %s.Zegar %s ustawiony na 0.");
-//	private ShaniString printTimeMessage=new ShaniString("Aktualny czas to %s.*Zliczono %s.*Timer pracowa³ przez %s.");
-//	
-//	private ShaniString nonExistStartMessage=new ShaniString("Tworzê timer %s.*Nowy timer %s wystartowa³.*Zegar w³¹czony.*Timer %s dzia³a.*W³¹czy³am timer %s.");
-//	private ShaniString nonExistStopMessage=new ShaniString("Nie mogê zatrzymaæ timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s");
-//	private ShaniString nonExistResetMessage=new ShaniString("Timer %s nie intnieje.*Nie mogê zresetowaæ timera %s. Takowy nie istnieje.");
-//	private ShaniString nonExistPrintTimeMessage=new ShaniString("Brak timera %s.*Jak mam wyœwietliæ czas z nieistniej¹cego timera?");
-	
-	private ShaniString startMessage=ShaniString.loadString("orders.TimerOrder.startMessage");                                          
-	private ShaniString alreadyRunningMessage=ShaniString.loadString("orders.TimerOrder.alreadyRunningMessage");
-	private ShaniString stopMessage=ShaniString.loadString("orders.TimerOrder.stopMessage");                                                                     
-	private ShaniString alreadyStoppedMessage=ShaniString.loadString("orders.TimerOrder.alreadyStoppedMessage");                                                                                         
-	private ShaniString resetMessage=ShaniString.loadString("orders.TimerOrder.resetMessage");                                                     
-	private ShaniString printTimeMessage=ShaniString.loadString("orders.TimerOrder.printTimeMessage");                                                      
+public class TimerOrder extends SentenceMatcherOrder{
+	private ShaniString startMessage;                                          
+	private ShaniString alreadyRunningMessage;
+	private ShaniString stopMessage;                                                                     
+	private ShaniString alreadyStoppedMessage;                                                                                         
+	private ShaniString resetMessage;                                                     
+	private ShaniString printTimeMessage;                                                      
 	                                                                                                                                                                         
-	private ShaniString nonExistStartMessage=ShaniString.loadString("orders.TimerOrder.nonExistStartMessage");            
-	private ShaniString nonExistStopMessage=ShaniString.loadString("orders.TimerOrder.nonExistStopMessage");                            
-	private ShaniString nonExistResetMessage=ShaniString.loadString("orders.TimerOrder.nonExistResetMessage");                                  
-	private ShaniString nonExistPrintTimeMessage=ShaniString.loadString("orders.TimerOrder.nonExistPrintTimeMessage");                                       
+	private ShaniString nonExistStartMessage;            
+	private ShaniString nonExistStopMessage;                            
+	private ShaniString nonExistResetMessage;                                  
+	private ShaniString nonExistPrintTimeMessage;                                       
+	
+	private short noTimerImportanceBias;
+	
+	private Node dataElement;			//node inside ordersData in shaniData
+	
+	private ArrayList<TimerAction> timers=new ArrayList<>();
 	
 	@Override
-	protected OrderTarget targetFactory(Element e) {
-		return new TimerTarget(e);
+	protected boolean initialize(Element e) {
+		startMessage=ShaniString.loadString(e,"startMessage");
+		alreadyRunningMessage=ShaniString.loadString(e,"alreadyRunningMessage");
+		stopMessage=ShaniString.loadString(e,"stopMessage");
+		alreadyStoppedMessage=ShaniString.loadString(e,"alreadyStoppedMessage");
+		resetMessage=ShaniString.loadString(e,"resetMessage");
+		printTimeMessage=ShaniString.loadString(e,"printTimeMessage");
+		
+		nonExistStartMessage=ShaniString.loadString(e,"nonExistStartMessage");
+		nonExistStopMessage=ShaniString.loadString(e,"nonExistStopMessage");
+		nonExistResetMessage=ShaniString.loadString(e,"nonExistResetMessage");
+		nonExistPrintTimeMessage=ShaniString.loadString(e,"nonExistPrintTimeMessage");
+		
+		dataElement=Storage.getOrderData(this);
+		
+		noTimerImportanceBias=(short)Storage.getInt(e, "config.noTimerImportanceBias");
+		
+		NodeList subnodes=dataElement.getChildNodes();
+		for(int i=0;i<subnodes.getLength();i++) {
+			if(subnodes.item(i) instanceof Element)
+				new TimerAction((Element)subnodes.item(i));
+		}
+		
+		return true;
 	}
 	
 	@Override
-	protected NotMatchedTarget getUnmatchedTarget() {
-		return new NoTimerTarget();
+	protected List<SentenceMatcherAction> actionFactoryList(String sentenceName, HashMap<String, String> returnValues) {
+		ArrayList<SentenceMatcherAction> ret=new ArrayList<>(timers.size());
+		
+		ShaniString keyword=new ShaniString(returnValues.get("name"));
+		
+		for(var timer:timers) {
+			timer.cost=timer.keyword.getCompareCost(keyword);
+			
+			if(timer.cost<Config.wordCompareTreshold)
+				ret.add(timer);
+		}
+		
+		if(ret.isEmpty())
+			ret.add(new NoTimerAction());
+		
+		return ret;
 	}
 	
 	@Override
 	public void save() {
-		for(var timer:orderTargets) {
-			if(timer instanceof TimerTarget)((TimerTarget)timer).save();
+		for(var timer:timers) {
+			timer.save();
 		}
 	}
 	
-	private class TimerTarget extends OrderTarget {
+	private class TimerAction extends SentenceMatcherAction {
+		protected Element targetFile;
+		protected ShaniString keyword;
+		
 		private int timeCounted;						//In sec
 		private boolean isRunning;
 		private long lastTimeMeansure;					//currentTimeMillis					
 		
-		private TimerTarget(Element e) {
-			super(e);
+		private TimerAction(Element e) {
+			targetFile=e;
+			keyword=new ShaniString(targetFile.getElementsByTagName("key").item(0));
+			
 			timeCounted=Integer.parseInt(targetFile.getElementsByTagName("time").item(0).getTextContent());
+			
+			timers.add(this);
 		}
-		private TimerTarget(ShaniString keyword) {
-			super(keyword);
+		private TimerAction(String keyword) {
+			this.keyword=new ShaniString(keyword);
+			targetFile=dataElement.getOwnerDocument().createElement("target");
+			dataElement.appendChild(targetFile);
+			
+			Element e=targetFile.getOwnerDocument().createElement("key");
+			targetFile.appendChild(e);
+			timers.add(this);
+			this.keyword.setNode(e);
+		}
+		
+		@Override
+		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
+			switch (sentenceName) {
+			case "start":
+				start(true);
+				break;
+			case "stop":
+				stop();
+				break;
+			case "show":
+				show();
+				break;
+			case "reset":
+				reset();
+				break;
+			default:
+				Engine.errorMessage.printOut();
+				System.err.println();
+				return false;
+			}
+			return true;
 		}
 		
 		@SuppressWarnings("unused")						//Used using java reflecion API
@@ -79,8 +154,8 @@ public class TimerOrder extends MultipleKeywordOrder{
 			if(isRunning) {
 				updateTime();
 				isRunning=false;
-				System.out.printf(stopMessage.toString(),targetKeyword.toString());
-			} else System.out.printf(alreadyStoppedMessage.toString(),targetKeyword.toString());
+				System.out.printf(stopMessage.toString(),keyword.toString());
+			} else System.out.printf(alreadyStoppedMessage.toString(),keyword.toString());
 			System.out.println();
 		}
 		@SuppressWarnings("unused")						//Used using java reflecion API
@@ -107,34 +182,46 @@ public class TimerOrder extends MultipleKeywordOrder{
 			updateTime();
 			var timeNode=targetFile.getElementsByTagName("time").item(0);
 			if(timeNode==null) {
-				timeNode=Engine.doc.createElement("time");
+				timeNode=targetFile.getOwnerDocument().createElement("time");
 				targetFile.appendChild(timeNode);
 			}
 			timeNode.setTextContent(Integer.toString(timeCounted));
 		}
 	}
-	private class NoTimerTarget extends NotMatchedTarget{
-		@SuppressWarnings("unused")						//Used using java reflecion API
-		private void start() {
-			System.out.printf(nonExistStartMessage.toString(),unmatched.toString());
-			System.out.println();
-			TimerTarget timer=new TimerTarget(unmatched);
-			timer.start(false);
+	private class NoTimerAction extends SentenceMatcherAction{
+		
+		private NoTimerAction() {
+			importanceBias=noTimerImportanceBias;
 		}
-		@SuppressWarnings("unused")						//Used using java reflecion API
-		private void stop() {
-			System.out.printf(nonExistStopMessage.toString(),unmatched.toString());
-			System.out.println();
-		}
-		@SuppressWarnings("unused")						//Used using java reflecion API
-		private void reset() {
-			System.out.printf(nonExistResetMessage.toString(),unmatched.toString());
-			System.out.println();
-		}
-		@SuppressWarnings("unused")						//Used using java reflecion API
-		private void show() {
-			System.out.printf(nonExistPrintTimeMessage.toString(),unmatched.toString());
-			System.out.println();
+		
+		@Override
+		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
+			String timerName=returnValues.get("name");
+			switch(sentenceName) {
+			case "start":
+				System.out.printf(nonExistStartMessage.toString(),timerName);
+				System.out.println();
+				TimerAction timer=new TimerAction(timerName);
+				timer.start(false);
+				break;
+			case "stop":
+				System.out.printf(nonExistStopMessage.toString(),timerName);
+				System.out.println();
+				break;
+			case "show":
+				System.out.printf(nonExistPrintTimeMessage.toString(),timerName);
+				System.out.println();
+				break;
+			case "reset":
+				System.out.printf(nonExistResetMessage.toString(),timerName);
+				System.out.println();
+				break;
+			default:
+				System.err.println("Unknow sentence name in NoTimerAction: "+sentenceName);
+				Engine.errorMessage.printOut();
+				return false;
+			}
+			return true;
 		}
 	}
 }

@@ -31,7 +31,7 @@ public abstract class Action{
 	 * @param importanceBias importance bias of this action.
 	 * @return Executable connected to this action with given cost and importance bias.
 	 */
-	public final Executable getExecutable(short cost, short importanceBias) {
+	public Executable getExecutable(short cost, short importanceBias) {
 		return new Executable(this,cost,importanceBias);
 	}
 	

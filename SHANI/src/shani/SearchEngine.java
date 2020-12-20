@@ -19,7 +19,7 @@ import shani.SearchEngine.SearchResoults.SearchResoult;
  * @author TakMashiddo
  */
 public class SearchEngine {
-	private static final Pattern websideDomainPattern=Pattern.compile("^(?:http://|https://)(?:[\\w\\d\\.-]*\\.)?([\\w\\d\\-]+\\.[\\w\\d]+)(?:/[\\w\\d\\-._~:/?#\\[\\]@!\\$&'\\(\\)\\*\\+,;%=]*)?$");
+	protected static final Pattern websideDomainPattern=Pattern.compile("^(?:http://|https://)(?:[\\w\\d\\.-]*\\.)?([\\w\\d\\-]+\\.[\\w\\d]+)(?:/[\\w\\d\\-._~:/?#\\[\\]@!\\$&'\\(\\)\\*\\+,;%=]*)?$");
 	
 	/**Returned by {@link SearchEngine#search(String)} if one of required licenses are not confimed,
 	 * save way to pass information about it wchich do not requaire additional handling.
@@ -190,6 +190,7 @@ public class SearchEngine {
 				return domain;
 			}
 			
+			@Override
 			public String toString() {
 				return url+" :::: "+title;
 			}

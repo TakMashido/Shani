@@ -13,6 +13,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import shani.orders.templates.Order;
+
 /**Class for getting and saving data in Shani data files.
  * 
  * Access to data is done by String containing path to it.
@@ -237,12 +239,32 @@ public class Storage {
 		return Return;
 	}
 	
+	public static Node getOrderData(Order order) {
+		return getNodes(ordersData, order.getClass().getCanonicalName(),true).item(0);
+	}
+	
+	public static int getInt(Node where,String path) {
+		return Integer.parseInt(getString(where,path));
+	}
+	/**Get Boolean stored under userData node, or null if not found.
+	 * @param path Where to search for boolean.
+	 * @return Stored value or null if not found.
+	 */
+	public static Boolean getBool(Node where, String path) {
+		var ret=getString(where,path);
+		
+		if(ret==null)
+			return null;
+		return Boolean.parseBoolean(ret);
+	}
+	
 	//<new><version><new><version><new><version><new><version><new><version><new><version>
 	static {
 		Document doc=null;
 		Node shaniDataNode=null;
 		Node storageNode=null;
 		Node userDataNode=null;
+		Node ordersDataNode=null;
 		
 		try {
 			doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.dataFile);
@@ -250,6 +272,7 @@ public class Storage {
 			shaniDataNode=doc.getElementsByTagName("shaniData").item(0);
 			storageNode=((Element)shaniDataNode).getElementsByTagName("storage").item(0);
 			userDataNode=((Element)shaniDataNode).getElementsByTagName("userdata").item(0);
+			ordersDataNode=((Element)shaniDataNode).getElementsByTagName("ordersdata").item(0);
 		} catch (SAXException | IOException | ParserConfigurationException e) {
 			e.printStackTrace();
 			Engine.registerLoadException();
@@ -259,12 +282,14 @@ public class Storage {
 		shaniData=shaniDataNode;
 		storage=storageNode;
 		userData=userDataNode;
+		ordersData=ordersDataNode;
 	}
 	
 	private static final Document shaniDataDoc;
 	public static final Node shaniData;
 	public static final Node storage;
 	public static final Node userData;
+	public static final Node ordersData;
 	
 	public static final void save() {
 		Engine.saveDocument(shaniDataDoc, Config.dataFile);

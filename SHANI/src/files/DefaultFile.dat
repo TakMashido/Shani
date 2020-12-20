@@ -50,6 +50,13 @@
 	</modules>
 	<orders>
 		<order classname="shani.orders.WeatherOrder">
+			<notKnowLocationMessage val="Nie wiem dla jakiego miejsca podać pogodę"/>
+			<cannotProcessDayMessage val="Nie wiem o jaki dzień ci chodzi.*Nie wiem kiedy to jest."/>
+			<cannotParseDayNumberMessage val="Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie."/>
+			<noForecastFoundMessage val="Nie znalazłam prognozy*Pogoda nie znaleziona"/>
+			<whichCityMessage val="Które miasto mam wybrać?*Z kąd podać pogodę?*Proszę podaj numer miasta dla którego chcesz uzyskać pogodę."/>
+			<cityOutOfBoundsMessage val="Nieprawidłowy numer miasta.*Wyszedłeś po za listę."/>
+			<unmatchingCityMessage val="Nie wiem które miasto wybrać.*Możesz powtórzyć?"/>
 			<sentence>
 				<template name="weather">$ask *?when $weather *$where ?where</template>
 				<template name="weather">$ask ?where $weather</template>
@@ -149,31 +156,44 @@
 			<cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
 		</order>
 		<order classname="shani.orders.TimerOrder">
-			<keyword>timer*zegar</keyword>
-			<suborder>
-				<keyword>odpal*start*włącz</keyword>
-				<method>start</method>
-			</suborder>
-			<suborder>
-				<keyword>"stop*wyłącz*zatrzymaj"</keyword>
-				<method>stop</method>
-			</suborder>
-			<suborder>
-				<keyword>wyświetl*show*pokaż ile zliczył*podaj ile zliczył*ile zliczył</keyword>
-				<method>show</method>
-			</suborder>
-			<suborder>
-				<keyword>reset*zeruj*wyzeruj</keyword>
-				<method>reset</method>
-			</suborder>
+			<sentence>
+				<template name="start">$start $timer ?name</template>
+				<template name="stop">$stop $timer ?name</template>
+				<template name="show">$show $timer ?name</template>
+				<template name="reset">$reset $timer ?name</template>
+				<timer>timer*zegar</timer>
+				<start>odpal*start*włącz</start>
+				<stop>stop*wyłącz*zatrzymaj</stop>
+				<show>wyświetl*show*pokaż ile zliczył*podaj ile zliczył*ile zliczył</show>
+				<reset>reset*zeruj*wyzeruj</reset>
+			</sentence>
+			<startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
+			<alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
+			<stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
+			<alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
+			<resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
+			<printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
+			<nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
+			<nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
+			<nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
+			<nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
+			<config>
+				<noTimerImportanceBias val="-20"/>
+			</config>
 		</order>
 		<order classname="shani.orders.ExecuteOrder">
-			<keywords>odpal*włącz*otwórz*pokaż*show*start*uruchom</keywords>
+			<keywords val="odpal*włącz*otwórz*pokaż*show*start*uruchom"/>
+			<successfulMessage val="Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia"/>
+			<notKnowMessage val="Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?"/>
+			<unrecognizedMessage val="Przykro mi nie potrafię tego włączyć.*Nie wiem gdzie to znaleźć.*nie mam pojęcia jak to włączyć."/>
+			<cantConnectMessage val="Wybacz nie wiem co zrobić.*Nie mogę połączyć tych akcji."/>
 		</order>
 		<order classname="shani.orders.TranslateOrder">
 			<keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
 		</order>
 		<order classname="shani.orders.CalculateOrder">
+            <calculationResoultMessage val="Wynik to %f.*%f*Po podliczeniu mamy %f."/>
+			<calculationFailedMessage val="Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć."/>
             <sentence>
                 <template name="power">$power ?power1 $connect ?power2</template>
                 <template name="power">?power1 $power ?power2</template>
@@ -198,6 +218,16 @@
         <order classname="shani.orders.CMDOrder">
 			<keywords>cmd</keywords>
 		</order>
+		<order classname="shani.orders.WikipediaOrder">
+			<wikis>en*pl</wikis>
+			<sentence>
+				<template name="check">$check *$onWikipedia ?what</template>
+				<template name="list">$check $articles *$onWikipedia ?what</template>
+				<check>sprawdź</check>
+				<onWikipedia>na wikipedii*na wiki</onWikipedia>
+				<articles>artykuły</articles>
+			</sentence>
+		</order>
 	</orders>
 	<storage>
 		<patterns>
@@ -213,51 +243,20 @@
 			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
 			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
 			<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
-			<loadingErrorMessage>Wystpi błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
+			<loadingErrorMessage>Wystąpił błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
 			<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
 			<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
 			<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
 		</engine>
 		<orders>
-			<ExecuteOrder>
-				<successfulMessage>Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia</successfulMessage>
-				<notKnowMessage>Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?</notKnowMessage>
-				<unrecognizedMessage>Przykro mi nie potrafię tego włączyć.*Nie wiem gdzie to znaleźć.*nie mam pojęcia jak to włączyć.</unrecognizedMessage>
-				<cantConnectMessage>Wybacz nie wiem co zrobić.*Nie mogę połączyć tych akcji.</cantConnectMessage>
-			</ExecuteOrder>
 			<MasterOrder>
 				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
 			</MasterOrder>
-			<TimerOrder>
-				<startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
-				<alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
-				<stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
-				<alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
-				<resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
-				<printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
-				<nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
-				<nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
-				<nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
-				<nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
-			</TimerOrder>
 			<TranslateOrder>
 				<maxLineSize>70</maxLineSize>
 				<translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
 				<translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
 			</TranslateOrder>
-			<CalculateOrder>
-				<calculationResoultMessage>Wynik to %f.*%f*Po podliczeniu mamy %f.</calculationResoultMessage>
-				<calculationFailedMessage>Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć.</calculationFailedMessage>
-			</CalculateOrder>
-			<WeatherOrder>
-				<notKnowLocationMessage>Nie wiem dla jakiego miejsca podać pogodę</notKnowLocationMessage>
-				<cannotProcessDayMessage>Nie wiem o jaki dzień ci chodzi.*Nie wiem kiedy to jest.</cannotProcessDayMessage>
-				<cannotParseDayNumberMessage>Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie.</cannotParseDayNumberMessage>
-				<noForecastFoundMessage>Nie znalazłam prognozy*Pogoda nie znaleziona</noForecastFoundMessage>
-				<whichCityMessage>Które miasto mam wybrać?*Z kąd podać pogodę?*Proszę podaj numer miasta dla którego chcesz uzyskać pogodę.</whichCityMessage>
-				<cityOutOfBoundsMessage>Nieprawidłowy numer miasta.*Wyszedłeś po za listę.</cityOutOfBoundsMessage>
-				<unmatchingCityMessage>Nie wiem które miasto wybrać.*Możesz powtórzyć?</unmatchingCityMessage>
-			</WeatherOrder>
 			<CMDOrder>
 				<executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
 				<runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
