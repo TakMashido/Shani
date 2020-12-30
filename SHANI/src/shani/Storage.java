@@ -182,7 +182,7 @@ public class Storage {
 		}
 		var node=nodes.item(0);
 		String str=((Element)node).getAttribute("val");
-		if(str!=null)return str;
+		if(!str.isEmpty())return str;
 		return node.getTextContent();
 	}
 	
@@ -208,7 +208,7 @@ public class Storage {
 		Node stor=createDirectory(Engine.doc,userdataOld,path);
 		stor.setTextContent(data);
 		
-		stor=createDirectory(shaniDataDoc,shaniData,path);
+		stor=createDirectory(shaniDataDoc,userData,path);
 		stor.setTextContent(data);
 	}
 	
