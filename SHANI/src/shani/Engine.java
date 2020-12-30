@@ -231,15 +231,23 @@ public class Engine {
 			if(str.length()==0)continue;
 			long time=System.nanoTime();
 			ShaniString command=new ShaniString(str,false);
-			Executable exec=interprete(command);
-			
-			if (exec==null) {
-				System.out.println(notUnderstandMessage);
-				commands.println("Can't execute");
-			} else {
-				commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms");
+			try {
+				Executable exec=interprete(command);
 				
-				if(exec.isSuccesful()) lastExecuted=exec;
+				if (exec==null) {
+					System.out.println(notUnderstandMessage);
+					commands.println("Can't execute");
+				} else {
+					commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms");
+					
+					if(exec.isSuccesful()) lastExecuted=exec;
+				}
+			} catch(Exception ex) {
+				ex.printStackTrace();
+				
+				commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms. Error ocured.");
+				
+				errorMessage.printOut();
 			}
 		}
 	}
