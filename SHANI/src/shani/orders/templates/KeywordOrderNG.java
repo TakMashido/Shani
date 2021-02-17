@@ -38,17 +38,21 @@ public abstract class KeywordOrderNG extends Order {
 	public boolean init(Element e) {
 		keyword=new ShaniString(e.getElementsByTagName("keywords").item(0));
 		
-		NodeList list=Storage.getNodes(getDataLocation());
-		targetDataNode=list.item(0);
-		list=targetDataNode.getChildNodes();
-		
-		for(int i=0;i<list.getLength();i++) {
-			if(list.item(i).getNodeType()!=Node.ELEMENT_NODE)
-				continue;
-			Element elem=(Element)list.item(i);
-			if(elem==null)continue;
-			actions.add(actionFactory(elem));
+		String dataLocation=getDataLocation();
+		if(dataLocation!=null) {
+			NodeList list=Storage.getNodes(getDataLocation());
+			targetDataNode=list.item(0);
+			list=targetDataNode.getChildNodes();
+			
+			for(int i=0;i<list.getLength();i++) {
+				if(list.item(i).getNodeType()!=Node.ELEMENT_NODE)
+					continue;
+				Element elem=(Element)list.item(i);
+				if(elem==null)continue;
+				actions.add(actionFactory(elem));
+			}
 		}
+		
 		return initialize(e);
 	}
 	

@@ -190,6 +190,9 @@
 		</order>
 		<order classname="shani.orders.TranslateOrder">
 			<keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
+			<maxLineSize>70</maxLineSize>
+			<translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
+			<translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
 		</order>
 		<order classname="shani.orders.CalculateOrder">
             <calculationResoultMessage val="Wynik to %f.*%f*Po podliczeniu mamy %f."/>
@@ -253,9 +256,6 @@
 				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
 			</MasterOrder>
 			<TranslateOrder>
-				<maxLineSize>70</maxLineSize>
-				<translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
-				<translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
 			</TranslateOrder>
 			<CMDOrder>
 				<executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
