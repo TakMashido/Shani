@@ -28,6 +28,9 @@ public abstract class KeywordOrderNG extends Order {
 	protected ShaniString keyword;
 	protected ArrayList<KeywordActionNG> actions=new ArrayList<>();
 	
+	/**If true then exact matching of targets keywords({@link ShaniMatcher#exactApply(ShaniString...)}) is applied, otherwise standard fuzzy ShaniString matching({@link ShaniMatcher#apply(ShaniString...)})*/
+	protected boolean targetExactMatch=false;
+	
 	protected Node targetDataNode;
 	
 	/**Where to search for targets. Each subnode under given path is treated as differed target, and {@link KeywordACtionNG} is created for it.
@@ -79,7 +82,10 @@ public abstract class KeywordOrderNG extends Order {
 		Engine.info.printf("KeywordOrderNG: %s:\n",keyword.toFullString());
 		for(KeywordActionNG action:actions) {
 			ShaniMatcher actionMatcher=matcher.clone();
-			actionMatcher.apply(action.actionKeyword);
+			if(targetExactMatch) 
+				actionMatcher.exactApply(action.actionKeyword);
+			else
+				actionMatcher.apply(action.actionKeyword);
 			
 			short cost=actionMatcher.getCost();
 			if(cost<minCost) {

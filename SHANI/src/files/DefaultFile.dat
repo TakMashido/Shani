@@ -220,6 +220,9 @@
         </order>
         <order classname="shani.orders.CMDOrder">
 			<keywords>cmd</keywords>
+			<executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
+			<runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
+			<endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>
 		</order>
 		<order classname="shani.orders.WikipediaOrder">
 			<wikis>en*pl</wikis>
@@ -255,13 +258,6 @@
 			<MasterOrder>
 				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
 			</MasterOrder>
-			<TranslateOrder>
-			</TranslateOrder>
-			<CMDOrder>
-				<executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
-				<runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
-				<endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>
-			</CMDOrder>
 		</orders>
 		<misc>
 			<connection>
