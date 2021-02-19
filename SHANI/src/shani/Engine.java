@@ -305,7 +305,7 @@ public class Engine {
 				
 				long time=System.nanoTime();
 				Class.forName(className).getMethod("staticInit", Element.class).invoke(null, e);
-				commands.printf("Static initializer %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+				commands.printf("Static initializer %-27s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 			} catch(ClassNotFoundException | IllegalArgumentException | NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException ex) {
 				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" static initilizer from main file.");
 				ex.printStackTrace();
