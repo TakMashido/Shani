@@ -19,15 +19,17 @@ public class TranslateOrder extends KeywordOrderNG{
 	private ShaniString translationSuccessMessage;
 	private ShaniString translationUnsuccessMessage;
 	
+	private ShaniString connectionTimeoutMessage;
+	private ShaniString connectionFailedMessage;
+	
 	@Override
 	protected boolean initialize(org.w3c.dom.Element e) {
-		var childs=e.getChildNodes();
-		for(int i=0;i<childs.getLength();i++)
-			System.out.println("a"+childs.item(i));
-		
 		maxLineSize=Integer.parseInt(ShaniString.loadString(e,"maxLineSize").toString());
 		translationSuccessMessage=ShaniString.loadString(e, "translationSuccessMessage");
 		translationUnsuccessMessage=ShaniString.loadString(e,"translationUnsuccessMessage");
+		
+		connectionTimeoutMessage=ShaniString.loadString(e,"connectionTimeoutMessage");
+		connectionFailedMessage=ShaniString.loadString(e,"connectionFailedMessage");
 		
 		return true;
 	}
@@ -88,7 +90,7 @@ public class TranslateOrder extends KeywordOrderNG{
 		private String targetLanguage;
 		private List<String> translations=new ArrayList<String>();
 	}
-	public static List<Entry> getEntries(String wordToTranslate) {
+	public List<Entry> getEntries(String wordToTranslate) {
 		try {
 			Document doc=Jsoup.connect("https://translatica.pl/szukaj/"+wordToTranslate).get();
 			
@@ -102,9 +104,9 @@ public class TranslateOrder extends KeywordOrderNG{
 			
 			return Return;
 		} catch (SocketTimeoutException e) {
-			ShaniString.loadString("misc.connection.connectionTimeoutMessage").printOut();
+			connectionTimeoutMessage.printOut();
 		} catch (IOException e) {
-			ShaniString.loadString("misc.connection.connectionFailedMessage").printOut();
+			connectionFailedMessage.printOut();
 		}
 		return null;
 	}

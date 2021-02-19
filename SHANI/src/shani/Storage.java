@@ -23,20 +23,7 @@ import shani.orders.templates.Order;
  * @author TakMashido
  */
 public class Storage {
-	@Deprecated
-	private static final Node mainNodeOld;
-	@Deprecated
-	private static final Node storageOld;
-	@Deprecated
-	private static final Node userdataOld;
-	
 	private static final Pattern divider=Pattern.compile("(?:\\s*\\.\\s*)+");
-	
-	static {
-		mainNodeOld=Engine.doc.getElementsByTagName("shani").item(0);
-		storageOld=((Element)mainNodeOld).getElementsByTagName("storage").item(0);						//Can throw error if initialized before invocing Engin.initialize
-		userdataOld=((Element)mainNodeOld).getElementsByTagName("userdata").item(0);
-	}
 	
 	/**Get nodes under given path in Storage part of data file.
 	 * Creates new nodes if node pointed by path not exists and returns it.
@@ -44,11 +31,7 @@ public class Storage {
 	 * @return NodeList pointed by given path.
 	 */
 	public static NodeList getNodes(String path) {
-		var ret=getNodes(storageOld,path);
-		if(ret!=null) return ret;
-		
-		ret = getNodes(storage,path,true);
-		return ret;
+		return getNodes(storage,path,true);
 	}
 	
 	/**Get ShaniString under given path in Storage part of file.
@@ -56,36 +39,7 @@ public class Storage {
 	 * @return ShaniString pointed by path.
 	 */
 	public static ShaniString getString(String stringPath) {
-		var ret=getShaniString(storage, stringPath);
-		if(ret!=null)return ret;
-		
-		return getShaniString(storageOld,stringPath);
-	}
-	
-	/**Returns node from "shani" node from mainFile pointed by provided path.
-	 * @param path Path to Node
-	 * @return Node from given path or null if not found.
-	 * @deprecated
-	 */
-	public static Node readNodeBase(String path) {
-		NodeList nodes=getNodes(mainNodeOld,path);
-		if(nodes!=null)return nodes.item(0);
-		return null;
-	}
-	/**Read data from directly from "shani" node in mainFile. 
-	 * @param path Path to data in xml file.
-	 * @return String from node under provided path.
-	 * @deprecated
-	 */
-	public static String readStringBase(String path) {
-		return getString(mainNodeOld,path);
-	}
-	/**Read data from directly from "shani" node in mainFile. 
-	 * @param path Path to data in xml file.
-	 * @return ShaniString from node under provided path.
-	 * @deprecated*/
-	public static ShaniString readShaniStringBase(String path) {
-		return getShaniString(mainNodeOld,path);
+		return getShaniString(storage, stringPath);
 	}
 	
 	/**Get nodes under given path in UserData part of file.
@@ -93,20 +47,14 @@ public class Storage {
 	 * @return NodeList pointed by given path.
 	 */
 	public static NodeList getUserNodes(String path) {
-		var ret=getNodes(userData,path);
-		if(ret!=null)return ret;
-		
-		return getNodes(userdataOld,path);
+		return getNodes(userData,path);
 	}
 	/**Get ShaniString under given path in UserData part of file.
 	 * @param stringPath Path to Node containing wanted ShaniString.
 	 * @return ShaniString pointed by path.
 	 */
 	public static ShaniString getUserShaniString(String stringPath) {
-		var ret=getShaniString(userdataOld,stringPath);
-		if(ret==null)
-			return getShaniString(userData,stringPath);
-		return ret;
+		return getShaniString(userData,stringPath);
 	}
 	/**Get Boolean stored under userData node.
 	 * @param path Where to search for boolean.
@@ -124,26 +72,23 @@ public class Storage {
 	 * @return Stored value or null if not found.
 	 */
 	public static Boolean getUserBool(String path) {
-		var ret=getString(userdataOld,path);
-		if(ret==null)
-			ret=getString(userData,path);
+		var ret=getString(userData,path);
 		
 		if(ret==null)
 			return null;
 		return Boolean.parseBoolean(ret);
 	}
 	public static int getUserInt(String path) {
-		return Integer.parseInt(getString(userdataOld,path));
+		return Integer.parseInt(getString(userData,path));
 	}
 	
-	private static NodeList getNodes(Node where, String path) {
+	public static NodeList getNodes(Node where, String path) {
 		return getNodes(where, path, false); 
 	}
 	@SuppressWarnings("resource")
 	private static NodeList getNodes(Node where, String path, boolean createNodes) {
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
-		assert false:"Handle ClassCastException when \"where\" is Document instance.";
-		Element previousNode=(Element)where;
+		Element previousNode=(Element)where;								//TODO Handle ClassCastException when "where" is Document instance.
 		
 		NodeList Return=null;
 		while(scanner.hasNext()) {
@@ -163,6 +108,12 @@ public class Storage {
 				previousNode=(Element)Return.item(0);
 		}
 		return Return;
+	}
+	public static Node getNode(Node where, String path) {
+		NodeList list=getNodes(where, path);
+		if(list==null)
+			return null;
+		return list.item(0);
 	}
 	public static ShaniString getShaniString(Node where, String stringPath) {			//All changes here have to be made also in getString(Node,String). This methods do the same but output is different.
 		var nodes=getNodes(where,stringPath);
@@ -204,12 +155,8 @@ public class Storage {
 	 * @param data Data to store.
 	 */
 	public static void writeUserData(String path,String data) {
-		//Write to both storages for now. After removing original one it will be written to one again.
-		Node stor=createDirectory(Engine.doc,userdataOld,path);
-		stor.setTextContent(data);
-		
-		stor=createDirectory(shaniDataDoc,userData,path);
-		stor.setTextContent(data);
+		Element stor=(Element)createDirectory(shaniDataDoc,userData,path);
+		stor.setAttribute("val", data);
 	}
 	
 	@SuppressWarnings("resource")

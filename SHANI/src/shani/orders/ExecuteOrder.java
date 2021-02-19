@@ -1,23 +1,15 @@
 package shani.orders;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
-import shani.Config;
 import shani.Engine;
 import shani.ShaniString;
-import shani.ShaniString.ShaniMatcher;
 import shani.Tools;
-import shani.orders.templates.Action;
-import shani.orders.templates.Executable;
-import shani.orders.templates.KeywordOrder.KeywordAction;
 import shani.orders.templates.KeywordOrderNG;
-import shani.orders.templates.KeywordOrderNG.KeywordActionNG;
 
 public class ExecuteOrder extends KeywordOrderNG {
 	private static ShaniString successfulMessage;

@@ -36,6 +36,8 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	private static ShaniString cityOutOfBoundsMessage;
 	private static ShaniString unmatchingCityMessage;
 	
+	private ShaniString connectionFailedMessage;
+	
 	private SentenceGenerator weatherSentence;
 	
 	private SentenceMatcher dayChooser;
@@ -48,13 +50,15 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	
 	@Override
 	protected boolean initialize(org.w3c.dom.Element e) {
-		notKnowLocationMessage=ShaniString.loadString(e,"orders.WeatherOrder.notKnowLocationMessage");          
-		cannotProcessDayMessage=ShaniString.loadString(e,"orders.WeatherOrder.cannotProcessDayMessage");        
-		cannotParseDayNumberMessage=ShaniString.loadString(e,"orders.WeatherOrder.cannotParseDayNumberMessage");
-		noForecastFoundMessage=ShaniString.loadString(e,"orders.WeatherOrder.noForecastFoundMessage");          
-		whichCityMessage=ShaniString.loadString(e,"orders.WeatherOrder.whichCityMessage");                      
-		cityOutOfBoundsMessage=ShaniString.loadString(e,"orders.WeatherOrder.cityOutOfBoundsMessage");          
-		unmatchingCityMessage=ShaniString.loadString(e,"orders.WeatherOrder.unmatchingCityMessage");            
+		notKnowLocationMessage=ShaniString.loadString(e,"notKnowLocationMessage");          
+		cannotProcessDayMessage=ShaniString.loadString(e,"cannotProcessDayMessage");        
+		cannotParseDayNumberMessage=ShaniString.loadString(e,"cannotParseDayNumberMessage");
+		noForecastFoundMessage=ShaniString.loadString(e,"noForecastFoundMessage");          
+		whichCityMessage=ShaniString.loadString(e,"whichCityMessage");                      
+		cityOutOfBoundsMessage=ShaniString.loadString(e,"cityOutOfBoundsMessage");          
+		unmatchingCityMessage=ShaniString.loadString(e,"unmatchingCityMessage");            
+		
+		connectionFailedMessage=ShaniString.loadString(e,"connectionFailedMessage");
 		
 		weatherSentence=new SentenceGenerator(e.getElementsByTagName("weathersentence").item(0));
 		dayChooser=new SentenceMatcher(e.getElementsByTagName("daychooser").item(0));
@@ -258,7 +262,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
-				ShaniString.loadString("misc.connection.connectionFailedMessage").printOut();
+				connectionFailedMessage.printOut();
 			}
 			
 			return true;

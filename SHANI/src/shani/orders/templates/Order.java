@@ -10,11 +10,6 @@ import shani.ShaniString;
  * @author TakMashido
  */
 public abstract class Order {
-	/**Source of data for shani.
-	 * use {@link #templateFile} instead.*/
-	@Deprecated
-	protected Element orderFile;
-	
 	/**Xml element containing Order data. Description, key words responses.*/
 	protected Element templateFile;
 	
@@ -22,16 +17,7 @@ public abstract class Order {
 	 * @param e XML Element representing this order Object.
 	 * @return If successfully initialized.
 	 */
-	public boolean init(Element e) {
-		orderFile=e;
-		return init();
-	}
-	/**Method for doing custom initializations. Override if you want do do some.
-	 * @return If successfully initialized.
-	 * @deprecated use {@link #init(Element)} instead.
-	 */
-	protected boolean init() {return false;}
-	
+	public abstract boolean init(Element e);
 	
 	/**Prepares list of executables which are respond for given command query.
 	 * @param command Command to interpret.

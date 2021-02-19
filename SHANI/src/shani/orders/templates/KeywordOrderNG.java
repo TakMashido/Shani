@@ -12,7 +12,6 @@ import shani.Engine;
 import shani.ShaniString;
 import shani.ShaniString.ShaniMatcher;
 import shani.Storage;
-import shani.orders.templates.KeywordOrder.UnmatchedAction;
 
 /**Represents order activated by a single keyword.
  * Supports creating multiple targets with it's own keywords represented by {@code KeywordAction} class.

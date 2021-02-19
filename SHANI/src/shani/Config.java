@@ -33,7 +33,7 @@ public class Config {
 			System.exit(-1);
 		}
 		
-		mainFile=getFileProperty(props,"mainFile");
+		language=getProperty(props,"language");
 		
 		dataFile=getFileProperty(props, "dataFile", Config.class.getResourceAsStream("/files/templates/shaniData.dat"));
 		
@@ -204,7 +204,7 @@ public class Config {
 		return ret.toArray(new Properties[ret.size()]);
 	}
 	
-	public static final File mainFile;
+	public static final String language;
 	
 	public static final File dataFile;
 	
@@ -223,7 +223,7 @@ public class Config {
 	public static final byte qwertyNeighbourCost;
 	public static final byte nationalSimilarityCost;						//a,¹||c,æ...
 	
-	
+	/*Character matching costs*/
 	public static final short wordCompareTreshold;
 	public static final Multiplier characterCompareCostMultiplier;					//Multiplier of cost for distance between short strings, val[length-1]
 	public static final short characterDeletionCost;
@@ -231,6 +231,7 @@ public class Config {
 	public static final short characterSwapTreshold;
 	public static final short characterSwapCost;
 	
+	/*Words matching cost*/
 	public static final short sentenseCompareTreshold;
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;

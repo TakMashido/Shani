@@ -1,6 +1,15 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <shani>
 	<version>v1</version>
+	<engine>
+		<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
+		<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
+		<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+		<loadingErrorMessage>Wystąpił błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
+		<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
+		<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
+		<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
+	</engine>
 	<modules>
 		<module classname="shani.modules.NumberFilter">
 			<_1000000000>miliard</_1000000000>
@@ -57,6 +66,8 @@
 			<whichCityMessage val="Które miasto mam wybrać?*Z kąd podać pogodę?*Proszę podaj numer miasta dla którego chcesz uzyskać pogodę."/>
 			<cityOutOfBoundsMessage val="Nieprawidłowy numer miasta.*Wyszedłeś po za listę."/>
 			<unmatchingCityMessage val="Nie wiem które miasto wybrać.*Możesz powtórzyć?"/>
+			<connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
+			<connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
 			<sentence>
 				<template name="weather">$ask *?when $weather *$where ?where</template>
 				<template name="weather">$ask ?where $weather</template>
@@ -146,6 +157,7 @@
 			</badWeather>
 		</order>
 		<order classname="shani.orders.MasterOrder">
+			<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
 			<exit>exit*żegnam*do widzenia*wyłącz się</exit>
 			<autosave>autosavetime</autosave>
 			<save>save*zapisz*zabezpiecz się*zapisz pliki*flush buffers</save>
@@ -193,6 +205,8 @@
 			<maxLineSize>70</maxLineSize>
 			<translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
 			<translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
+			<connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
+			<connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
 		</order>
 		<order classname="shani.orders.CalculateOrder">
             <calculationResoultMessage val="Wynik to %f.*%f*Po podliczeniu mamy %f."/>
@@ -224,50 +238,9 @@
 			<runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
 			<endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>
 		</order>
-		<order classname="shani.orders.WikipediaOrder">
-			<wikis>en*pl</wikis>
-			<sentence>
-				<template name="check">$check *$onWikipedia ?what</template>
-				<template name="list">$check $articles *$onWikipedia ?what</template>
-				<check>sprawdź</check>
-				<onWikipedia>na wikipedii*na wiki</onWikipedia>
-				<articles>artykuły</articles>
-			</sentence>
-		</order>
 	</orders>
-	<storage>
-		<patterns>
-			<stem>
-				<!-- Suffix indentical to suf attribute will be changed to value from rep attribute. 
-					 Used by Tools.stem(String)-->
-				<tag suf="ie" rep=""/>
-				<tag suf="u" rep=""/>
-				<tag suf="ach" rep="e"/>
-			</stem>
-		</patterns>
-		<engine>
-			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
-			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
-			<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
-			<loadingErrorMessage>Wystąpił błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
-			<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
-			<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
-			<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
-		</engine>
-		<orders>
-			<MasterOrder>
-				<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
-			</MasterOrder>
-		</orders>
-		<misc>
-			<connection>
-				<connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
-				<connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
-			</connection>
-		</misc>
-	</storage>
-	<parsers>
-		<TimeParser>
+	<static>
+		<TimeParser classname="shani.tools.Parsers">
 			<andWord>i*oraz*i*i</andWord>
 			<h>
 				<strict>
@@ -303,8 +276,11 @@
 				</lastDigit>
 			</s>
 		</TimeParser>
-	</parsers>
-	<userdata>
-		<acceptedLicences/>
-	</userdata>
+		<stem classname="shani.Tools">
+				<!-- Suffix indentical to suf attribute will be changed to value from rep attribute.-->
+				<tag suf="ie" rep=""/>
+				<tag suf="u" rep=""/>
+				<tag suf="ach" rep="e"/>
+		</stem>
+	</static>
 </shani>
