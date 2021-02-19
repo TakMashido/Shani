@@ -1,8 +1,10 @@
 package shani;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,11 +33,14 @@ public class Config {
 			System.exit(-1);
 		}
 		
-		mainFile=getFileProperty(props,"mainFile");
+		language=getProperty(props,"language");
+		
+		dataFile=getFileProperty(props, "dataFile", Config.class.getResourceAsStream("/files/templates/shaniData.dat"));
 		
 		errorsLogFileLocation=getFileProperty(props, "errorsLogFileLocation");
 		debugLogFileLocation=getFileProperty(props, "debugLogFileLocation");
 		commandsLogFileLocation=getFileProperty(props, "commandsLogFileLocation");
+		infoLogFileLocation=getFileProperty(props, "infoLogFileLocation");
 		
 		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey"));
 		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey"));
@@ -70,7 +75,7 @@ public class Config {
 		
 		if(!errors.isEmpty()) {
 			Engine.registerLoadException();
-			System.err.println("Config file is corrupted:");
+			System.err.println("Error during parsing config file:");
 			for(String str:errors) {
 				System.err.println("\t"+str);
 			}
@@ -89,6 +94,9 @@ public class Config {
 	}
 	
 	private static final File getFileProperty(Properties props[], String key) {
+		return getFileProperty(props, key, null);
+	}
+	private static final File getFileProperty(Properties props[], String key, InputStream defaultFileContent) {
 		String source=getProperty(props, key);
 		if(source==null)
 			return null;			//Error already handled in getProperty(...) and end of static initializer block
@@ -98,6 +106,23 @@ public class Config {
 		if(parent!=null&&!parent.exists()) {
 			parent.mkdirs();
 		}
+		
+		if(defaultFileContent!=null&&!ret.exists()) {
+			try(OutputStream out=new FileOutputStream(ret)){
+				ret.createNewFile();
+				
+				byte[] buf=new byte[1024];
+				int toCopy;
+				while((toCopy=defaultFileContent.read(buf))>0) {
+					out.write(buf, 0, toCopy);
+				}
+			} catch (IOException e) {
+				errors.add("Error encountered during data file creation.");
+				e.printStackTrace();
+			}
+			
+		}
+		
 		
 		return ret;
 	}
@@ -146,7 +171,7 @@ public class Config {
 							if(!file.exists()) {
 								if(!file.mkdirs()) {
 									Engine.registerLoadException();
-									System.err.println("Failed to create config directory: "+file);
+									System.err.println("Failed to create config directory: "+file.getCanonicalPath());
 								}
 								continue;
 							}
@@ -159,9 +184,13 @@ public class Config {
 							}
 						} else {
 							if(!file.exists()) {
-								if(!(file.getParentFile().mkdir()&&file.createNewFile())) {
+								if(file.getParentFile()!=null&&file.getParentFile().mkdirs()){						//File inside shani file system root
 									Engine.registerLoadException();
-									System.err.println("Failed to create config file: "+file);
+									System.out.println(file.getParentFile());
+									System.err.println("Failed to create config file: "+file.getCanonicalPath()+" cannot create parent directory.");
+								} else if(!file.createNewFile()) {
+									Engine.registerLoadException();
+									System.err.println("Failed to create config file: "+file.getCanonicalPath()+".");
 								}
 								continue;
 							}
@@ -175,12 +204,15 @@ public class Config {
 		return ret.toArray(new Properties[ret.size()]);
 	}
 	
-	public static final File mainFile;
+	public static final String language;
+	
+	public static final File dataFile;
 	
 	/*Log files location*/
 	public static final File errorsLogFileLocation;
 	public static final File debugLogFileLocation;
 	public static final File commandsLogFileLocation;
+	public static final File infoLogFileLocation;
 	
 	/*Basic responses*/												//TODO move to main file
 	public static final ShaniString positiveResponeKey;
@@ -191,7 +223,7 @@ public class Config {
 	public static final byte qwertyNeighbourCost;
 	public static final byte nationalSimilarityCost;						//a,¹||c,æ...
 	
-	
+	/*Character matching costs*/
 	public static final short wordCompareTreshold;
 	public static final Multiplier characterCompareCostMultiplier;					//Multiplier of cost for distance between short strings, val[length-1]
 	public static final short characterDeletionCost;
@@ -199,6 +231,7 @@ public class Config {
 	public static final short characterSwapTreshold;
 	public static final short characterSwapCost;
 	
+	/*Words matching cost*/
 	public static final short sentenseCompareTreshold;
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;

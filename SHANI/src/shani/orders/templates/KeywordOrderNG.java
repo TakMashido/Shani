@@ -4,68 +4,82 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import shani.Config;
 import shani.Engine;
 import shani.ShaniString;
 import shani.ShaniString.ShaniMatcher;
+import shani.Storage;
 
 /**Represents order activated by a single keyword.
- * Supports creating multiple tergets with it's own keywords represented by {@code KeywordAction} class.
+ * Supports creating multiple targets with it's own keywords represented by {@code KeywordAction} class.
  * Creation of KeywordAction registers it in inner targets List and mainFile Document object.
  * <p>
- * To execute Actions do not having specyfied keywords override {@link UnmatchedAction} class and return it's instance from {@link #getUnmatchedAction(ShaniString)} or {@link #getUnmatchedAction()} method. 
+ * To execute Actions do not having specified keywords override {@link UnmatchedAction} class and return it's instance from {@link #getUnmatchedAction(ShaniString)} or {@link #getUnmatchedAction()} method. 
  * <p>
  * Loading of targets stored in MainFile is done in {@link #actionFactory(Element)}.
  * 
  * @author TakMashido
  */
-public abstract class KeywordOrder extends Order {
+public abstract class KeywordOrderNG extends Order {
 	protected ShaniString keyword;
-	protected ArrayList<KeywordAction> actions=new ArrayList<KeywordAction>();
-	
+	protected ArrayList<KeywordActionNG> actions=new ArrayList<>();
 	
 	/**If true then exact matching of targets keywords({@link ShaniMatcher#exactApply(ShaniString...)}) is applied, otherwise standard fuzzy ShaniString matching({@link ShaniMatcher#apply(ShaniString...)})*/
 	protected boolean targetExactMatch=false;
 	
-	protected boolean init() {
-		keyword=new ShaniString(orderFile.getElementsByTagName("keywords").item(0));
+	protected Node targetDataNode;
+	
+	/**Where to search for targets. Each subnode under given path is treated as differed target, and {@link KeywordACtionNG} is created for it.
+	 * @return String[] containing paths to use.*/
+	protected abstract String getDataLocation();
+	
+	@Override
+	public boolean init(Element e) {
+		keyword=new ShaniString(e.getElementsByTagName("keywords").item(0));
 		
-		NodeList list=orderFile.getElementsByTagName("target");
-		for(int i=0;i<list.getLength();i++) {
-			Element elem=(Element)list.item(i);
-			actions.add(actionFactory(elem));
+		String dataLocation=getDataLocation();
+		if(dataLocation!=null) {
+			NodeList list=Storage.getNodes(getDataLocation());
+			targetDataNode=list.item(0);
+			list=targetDataNode.getChildNodes();
+			
+			for(int i=0;i<list.getLength();i++) {
+				if(list.item(i).getNodeType()!=Node.ELEMENT_NODE)
+					continue;
+				Element elem=(Element)list.item(i);
+				if(elem==null)continue;
+				actions.add(actionFactory(elem));
+			}
 		}
-		return initialize();
+		
+		return initialize(e);
 	}
 	
-	/**Overide if you want do some initializations to your module
-	 * @return If succesfuly initializated
+	/**Override if you want do some initializations to your module.
+	 * @return If successfully initialized
 	 */
-	protected boolean initialize() {return true;}
+	protected boolean initialize(Element e) {return true;}
 	
-	/**Creates Action object from specyfic xml Element
-	 * @param element Element containg Action data
+	/**Creates Action object from specific xml Element
+	 * @param element Element containing Action data
 	 * @return Ready to use Action
 	 */
-	public KeywordAction actionFactory(Element element) {return null;};
-	public KeywordAction createAction(Element element){
-		KeywordAction action=actionFactory(element);
-		if(action==null)return null;
-		
-		if(action.actionKeyword==null)action.actionKeyword=new ShaniString(element.getElementsByTagName("key").item(0));
-		
-		return action;
-	}
+	public abstract KeywordActionNG actionFactory(Element element);
 	
+	@Override
 	public List<Executable> getExecutables(ShaniString command) {
 		ArrayList<Executable> Return=new ArrayList<Executable>();
 		
 		ShaniMatcher matcher=command.getMatcher().apply(keyword);
 		
-		Engine.info.println('\n'+keyword.toFullString()+"-> "+command.toFullString()+":");
-		for(KeywordAction action:actions) {
+		short minCost=Short.MAX_VALUE;
+		KeywordActionNG minAction=null;
+		
+		Engine.info.printf("KeywordOrderNG: %s:\n",keyword.toFullString());
+		for(KeywordActionNG action:actions) {
 			ShaniMatcher actionMatcher=matcher.clone();
 			if(targetExactMatch) 
 				actionMatcher.exactApply(action.actionKeyword);
@@ -73,15 +87,19 @@ public abstract class KeywordOrder extends Order {
 				actionMatcher.apply(action.actionKeyword);
 			
 			short cost=actionMatcher.getCost();
-			if(cost<Config.sentenseCompareTreshold) {
-				Return.add(new Executable(action,cost));
+			if(cost<minCost) {
+				minCost=cost;
+				minAction=action;
 			}
-			if(cost<Config.sentenseCompareTreshold*2)
+			
+			if(cost<Config.sentenseCompareTreshold*1.5f)
 				Engine.info.println(action.actionKeyword.toFullString()+"= "+cost);
 		}
 		Engine.info.println();
 		
-		if(Return.size()==0&&matcher.isSemiEqual()) {
+		if(minCost<Config.sentenseCompareTreshold) {
+			Return.add(new Executable(minAction,minCost));
+		} else if(matcher.isSemiEqual()) {
 			ShaniString unmatched=matcher.getUnmatched();
 			var add=getUnmatchedAction(unmatched);
 			if(add!=null) {
@@ -95,10 +113,27 @@ public abstract class KeywordOrder extends Order {
 		
 		return Return;
 	}
-	/**Method for creation of cuscom Executables.
+	protected KeywordActionNG getAction(ShaniString command) {
+		short minCost=Short.MAX_VALUE;
+		KeywordActionNG minAction=null;
+		
+		for(var action:actions) {
+			short cost=action.actionKeyword.getCompareCost(command);
+			
+			if(cost<minCost) {
+				minCost=cost;
+				minAction=action;
+			}
+		}
+		
+		if(minCost<Config.sentenseCompareTreshold)
+			return minAction;
+		return null;
+	}
+	/**Method for creation of custom Executables.
 	 * @param command Command from user
 	 * @param matcher ShaniMatcher created from command with applied keyword
-	 * @return List of additional executables for specyfied command.
+	 * @return List of additional executables for specified command.
 	 */
 	protected List<Executable> createExecutables(ShaniString command, ShaniMatcher matcher){
 		return null;
@@ -108,36 +143,38 @@ public abstract class KeywordOrder extends Order {
 	 * @param unmatched Input command without key of this Order.
 	 * @return Custom order for handling unmatched data.
 	 */
-	protected UnmatchedAction getUnmatchedAction(ShaniString unmatched) {return getUnmatchedAction();}
+	protected UnmatchedActionNG getUnmatchedAction(ShaniString unmatched) {return getUnmatchedAction();}
 	/**Use to handle inputs matching key of order, but not matching any target
 	 * @return Custom order for handling unmatched data.
 	 */
-	protected UnmatchedAction getUnmatchedAction() {return null;}
+	protected UnmatchedActionNG getUnmatchedAction() {return null;}
 	
-	public abstract class UnmatchedAction extends Action {
+	public abstract class UnmatchedActionNG extends Action {
 		protected ShaniString unmatched;
 		
+		@Override
 		public boolean connectAction(String action) {
 			assert false:"Connecting actions to "+this.getClass().getName()+"is not possible";
 			System.err.println("Connecting actions to "+this.getClass().getName()+"is not possible");
 			return false;
 		}
 		
-		private void setUnmatched(ShaniString newUnmatched) {
+		protected void setUnmatched(ShaniString newUnmatched) {
 			unmatched=newUnmatched;
 		}
 	}
 	/**Keyword based action.
+	 * Override {@link KeywordActionNG#keywordExecute()} to define behavior.
 	 * @author TakMashido
 	 */
-	public abstract class KeywordAction extends Action{
+	public abstract class KeywordActionNG extends Action{
 		protected ShaniString actionKeyword;
 		protected ShaniString mergedActions;
 		
 		/**Super constructor for loading Action.
 		 * @param elem Element representing this Action.
 		 */
-		protected KeywordAction(Element elem) {
+		protected KeywordActionNG(Element elem) {
 			actionFile=elem;
 			actionKeyword=new ShaniString(elem.getElementsByTagName("key").item(0));
 			mergedActions=new ShaniString(elem.getElementsByTagName("merged").item(0));
@@ -145,27 +182,30 @@ public abstract class KeywordOrder extends Order {
 		/**SuperConstructor for creating new Action.
 		 * @param keyword Keyword for new Action.
 		 */
-		protected KeywordAction(ShaniString keyword) {
-			actionFile=Engine.doc.createElement("target");
-			orderFile.appendChild(actionFile);
+		protected KeywordActionNG(ShaniString keyword) {
+			var doc=targetDataNode.getOwnerDocument();
 			
-			Element e=Engine.doc.createElement("key");
+			actionFile=doc.createElement("executable");
+			targetDataNode.appendChild(actionFile);
+			
+			Element e=doc.createElement("key");
 			actionFile.appendChild(e);
 			//e.appendChild(Engine.doc.createTextNode(keyword.toFullString()));
 			actionKeyword=keyword.copy();
 			actionKeyword.setNode(e);
 			
-			e=Engine.doc.createElement("merged");
+			e=doc.createElement("merged");
 			actionFile.appendChild(e);
 			mergedActions=new ShaniString(e);
 			
 			actions.add(this);
 		}
 		
-		/* (non-Javadoc)
-		 * Classes overiding {@link shani.orders.KeywordOrder.KeywordAction} shouldn't override this method. Use {@link #keywordExecute()} instead.
+		/**
+		 * Classes overriding {@link shani.orders.KeywordOrder.KeywordAction} shouldn't override this method. Use {@link #keywordExecute()} instead.
 		 * @see shani.orders.Order.Action#execute()
 		 */
+		@Override
 		public boolean execute() {
 			boolean Return=keywordExecute();
 			if(!Return)return false;
@@ -175,10 +215,11 @@ public abstract class KeywordOrder extends Order {
 			return true;
 		}
 		/**Basic method for executing KeywordAction.
-		 * @return If action was successfuly exeuted.
+		 * @return If action was successfully executed.
 		 */
 		public abstract boolean keywordExecute();
 		
+		@Override
 		public boolean connectAction(String action) {
 			mergedActions.add(action);
 			return true;

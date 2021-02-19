@@ -6,20 +6,21 @@ import org.w3c.dom.NodeList;
 public class Tools {
 	private static String[] suffix;
 	private static String[] replacement;
-	public static String stem(String dat) {
-		if(suffix==null) {
-			NodeList nodes=Storage.getNodes("patterns.stem.tag");
-			
-			suffix=new String[nodes.getLength()];
-			replacement=new String[nodes.getLength()];
-			
-			for(int i=0;i<suffix.length;i++) {
-				Element elem=(Element)nodes.item(i);
-				suffix[i]=elem.getAttribute("suf");
-				replacement[i]=elem.getAttribute("rep");
-			}
-		}
+	
+	public static void staticInit(Element e) {
+		NodeList nodes=e.getElementsByTagName("tag");
 		
+		suffix=new String[nodes.getLength()];
+		replacement=new String[nodes.getLength()];
+		
+		for(int i=0;i<suffix.length;i++) {
+			Element elem=(Element)nodes.item(i);
+			suffix[i]=elem.getAttribute("suf");
+			replacement[i]=elem.getAttribute("rep");
+		}
+	}
+	
+	public static String stem(String dat) {
 		for(int i=0;i<suffix.length;i++) {
 			if(dat.endsWith(suffix[i])) {
 				return dat.substring(0,dat.length()-suffix[i].length())+replacement[i];

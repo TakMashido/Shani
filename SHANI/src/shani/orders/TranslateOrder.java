@@ -12,20 +12,35 @@ import org.jsoup.select.Elements;
 
 import shani.Engine;
 import shani.ShaniString;
-import shani.orders.templates.KeywordOrder;
+import shani.orders.templates.KeywordOrderNG;
 
-public class TranslateOrder extends KeywordOrder{
-	private static final int maxLineSize=Integer.parseInt(ShaniString.loadString("orders.TranslateOrder.maxLineSize").toString());
-	private static ShaniString translationSuccessMessage=ShaniString.loadString("orders.TranslateOrder.translationSuccessMessage");
-	private static ShaniString translationUnsuccessMessage=ShaniString.loadString("orders.TranslateOrder.translationUnsuccessMessage");
+public class TranslateOrder extends KeywordOrderNG{
+	private int maxLineSize;
+	private ShaniString translationSuccessMessage;
+	private ShaniString translationUnsuccessMessage;
 	
-	public KeywordAction actionFactory(org.w3c.dom.Element element) {return null;}
+	private ShaniString connectionTimeoutMessage;
+	private ShaniString connectionFailedMessage;
 	
-	public UnmatchedAction getUnmatchedAction() {
+	@Override
+	protected boolean initialize(org.w3c.dom.Element e) {
+		maxLineSize=Integer.parseInt(ShaniString.loadString(e,"maxLineSize").toString());
+		translationSuccessMessage=ShaniString.loadString(e, "translationSuccessMessage");
+		translationUnsuccessMessage=ShaniString.loadString(e,"translationUnsuccessMessage");
+		
+		connectionTimeoutMessage=ShaniString.loadString(e,"connectionTimeoutMessage");
+		connectionFailedMessage=ShaniString.loadString(e,"connectionFailedMessage");
+		
+		return true;
+	}
+	
+	public KeywordActionNG actionFactory(org.w3c.dom.Element element) {return null;}
+	
+	public UnmatchedActionNG getUnmatchedAction() {
 		return new TranslationAction();
 	}
 	
-	private class TranslationAction extends UnmatchedAction{
+	private class TranslationAction extends UnmatchedActionNG{
 		@Override
 		public boolean connectAction(String action) {
 			assert false:"Can't connect action to shani.orders.TranslatorOrder";
@@ -75,7 +90,7 @@ public class TranslateOrder extends KeywordOrder{
 		private String targetLanguage;
 		private List<String> translations=new ArrayList<String>();
 	}
-	public static List<Entry> getEntries(String wordToTranslate) {
+	public List<Entry> getEntries(String wordToTranslate) {
 		try {
 			Document doc=Jsoup.connect("https://translatica.pl/szukaj/"+wordToTranslate).get();
 			
@@ -89,9 +104,9 @@ public class TranslateOrder extends KeywordOrder{
 			
 			return Return;
 		} catch (SocketTimeoutException e) {
-			ShaniString.loadString("misc.connection.connectionTimeoutMessage").printOut();
+			connectionTimeoutMessage.printOut();
 		} catch (IOException e) {
-			ShaniString.loadString("misc.connection.connectionFailedMessage").printOut();
+			connectionFailedMessage.printOut();
 		}
 		return null;
 	}
@@ -111,5 +126,10 @@ public class TranslateOrder extends KeywordOrder{
 		}
 		
 		return Return;
+	}
+	
+	@Override
+	protected String getDataLocation() {
+		return null;
 	}
 }

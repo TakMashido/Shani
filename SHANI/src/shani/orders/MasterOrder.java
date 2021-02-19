@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import org.w3c.dom.Element;
+
 import shani.Engine;
 import shani.ShaniString;
 import shani.ShaniString.ShaniMatcher;
@@ -13,7 +15,7 @@ import shani.orders.templates.Executable;
 import shani.orders.templates.Order;
 
 public class MasterOrder extends Order {
-	private static final ShaniString notGoodTimeMessage=ShaniString.loadString("orders.MasterOrder.notGoodTimeMessage");
+	private ShaniString notGoodTimeMessage;
 	
 	private enum ActionType{exit,save,autosaveTime};
 	
@@ -25,14 +27,17 @@ public class MasterOrder extends Order {
 	
 	private AutoSaver autoSaver;
 	
-	protected boolean init() {
+	@Override
+	public boolean init(Element e) {
 		autoSaver=new AutoSaver();
 		autoSaver.setDaemon(true);
 		autoSaver.start();
 		
-		exitKey=new ShaniString(orderFile.getElementsByTagName("exit").item(0));
-		autoSaveTimeKey=new ShaniString(orderFile.getElementsByTagName("autosave").item(0));
-		saveKey=new ShaniString(orderFile.getElementsByTagName("save").item(0));
+		exitKey=ShaniString.loadString(e,"exit");
+		autoSaveTimeKey=ShaniString.loadString(e,"autosave");
+		saveKey=ShaniString.loadString(e,"save");
+		
+		notGoodTimeMessage=ShaniString.loadString(e,"notGoodTimeMessage");
 		
 		return true;
 	}

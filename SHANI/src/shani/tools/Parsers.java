@@ -10,15 +10,25 @@ import org.w3c.dom.NodeList;
 import shani.ShaniString;
 import shani.Storage;;
 
-/**Contain methods to parse diffrend forms of data to ready to display String.
+/**Contain methods to parse differed forms of data to ready to display String.
  * @author TakMashido
  */
-public class Parsers {
+public class Parsers{
 	private static IntValueParser h;
 	private static IntValueParser m;
 	private static IntValueParser s;
 	
-	private static final ShaniString timeAndWord=Storage.readShaniStringBase("parsers.TimeParser.andWord");
+	private static ShaniString timeAndWord;
+	
+	
+	public static void staticInit(Element e) {
+		timeAndWord=ShaniString.loadString(e,"andWord");
+		
+		h=new IntValueParser(Storage.getNode(e, "h"));
+		m=new IntValueParser(Storage.getNode(e,"m"));
+		s=new IntValueParser(Storage.getNode(e, "s"));
+	}
+
 	
 	public static String parseTime(int seconds) {
 		int hours=seconds/3600;
@@ -28,9 +38,6 @@ public class Parsers {
 		return parseTime(hours,mins,seconds);
 	}
 	public static String parseTime(int hours, int mins, int seconds) {
-		if(h==null)h=new IntValueParser(Storage.readNodeBase("parsers.TimeParser.h"));
-		if(m==null)m=new IntValueParser(Storage.readNodeBase("parsers.TimeParser.m"));
-		if(s==null)s=new IntValueParser(Storage.readNodeBase("parsers.TimeParser.s"));
 		StringBuffer ret=new StringBuffer();
 		
 		if(hours!=0) ret.append(h.parse(hours)).append(' ');
@@ -47,7 +54,7 @@ public class Parsers {
 		private final List<Rule> strictRules;
 		private final List<Rule> lastDigitRules;
 		
-		private final String name;					//For debug propouses
+		private final String name;					//For debug proposes
 		
 		private final boolean isDump;
 		
@@ -114,7 +121,7 @@ public class Parsers {
 			return rules;
 		}
 		
-		private String parse(int value) {
+		protected String parse(int value) {
 			if(isDump)return Integer.toString(value);
 			
 			for(Rule rule:strictRules) {
@@ -134,11 +141,11 @@ public class Parsers {
 			return Integer.toString(value);
 		}
 		
-		private class Rule{
+		protected class Rule{
 			int begin;
 			int end;
 			ShaniString value;
-			private boolean inRange(int value) {
+			protected boolean inRange(int value) {
 				return value>=begin&&value<=end;
 			}
 		}

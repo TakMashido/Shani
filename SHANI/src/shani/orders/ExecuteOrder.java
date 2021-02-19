@@ -1,91 +1,85 @@
 package shani.orders;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
-import shani.Config;
 import shani.Engine;
 import shani.ShaniString;
-import shani.ShaniString.ShaniMatcher;
 import shani.Tools;
-import shani.orders.templates.Action;
-import shani.orders.templates.Executable;
-import shani.orders.templates.KeywordOrder;
+import shani.orders.templates.KeywordOrderNG;
 
-public class ExecuteOrder extends KeywordOrder {
-	private static final ShaniString successfulMessage=ShaniString.loadString("orders.ExecuteOrder.successfulMessage");
-	private static final ShaniString notKnowMessage=ShaniString.loadString("orders.ExecuteOrder.notKnowMessage");
-	private static final ShaniString unrecognizedMessage=ShaniString.loadString("orders.ExecuteOrder.unrecognizedMessage");
-	public static final ShaniString cantConnectMessage=ShaniString.loadString("orders.ExecuteOrder.cantConnectMessage");
+public class ExecuteOrder extends KeywordOrderNG {
+	private static ShaniString successfulMessage;
+	private static ShaniString notKnowMessage;
+	private static ShaniString unrecognizedMessage;
 	
-	public KeywordAction actionFactory(Element element) {
+	@Override
+	protected boolean initialize(Element e) {
+		successfulMessage=ShaniString.loadString(e, "successfulMessage");
+		notKnowMessage=ShaniString.loadString(e, "notKnowMessage");
+		unrecognizedMessage=ShaniString.loadString(e, "unrecognizedMessage");
+		
+		return true;
+	}
+	
+	@Override
+	protected String getDataLocation() {
+		return "fileSystem.executables";
+	}
+	
+	@Override
+	public KeywordActionNG actionFactory(Element element) {
 		return new ExecuteAction(element);
 	}
-	
-	public List<Executable> createExecutables(ShaniString command, ShaniMatcher matcher){
-		if(matcher.getMatchedCost()>Config.sentenseCompareTreshold||matcher.getMatchedNumber()==0)return null;
-		ArrayList<Executable> Return=new ArrayList<Executable>();
-		Return.add(new Executable(new AddExecuteAction(matcher),(short)(Config.sentenseCompareTreshold-1)));
-		return Return;
-	}
-	
-	private ExecuteAction getAction(String com) {
-		ShaniString com2=new ShaniString(com);
-		int index=-1;
-		for(int i=0;i<actions.size();i++) {
-			KeywordAction action=actions.get(i);
-			if(action.isEqual(com2)) {
-				index=i;
-				break;
-			}
-		}
-		return index!=-1?(ExecuteAction)actions.get(index):null;
+	@Override
+	public UnmatchedActionNG getUnmatchedAction() {
+		return new AddExecuteAction();
 	}
 	
 	private static final Pattern UriPattern=Pattern.compile("\"?[\\w\\.]+://[\\w/\\\\\\?=& ]+\"?");
 	private static final Pattern StartDirPattern =Pattern.compile("^\"?(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\"?$");				//group 1- Home dir, 2- fileName
 	private static final Pattern StartDirPattern2=Pattern.compile("^\"(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\" ?(.*)$");			//SAME							, 3- command line arguments
 	private static final Pattern PathPattern=Pattern.compile("\"?\\w:\\\\[\\w\\d \\\\()']+\"?");
-	private boolean isUri(String com) {
+	protected boolean isUri(String com) {
 		return UriPattern.matcher(Tools.removeNational(com)).matches();
 	}
-	private boolean isExecutable(String com) {
+	protected boolean isExecutable(String com) {
 		String path=Tools.removeNational(com);
 		return StartDirPattern.matcher(path).matches()||StartDirPattern2.matcher(path).matches();
 	}
-	private boolean isPath(String com) {
+	protected boolean isPath(String com) {
 		return PathPattern.matcher(Tools.removeNational(com)).matches();
 	}
-	
-	private class ExecuteAction extends KeywordAction{
+ 	
+	protected class ExecuteAction extends KeywordActionNG{
 		private String targetType;
 		private String[] target;
 		
-		private ExecuteAction(Element e) {
+		protected ExecuteAction(Element e) {
 			super(e);
 			actionFile=e;
 			targetType=e.getElementsByTagName("type").item(0).getTextContent();
 			target=new ShaniString(e.getElementsByTagName("todo").item(0).getTextContent()).getArray();
 		}
-		private ExecuteAction(ShaniString key,String targetType,String[] target) {
+		protected ExecuteAction(ShaniString key,String targetType,String[] target) {
 			super(key);
 			
-			Element e2=Engine.doc.createElement("type");
-			e2.appendChild(Engine.doc.createTextNode(targetType));
+			var doc=targetDataNode.getOwnerDocument();
+			Element e2=doc.createElement("type");
+			e2.appendChild(doc.createTextNode(targetType));
 			actionFile.appendChild(e2);
 			this.targetType=targetType;
 			
-			e2=Engine.doc.createElement("todo");
-			e2.appendChild(Engine.doc.createTextNode(new ShaniString(target).toFullString()));
+			e2=doc.createElement("todo");
+			e2.appendChild(doc.createTextNode(new ShaniString(target).toFullString()));
 			actionFile.appendChild(e2);
 			this.target=target;
 		}
 		
+		@Override
 		public boolean keywordExecute() {
 			boolean Return=false;
 			switch(targetType) {
@@ -106,9 +100,9 @@ public class ExecuteOrder extends KeywordOrder {
 					Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+"\" "+target[2],0);
 				} else {
 					Return=false;
-					System.out.println("Failed to execute: shani bug");
-					assert false:"Execute order suports executing only of targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!";
-					System.err.println("Execute order suports executing only of targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!");
+					System.out.println("Failed to execute: You've just found shani bug so congrats and report on github.com/takmashido/shani.");
+					assert false:"Execute order suports executing only startdir targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!";
+					System.err.println("Execute order suports executing only startdir targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!");
 				}
 				break;
 			case "dir":
@@ -136,21 +130,16 @@ public class ExecuteOrder extends KeywordOrder {
 			}
 		}
 	}
-	private class AddExecuteAction extends Action{
-		private String unmatched;
-		private KeywordAction readyAction;
+	protected class AddExecuteAction extends UnmatchedActionNG{
+		private KeywordActionNG readyAction;
 		
-		private AddExecuteAction(ShaniMatcher matcher) {
-			unmatched=matcher.getUnmatched().toString();
-		}
-		
+		@Override
 		public boolean execute() {
 			System.out.println(notKnowMessage);
 			
-//			String newCom=Tools.clear(Engine.in.nextLine());
 			String newCom=Engine.in.nextLine().trim();
 			Boolean positive=Engine.isInputPositive(new ShaniString(newCom,false));
-			if(positive!=null&&positive==false)
+			if(positive!=null&&!positive)
 				return false;
 			if(isPath(newCom)) {
 				return createAction(unmatched,"dir",new String[] {Tools.clear(newCom)});
@@ -168,24 +157,25 @@ public class ExecuteOrder extends KeywordOrder {
 				mat.group();
 				
 				return createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
-			} else {
-				KeywordAction exec=getAction(newCom);
-				if(exec!=null) {
-					exec.addKey(new ShaniString(unmatched));
-					exec.execute();
-					readyAction=exec;
-					return true;
-				}
-				unrecognizedMessage.printOut();
-				return false;
 			}
+			
+			KeywordActionNG exec=getAction(new ShaniString(newCom,false));				//Input is not valid program/file/URL. Check if it's one of already existing keys.
+			if(exec!=null) {
+				exec.addKey(unmatched);
+				exec.execute();
+				readyAction=exec;
+				return true;
+			}
+			unrecognizedMessage.printOut();
+			return false;
 		}
-		private boolean createAction(String key, String targetType, String[] target) {
-			KeywordAction action=new ExecuteAction(new ShaniString(key),targetType,target);
+		private boolean createAction(ShaniString key, String targetType, String[] target) {
+			KeywordActionNG action=new ExecuteAction(key,targetType,target);
 			action.execute();
 			readyAction=action;
 			return true;
 		}
+		@Override
 		public boolean connectAction(String action) {
 			if(readyAction!=null) {
 				return readyAction.connectAction(action);

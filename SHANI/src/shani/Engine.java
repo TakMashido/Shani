@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -22,7 +20,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -38,16 +35,13 @@ import shani.modules.templates.FilterModule;
 import shani.modules.templates.ShaniModule;
 import shani.orders.templates.Executable;
 import shani.orders.templates.Order;
-import shani.tools.MainFileTools;
 
 public class Engine {
 	public static PrintStream debug;
-	/**Use {@link #debug instead}*/
-	@Deprecated
 	public static PrintStream info;
 	private static PrintStream commands;
 	
-	private static ShaniString helloMessage;												//Have to be initialzed after loading doc.
+	private static ShaniString helloMessage;												//Have to be initialized after loading doc.
 	private static ShaniString notUnderstandMessage;
 	private static ShaniString licenseConfirmationMessage;						//Sentence construction may be very not accurate.
 	private static ShaniString closeMessage;
@@ -57,6 +51,7 @@ public class Engine {
 	
 	public static final Scanner in=new Scanner(System.in);
 	
+	/**Main document of templateFile*/
 	public static Document doc;
 	private static ArrayList<Order> orders = new ArrayList<Order>();
 	private static ArrayList<FilterModule> filterModules = new ArrayList<>();
@@ -112,17 +107,7 @@ public class Engine {
 				e1.printStackTrace();
 			}
 		}
-		if(argsDec.containFlag("-u","--update")) {
-			try {
-				System.out.println("Updating shani mainfile...");
-				MainFileTools.update(Engine.class.getResourceAsStream("/files/DefaultFile.dat"), Config.mainFile);
-				System.out.println("Main file updated.");
-			} catch (SAXException | IOException | ParserConfigurationException e) {
-				System.out.println("Failed to update main file. Closing...");
-				e.printStackTrace();
-				System.exit(0);
-			}
-		}
+		
 		Integer integer;
 		if((integer=argsDec.getInt("-cl","--close"))!=null) {
 			Thread closingThread=new Thread("CloserThread") {
@@ -137,20 +122,21 @@ public class Engine {
 			closingThread.setDaemon(true);
 			closingThread.start();
 		}
+		
 		if(argsDec.containFlag("-v","--verbose")) {
 			Config.verbose=true;
 		}
 		
 		if(!argsDec.isProcesed()) {														//End of args processing
-			System.out.println("Program input contain un recognized parameters:");
+			System.out.println("Program input contain unrecognized parameters:");
 			var unmatched=argsDec.getUnprocesed();
 			for(var un:unmatched)System.out.println(un);
 			System.exit(0);
 		}
 		
 		try {
-			new File("info.log").delete();
-			info=new PrintStream(new BufferedOutputStream(new FileOutputStream("Info.log"),1024));
+			Config.infoLogFileLocation.delete();
+			info=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.infoLogFileLocation),1024));
 		} catch (FileNotFoundException e1) {
 			System.out.println("Failed to set info file");
 			e1.printStackTrace();
@@ -175,37 +161,18 @@ public class Engine {
 		}
 		
 		commands.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<startup>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");				//Make startup place visible inside commands file
-		if (Config.mainFile.exists()) {
-			try {
-				parseMainFile();
-			} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException | SecurityException | DOMException e) {
-				System.out.println("Failed to parse main data file");
-				e.printStackTrace();
-				return;
-			}
-		} else {
-			System.out.println("Main data file doesn't exist. Create now y/n?");
-			if (in.next().equals("y")) {
-				try {
-					createMainFile();
-					System.out.println("File created. Please restart Shani.");
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {}
-					System.exit(0);
-				} catch (IOException | TransformerFactoryConfigurationError e) {
-					System.out.println("Failed to create main file");
-					e.printStackTrace();
-					return;
-				}
-			} else {
-				System.out.println("Closing Shani");
-				System.exit(0);
-			}
+		commands.println();
+		
+		try {
+			parseMainFile();
+		} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException | SecurityException | DOMException e) {
+			System.out.println("Failed to parse main data file");
+			e.printStackTrace();
+			return;
 		}
 		
 		if(LOADING_ERROR) {
-			ShaniString loadingErrorMessage=ShaniString.loadString("engine.loadingErrorMessage");
+			ShaniString loadingErrorMessage=ShaniString.loadString(doc,"engine.loadingErrorMessage");
 			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
 			else System.out.println("Error encountered during loading shani. Further info in errors.log file");
 		}
@@ -232,49 +199,41 @@ public class Engine {
 			if(str.length()==0)continue;
 			long time=System.nanoTime();
 			ShaniString command=new ShaniString(str,false);
-			Executable exec=interprete(command);
-			
-			if (exec==null) {
-				System.out.println(notUnderstandMessage);
-				commands.println("Can't execute");
-			} else {
-				commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms");
+			try {
+				Executable exec=interprete(command);
 				
-				if(exec.isSuccesful()) lastExecuted=exec;
+				if (exec==null) {
+					System.out.println(notUnderstandMessage);
+					commands.println("Can't execute");
+				} else {
+					commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms");
+					
+					if(exec.isSuccesful()) lastExecuted=exec;
+				}
+			} catch(Exception ex) {
+				ex.printStackTrace();
+				
+				commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms. Error ocured.");
+				
+				errorMessage.printOut();
 			}
 		}
 	}
 	
-	/**Copy file from "/files/DefaultFile.dat" in jar as mainFile specified in config
-	 * @throws IOException when failed to create mainFile
-	 * @throws NullPointerException when failed to read file inside jar
-	 */
-	private static void createMainFile() throws IOException{
-		Config.mainFile.createNewFile();
-		
-		try(InputStream in=Engine.class.getResourceAsStream("/files/DefaultFile.dat");
-				OutputStream out=new FileOutputStream(Config.mainFile)){
-			
-			byte[] buf=new byte[1024];
-			int toCopy;
-			while((toCopy=in.read(buf))>0) {
-				out.write(buf, 0, toCopy);
-			}
-		}
-	}
 	private static void parseMainFile() throws SAXException, IOException, ParserConfigurationException {
-		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Config.mainFile);
+		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Engine.class.getResourceAsStream("/files/ordersData/"+Config.language+".xml"));
 		doc.getDocumentElement().normalize();
 		
-		helloMessage=ShaniString.loadString("engine.helloMessage");					
-		closeMessage=ShaniString.loadString("engine.closeMessage");
-		notUnderstandMessage=ShaniString.loadString("engine.notUnderstandMessage");
-		errorMessage=ShaniString.loadString("engine.errorMessage");                
-		licenseConfirmationMessage=ShaniString.loadString("engine.licenseConfirmationMessage");
-		licensesNotConfirmedMessage=ShaniString.loadString("engine.licensesNotConfirmedMessage");
+		Node engineNode=doc.getElementsByTagName("engine").item(0);
+		
+		helloMessage=ShaniString.loadString(engineNode, "helloMessage");
+		closeMessage=ShaniString.loadString(engineNode, "closeMessage");
+		notUnderstandMessage=ShaniString.loadString(engineNode, "notUnderstandMessage");
+		errorMessage=ShaniString.loadString(engineNode, "errorMessage");
+		licenseConfirmationMessage=ShaniString.loadString(engineNode, "licenseConfirmationMessage");
+		licensesNotConfirmedMessage=ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
 		
 		long bigTime=System.nanoTime();
-		commands.println();
 		NodeList ordersNode = ((Element)doc.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
 		for (int i = 0; i < ordersNode.getLength(); i++) {
 			Node node = ordersNode.item(i);
@@ -291,7 +250,7 @@ public class Engine {
 					long time=System.nanoTime();
 					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
 					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-					order.init(e);
+					order.init(e);									//TODO add test if loaded successfully
 					orders.add(order);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 					Engine.registerLoadException();
@@ -328,12 +287,36 @@ public class Engine {
 			}
 		}
 		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
+		
+		bigTime=System.nanoTime();
+		moduleNodes=((Element)doc.getElementsByTagName("static").item(0)).getChildNodes();
+		for(int i=0;i<moduleNodes.getLength();i++) {
+			Node n=moduleNodes.item(i);
+			if(n.getNodeType()!=Node.ELEMENT_NODE) continue;
+			Element e=(Element)moduleNodes.item(i);
+			
+			try {
+				String className=e.getAttribute("classname");
+				if(className.equals("")) {
+					System.out.println("Error in mainfile found");
+					System.err.println("Classname of an static init is not specyfied.");
+					continue;
+				}
+				
+				long time=System.nanoTime();
+				Class.forName(className).getMethod("staticInit", Element.class).invoke(null, e);
+				commands.printf("Static initializer %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+			} catch(ClassNotFoundException | IllegalArgumentException | NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException ex) {
+				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" static initilizer from main file.");
+				ex.printStackTrace();
+			}
+		}
+		commands.printf("Static data loaded in \t%8.3f ms.%n", (System.nanoTime()-bigTime)/1000000f);
+		
 	}
-	public static void saveMainFile(){										//TODO fix xml parsing. It throws new lines everywhere. Currently cleaned after output creation
+	public static void saveMainFile(){
 		for(var order:orders)order.save();									//Flush all orders save data
 		Storage.save();														//Save data file
-		
-		saveDocument(doc, Config.mainFile);
 	}
 	public static void saveDocument(Document document, File targetFile) {
 		try {
@@ -347,7 +330,7 @@ public class Engine {
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			
 			var string=new StringWriter();
-			transformer.transform(new DOMSource(document), new StreamResult(string));
+			transformer.transform(new DOMSource(document), new StreamResult(string));			//TODO fix xml parsing. It throws new lines everywhere. Currently cleaned after output creation
 			
 			try(Scanner output=new Scanner(string.toString());
 					var fileOut=new OutputStreamWriter(new FileOutputStream(targetFile),StandardCharsets.UTF_8)){
@@ -379,14 +362,18 @@ public class Engine {
 		if(command.isEmpty())return null;
 		
 		commands.println("\n"+command.toFullString()+':');
+		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+command.toFullString()+':');
 		for(FilterModule filter:filterModules)command=filter.filter(command);
 		commands.println("\t"+command.toFullString());
+		info.println("\t"+command.toFullString());
 		
 		lastCommand=command;
 		Executable toExec=getExecutable(command);
 		
 		if(toExec!=null&&toExec.cost<=Config.sentenseCompareTreshold) {
+			info.println("<Execution><Excution><Execution><Execution>");
 			toExec.execute();
+			info.println("<End><End><End><End><End><End><End><End><End>");
 			System.gc();
 			return toExec;
 		} else {
@@ -477,6 +464,14 @@ public class Engine {
 		if(confirmed2==null)return false;
 		if(confirmed2)Storage.writeUserData("acceptedLicences."+nameToSearch, true);
 		return confirmed2;
+	}
+	/**Checks if input is positive response.
+	 * Equivalent to {@link Engine#isInputPositive(ShaniString)}.
+	 * @param input value to check.
+	 * @return true if positive, false if negative, null if unrecognized./.
+	 */
+	public static Boolean isInputPositive(String input) {
+		return isInputPositive(new ShaniString(input,false));
 	}
 	/**Checks if input is positive response.
 	 * Return true for positive/agreeding one (yes,youp),

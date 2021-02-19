@@ -7,24 +7,31 @@ import org.w3c.dom.Element;
 
 import shani.Engine;
 import shani.ShaniString;
-import shani.orders.templates.KeywordOrder;
+import shani.orders.templates.KeywordOrderNG;
+import shani.orders.templates.KeywordOrderNG.KeywordActionNG;
+import shani.orders.templates.KeywordOrderNG.UnmatchedActionNG;
 
-public class CMDOrder extends KeywordOrder{
-	private static final ShaniString executeMessage=ShaniString.loadString("orders.CMDOrder.executeMessage");
-	private static final ShaniString runCMDSessionMessage=ShaniString.loadString("orders.CMDOrder.runCMDSessionMessage");
-	private static final ShaniString endCMDSessionMessage=ShaniString.loadString("orders.CMDOrder.endCMDSessionMessage");
+public class CMDOrder extends KeywordOrderNG{
+	private ShaniString executeMessage;
+	private ShaniString runCMDSessionMessage;
+	private ShaniString endCMDSessionMessage;
 	
-	public boolean initialize() {
+	@Override
+	public boolean initialize(Element e) {
+		executeMessage=ShaniString.loadString(e,"executeMessage");
+		runCMDSessionMessage=ShaniString.loadString(e,"runCMDSessionMessage");
+		endCMDSessionMessage=ShaniString.loadString(e,"endCMDSessionMessage");
+		
 		targetExactMatch=true;
 		return true;
 	}
 	
 	@Override
-	public KeywordAction actionFactory(Element element) {
+	public KeywordActionNG actionFactory(Element element) {
 		return new MergedCMDAction(element);
 	}
 	@Override
-	public UnmatchedAction getUnmatchedAction() {
+	public UnmatchedActionNG getUnmatchedAction() {
 		return new CMDAction();
 	}
 	
@@ -74,7 +81,7 @@ public class CMDOrder extends KeywordOrder{
 		} catch (InterruptedException e) {}
 	}
 	
-	private class MergedCMDAction extends KeywordAction{
+	private class MergedCMDAction extends KeywordActionNG{
 		private final String command;
 		
 		protected MergedCMDAction(Element elem) {
@@ -96,7 +103,7 @@ public class CMDOrder extends KeywordOrder{
 			return true;
 		}
 	}
-	private class CMDAction extends UnmatchedAction{
+	private class CMDAction extends UnmatchedActionNG{
 		private MergedCMDAction mergedAction=null;  
 		
 		@Override
@@ -110,5 +117,10 @@ public class CMDOrder extends KeywordOrder{
 			}
 			return mergedAction.connectAction(action);
 		}
+	}
+	
+	@Override
+	protected String getDataLocation() {
+		return null;
 	}
 }

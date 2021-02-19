@@ -1,0 +1,14 @@
+XML file containing unified structure of data saved by orders.
+It's root name is named shaniData and averything is stored under it.
+
+nodes paths:
+
+userdata 						- contain data about user
+
+storage							- for general data storage
+	fileSystem					- data about computer files
+		executables				- collected executables, in form of .exe files, scripts, local urls e.g:"steam://rungameid/335300"
+
+ordersdata						- for data directly reletad to orders. Should be stored insite nodes named by getClass().getCanonicalName().replace(".","-"), with packages policy following oracle packages policy to make the unique
+
+acceptedLicences				- stores licenses accepted by user
