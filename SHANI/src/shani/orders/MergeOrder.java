@@ -18,14 +18,13 @@ public class MergeOrder extends Order{
 	
 	private ShaniString connectKey;
 	
-	@Override
-	public boolean init(Element e) {
+	public MergeOrder(Element e) {
+		super(e);
+		
 		connectKey=ShaniString.loadString(e, "key");
 		
 		connectSuccessfulMessage=ShaniString.loadString(e,"connectSuccessfulMessage");
 		cantConnectMessage=ShaniString.loadString(e,"connectSuccessfulMessage");
-		
-		return true;
 	}
 	
 	@Override

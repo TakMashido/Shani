@@ -248,10 +248,11 @@ public class Engine {
 						continue;
 					}
 					long time=System.nanoTime();
-					Order order = (Order) Class.forName(className).getDeclaredConstructor().newInstance();
-					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-					order.init(e);									//TODO add test if loaded successfully
+					
+					Order order = (Order) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
 					orders.add(order);
+					
+					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 					Engine.registerLoadException();
 					System.err.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");

@@ -27,8 +27,9 @@ public class MasterOrder extends Order {
 	
 	private AutoSaver autoSaver;
 	
-	@Override
-	public boolean init(Element e) {
+	public MasterOrder(Element e) {
+		super(e);
+		
 		autoSaver=new AutoSaver();
 		autoSaver.setDaemon(true);
 		autoSaver.start();
@@ -38,8 +39,6 @@ public class MasterOrder extends Order {
 		saveKey=ShaniString.loadString(e,"save");
 		
 		notGoodTimeMessage=ShaniString.loadString(e,"notGoodTimeMessage");
-		
-		return true;
 	}
 	
 	private void invokeSave() {

@@ -9,20 +9,19 @@ import org.w3c.dom.Element;
 import shani.Engine;
 import shani.ShaniString;
 import shani.Tools;
-import shani.orders.templates.KeywordOrderNG;
+import shani.orders.templates.KeywordOrder;
 
-public class ExecuteOrder extends KeywordOrderNG {
+public class ExecuteOrder extends KeywordOrder {
 	private static ShaniString successfulMessage;
 	private static ShaniString notKnowMessage;
 	private static ShaniString unrecognizedMessage;
 	
-	@Override
-	protected boolean initialize(Element e) {
+	public ExecuteOrder(Element e) {
+		super(e);
+		
 		successfulMessage=ShaniString.loadString(e, "successfulMessage");
 		notKnowMessage=ShaniString.loadString(e, "notKnowMessage");
 		unrecognizedMessage=ShaniString.loadString(e, "unrecognizedMessage");
-		
-		return true;
 	}
 	
 	@Override

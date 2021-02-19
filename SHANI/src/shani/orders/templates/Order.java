@@ -13,11 +13,8 @@ public abstract class Order {
 	/**Xml element containing Order data. Description, key words responses.*/
 	protected Element templateFile;
 	
-	/**Main method for initializing module.
-	 * @param e XML Element representing this order Object.
-	 * @return If successfully initialized.
-	 */
-	public abstract boolean init(Element e);
+	/**Constructor loading order from xml node*/
+	public Order(Element e) {}
 	
 	/**Prepares list of executables which are respond for given command query.
 	 * @param command Command to interpret.

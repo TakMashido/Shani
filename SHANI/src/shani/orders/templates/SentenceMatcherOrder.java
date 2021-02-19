@@ -12,10 +12,9 @@ import shani.ShaniString;
 public abstract class SentenceMatcherOrder extends Order{
 	protected SentenceMatcher matcher;
 	
-	@Override
-	public boolean init(Element e) {
+	public SentenceMatcherOrder(Element e) {
+		super(e);
 		matcher=new SentenceMatcher(e.getElementsByTagName("sentence").item(0));
-		return initialize(e);
 	}
 	
 	/**Override to do some initializations in your module.

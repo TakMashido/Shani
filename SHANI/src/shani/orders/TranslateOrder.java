@@ -12,9 +12,9 @@ import org.jsoup.select.Elements;
 
 import shani.Engine;
 import shani.ShaniString;
-import shani.orders.templates.KeywordOrderNG;
+import shani.orders.templates.KeywordOrder;
 
-public class TranslateOrder extends KeywordOrderNG{
+public class TranslateOrder extends KeywordOrder{
 	private int maxLineSize;
 	private ShaniString translationSuccessMessage;
 	private ShaniString translationUnsuccessMessage;
@@ -22,16 +22,15 @@ public class TranslateOrder extends KeywordOrderNG{
 	private ShaniString connectionTimeoutMessage;
 	private ShaniString connectionFailedMessage;
 	
-	@Override
-	protected boolean initialize(org.w3c.dom.Element e) {
+	public TranslateOrder(org.w3c.dom.Element e) {
+		super(e);
+		
 		maxLineSize=Integer.parseInt(ShaniString.loadString(e,"maxLineSize").toString());
 		translationSuccessMessage=ShaniString.loadString(e, "translationSuccessMessage");
 		translationUnsuccessMessage=ShaniString.loadString(e,"translationUnsuccessMessage");
 		
 		connectionTimeoutMessage=ShaniString.loadString(e,"connectionTimeoutMessage");
 		connectionFailedMessage=ShaniString.loadString(e,"connectionFailedMessage");
-		
-		return true;
 	}
 	
 	public KeywordActionNG actionFactory(org.w3c.dom.Element element) {return null;}

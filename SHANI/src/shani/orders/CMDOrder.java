@@ -7,23 +7,23 @@ import org.w3c.dom.Element;
 
 import shani.Engine;
 import shani.ShaniString;
-import shani.orders.templates.KeywordOrderNG;
-import shani.orders.templates.KeywordOrderNG.KeywordActionNG;
-import shani.orders.templates.KeywordOrderNG.UnmatchedActionNG;
+import shani.orders.templates.KeywordOrder;
+import shani.orders.templates.KeywordOrder.KeywordActionNG;
+import shani.orders.templates.KeywordOrder.UnmatchedActionNG;
 
-public class CMDOrder extends KeywordOrderNG{
+public class CMDOrder extends KeywordOrder{
 	private ShaniString executeMessage;
 	private ShaniString runCMDSessionMessage;
 	private ShaniString endCMDSessionMessage;
 	
-	@Override
-	public boolean initialize(Element e) {
+	public CMDOrder(Element e) {
+		super(e);
+		
 		executeMessage=ShaniString.loadString(e,"executeMessage");
 		runCMDSessionMessage=ShaniString.loadString(e,"runCMDSessionMessage");
 		endCMDSessionMessage=ShaniString.loadString(e,"endCMDSessionMessage");
 		
 		targetExactMatch=true;
-		return true;
 	}
 	
 	@Override

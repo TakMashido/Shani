@@ -34,8 +34,9 @@ public class TimerOrder extends SentenceMatcherOrder{
 	
 	private ArrayList<TimerAction> timers=new ArrayList<>();
 	
-	@Override
-	protected boolean initialize(Element e) {
+	public TimerOrder(Element e) {
+		super(e);
+		
 		startMessage=ShaniString.loadString(e,"startMessage");
 		alreadyRunningMessage=ShaniString.loadString(e,"alreadyRunningMessage");
 		stopMessage=ShaniString.loadString(e,"stopMessage");
@@ -57,8 +58,6 @@ public class TimerOrder extends SentenceMatcherOrder{
 			if(subnodes.item(i) instanceof Element)
 				new TimerAction((Element)subnodes.item(i));
 		}
-		
-		return true;
 	}
 	
 	@Override

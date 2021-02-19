@@ -14,12 +14,11 @@ public class CalculateOrder extends SentenceMatcherOrder {
 	private static ShaniString calculationResoultMessage;
 	private static ShaniString calculationFailedMessage;
 	
-	@Override
-	protected boolean initialize(Element e) {
+	public CalculateOrder(Element e) {
+		super(e);
+		
 		calculationResoultMessage=ShaniString.loadString(e, "calculationResoultMessage");
 		calculationFailedMessage=ShaniString.loadString(e, "calculationFailedMessage");
-		
-		return true;
 	}
 	
 	@Override

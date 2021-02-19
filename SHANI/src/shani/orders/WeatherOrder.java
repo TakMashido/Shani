@@ -48,8 +48,9 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	private int badWeatherWind;
 	private String[] badWeatherTypes;
 	
-	@Override
-	protected boolean initialize(org.w3c.dom.Element e) {
+	public WeatherOrder(org.w3c.dom.Element e) {
+		super(e);
+		
 		notKnowLocationMessage=ShaniString.loadString(e,"notKnowLocationMessage");          
 		cannotProcessDayMessage=ShaniString.loadString(e,"cannotProcessDayMessage");        
 		cannotParseDayNumberMessage=ShaniString.loadString(e,"cannotParseDayNumberMessage");
@@ -83,8 +84,6 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				break;
 			}
 		}
-		
-		return true;
 	}
 	
 	private static class Weather{

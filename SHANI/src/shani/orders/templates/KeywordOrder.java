@@ -23,7 +23,7 @@ import shani.Storage;
  * 
  * @author TakMashido
  */
-public abstract class KeywordOrderNG extends Order {
+public abstract class KeywordOrder extends Order {
 	protected ShaniString keyword;
 	protected ArrayList<KeywordActionNG> actions=new ArrayList<>();
 	
@@ -36,8 +36,9 @@ public abstract class KeywordOrderNG extends Order {
 	 * @return String[] containing paths to use.*/
 	protected abstract String getDataLocation();
 	
-	@Override
-	public boolean init(Element e) {
+	public KeywordOrder(Element e) {
+		super(e);
+		
 		keyword=new ShaniString(e.getElementsByTagName("keywords").item(0));
 		
 		String dataLocation=getDataLocation();
@@ -54,8 +55,6 @@ public abstract class KeywordOrderNG extends Order {
 				actions.add(actionFactory(elem));
 			}
 		}
-		
-		return initialize(e);
 	}
 	
 	/**Override if you want do some initializations to your module.
