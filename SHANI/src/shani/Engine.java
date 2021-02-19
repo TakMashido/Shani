@@ -60,6 +60,9 @@ public class Engine {
 	
 	private static ShaniString lastCommand;
 	
+	/**When last command was executed in ms.*/
+	public static long lastExecutionTime=System.currentTimeMillis();				
+	
 	private static boolean initialized=false;
 	private static boolean LOADING_ERROR=false;
 	
@@ -374,7 +377,7 @@ public class Engine {
 			info.println("<Execution><Excution><Execution><Execution>");
 			toExec.execute();
 			info.println("<End><End><End><End><End><End><End><End><End>");
-			System.gc();
+			lastExecutionTime=System.currentTimeMillis();
 			return toExec;
 		} else {
 			Engine.debug.println("cannot execute: "+command);			
