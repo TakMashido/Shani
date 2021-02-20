@@ -250,7 +250,7 @@
 				<lastDigit>
 					<_0-1>godzin</_0-1>
 					<_2-4>godziny</_2-4>
-					<_5-21>godzin</_5-21>
+					<_5-9>godzin</_5-9>
 				</lastDigit>
 			</h>
 			<m>
@@ -261,7 +261,7 @@
 				<lastDigit>
 					<_0-1>minut</_0-1>
 					<_2-4>minuty</_2-4>
-					<_5-21>minut</_5-21>
+					<_5-9>minut</_5-9>
 				</lastDigit>
 			</m>
 			<s>
@@ -272,7 +272,7 @@
 				<lastDigit>
 					<_0-1>sekund</_0-1>
 					<_2-4>sekundy</_2-4>
-					<_5-21>sekund</_5-21>
+					<_5-9>sekund</_5-9>
 				</lastDigit>
 			</s>
 		</TimeParser>

@@ -13,7 +13,7 @@ import shani.Engine;
 import shani.ShaniString;
 import shani.Storage;
 import shani.orders.templates.SentenceMatcherOrder;
-import shani.tools.Parsers;
+import shani.tools.parsers.TimeParser;
 
 public class TimerOrder extends SentenceMatcherOrder{
 	private ShaniString startMessage;                                          
@@ -167,7 +167,7 @@ public class TimerOrder extends SentenceMatcherOrder{
 		@SuppressWarnings("unused")						//Used using java reflecion API
 		private void show() {
 			updateTime();
-			System.out.printf(printTimeMessage.toString(), Parsers.parseTime(timeCounted));
+			System.out.printf(printTimeMessage.toString(), TimeParser.parseTime(timeCounted));
 			System.out.println();
 		}
 		
