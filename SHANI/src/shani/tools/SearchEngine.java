@@ -1,4 +1,4 @@
-package shani;
+package shani.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,7 +7,8 @@ import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
-import shani.SearchEngine.SearchResoults.SearchResoult;
+import shani.Engine;
+import shani.tools.SearchEngine.SearchResoults.SearchResoult;
 
 /**<p>Class automating web search.</p>
  * 

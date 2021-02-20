@@ -19,13 +19,13 @@ import org.w3c.dom.Node;
 
 import shani.Config;
 import shani.Engine;
-import shani.SearchEngine;
-import shani.SearchEngine.SearchResoults.SearchResoult;
 import shani.SentenceGenerator;
 import shani.SentenceMatcher;
 import shani.ShaniString;
 import shani.orders.templates.SentenceMatcherOrder;
+import shani.tools.InputCleaners;
 import shani.tools.SearchEngine;
+import shani.tools.SearchEngine.SearchResoults.SearchResoult;
 
 public class WeatherOrder extends SentenceMatcherOrder {
 	private static ShaniString notKnowLocationMessage;
