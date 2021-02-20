@@ -1,13 +1,12 @@
-package shani.modules;
+package shani.filters;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import shani.Config;
 import shani.ShaniString;
-import shani.modules.templates.FilterModule;
 
-public class WordTrashFilter extends FilterModule {
+public class WordTrashFilter extends IntentFilter {
 	private ShaniString words;
 	
 	public WordTrashFilter(Element e) {

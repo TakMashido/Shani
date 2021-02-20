@@ -1,4 +1,4 @@
-package shani.modules;
+package shani.filters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,13 +9,12 @@ import org.w3c.dom.NodeList;
 
 import shani.Config;
 import shani.ShaniString;
-import shani.modules.templates.FilterModule;
 
 /**Changes word represented numbers to it's digit represetation.
  * "One" becomes 1, "three thousand forty seven" to 3047
  * @author TakMashido
  */
-public class NumberFilter extends FilterModule {
+public class NumberFilter extends IntentFilter {
 	private ArrayList<NumberElement> elements;
 	
 	public NumberFilter(Element e) {

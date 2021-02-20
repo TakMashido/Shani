@@ -10,8 +10,8 @@
 		<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
 		<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
 	</engine>
-	<modules>
-		<module classname="shani.modules.NumberFilter">
+	<inputFilters>
+		<filter classname="shani.filters.NumberFilter">
 			<_1000000000>miliard</_1000000000>
 			<_1000000>milion</_1000000>
 			<_1000>tysiąc</_1000>
@@ -51,12 +51,12 @@
 			<_3>trzy*trójka*trzeci*trzech</_3>
 			<_2>dwa*dwójka*drugi*dwóch</_2>
 			<_1>jeden*raz*pierwszy</_1>
-		</module>
-		<module classname="shani.modules.WordTrashFilter">
+		</filter>
+		<filter classname="shani.filters.WordTrashFilter">
 			<please>proszę*uprzejmie proszę</please>
 			<faster>natychmiast*ale już*w tym momencie*szybko</faster>
-		</module>
-	</modules>
+		</filter>
+	</inputFilters>
 	<orders>
 		<order classname="shani.orders.WeatherOrder">
 			<notKnowLocationMessage val="Nie wiem dla jakiego miejsca podać pogodę"/>

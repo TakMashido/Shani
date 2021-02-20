@@ -1,4 +1,4 @@
-package shani.modules.templates;
+package shani.filters;
 
 import org.w3c.dom.Element;
 
@@ -7,11 +7,9 @@ import shani.ShaniString;
 /**Shani module to filter input before trying to match it with Order.
  * @author TakMashido
  */
-public abstract class FilterModule extends ShaniModule{
+public abstract class IntentFilter{
 	
-	public FilterModule(Element e) {
-		super(e);
-	}
+	public IntentFilter(Element e) {}
 
 	public abstract ShaniString filter(ShaniString orginalRespond);
 }

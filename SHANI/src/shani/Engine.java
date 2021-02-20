@@ -31,8 +31,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import liblaries.ArgsDecoder;
-import shani.modules.templates.FilterModule;
-import shani.modules.templates.ShaniModule;
+import shani.filters.IntentFilter;
 import shani.orders.templates.Executable;
 import shani.orders.templates.Order;
 
@@ -54,7 +53,7 @@ public class Engine {
 	/**Main document of templateFile*/
 	public static Document doc;
 	private static ArrayList<Order> orders = new ArrayList<Order>();
-	private static ArrayList<FilterModule> filterModules = new ArrayList<>();
+	private static ArrayList<IntentFilter> inputFilters = new ArrayList<>();
 	
 	private static Executable lastExecuted;
 	
@@ -263,7 +262,7 @@ public class Engine {
 		commands.printf("Orders loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 		
 		bigTime=System.nanoTime();
-		NodeList moduleNodes=((Element)doc.getElementsByTagName("modules").item(0)).getElementsByTagName("module");
+		NodeList moduleNodes=((Element)doc.getElementsByTagName("inputFilters").item(0)).getElementsByTagName("filter");
 		for(int i=0;i<moduleNodes.getLength();i++) {
 			Element e=(Element)moduleNodes.item(i);
 			try {
@@ -274,20 +273,16 @@ public class Engine {
 					continue;
 				}
 				long time=System.nanoTime();
-				ShaniModule module=(ShaniModule) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
-				commands.printf("Module %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+				IntentFilter module=(IntentFilter) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+				commands.printf("Filter %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 				
-				if(module instanceof FilterModule) {
-					filterModules.add((FilterModule)module);
-				} else {
-					System.out.println("Unrecognized module \""+className+"\".");
-				}
+				inputFilters.add((IntentFilter)module);
 			} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" module from main file.");
+				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" filter from main file.");
 				ex.printStackTrace();
 			}
 		}
-		commands.printf("Modules loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
+		commands.printf("Input filters loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
 		
 		bigTime=System.nanoTime();
 		moduleNodes=((Element)doc.getElementsByTagName("static").item(0)).getChildNodes();
@@ -364,7 +359,7 @@ public class Engine {
 		
 		commands.println("\n"+command.toFullString()+':');
 		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+command.toFullString()+':');
-		for(FilterModule filter:filterModules)command=filter.filter(command);
+		for(IntentFilter filter:inputFilters)command=filter.filter(command);
 		commands.println("\t"+command.toFullString());
 		info.println("\t"+command.toFullString());
 		
