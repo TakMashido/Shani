@@ -8,8 +8,8 @@ import org.w3c.dom.Element;
 
 import shani.Engine;
 import shani.ShaniString;
-import shani.Tools;
 import shani.orders.templates.KeywordOrder;
+import shani.tools.InputCleaners;
 
 public class ExecuteOrder extends KeywordOrder {
 	private static ShaniString successfulMessage;
@@ -43,14 +43,14 @@ public class ExecuteOrder extends KeywordOrder {
 	private static final Pattern StartDirPattern2=Pattern.compile("^\"(\\w:[\\\\/][\\w\\\\/!@#\\$%^&\\(\\)';,-\\[\\]\\{\\} ]+)[\\\\/]([\\w\\\\/!@#$%^&\\(\\)';,-\\[\\]\\{\\} ]+\\.[\\w]+)\" ?(.*)$");			//SAME							, 3- command line arguments
 	private static final Pattern PathPattern=Pattern.compile("\"?\\w:\\\\[\\w\\d \\\\()']+\"?");
 	protected boolean isUri(String com) {
-		return UriPattern.matcher(Tools.removeNational(com)).matches();
+		return UriPattern.matcher(InputCleaners.removeNational(com)).matches();
 	}
 	protected boolean isExecutable(String com) {
-		String path=Tools.removeNational(com);
+		String path=InputCleaners.removeNational(com);
 		return StartDirPattern.matcher(path).matches()||StartDirPattern2.matcher(path).matches();
 	}
 	protected boolean isPath(String com) {
-		return PathPattern.matcher(Tools.removeNational(com)).matches();
+		return PathPattern.matcher(InputCleaners.removeNational(com)).matches();
 	}
  	
 	protected class ExecuteAction extends KeywordActionNG{
@@ -141,13 +141,13 @@ public class ExecuteOrder extends KeywordOrder {
 			if(positive!=null&&!positive)
 				return false;
 			if(isPath(newCom)) {
-				return createAction(unmatched,"dir",new String[] {Tools.clear(newCom)});
+				return createAction(unmatched,"dir",new String[] {InputCleaners.clear(newCom)});
 			}
 			if(isUri(newCom)) {
-				return createAction(unmatched,"start",new String[] {Tools.clear(newCom)});
+				return createAction(unmatched,"start",new String[] {InputCleaners.clear(newCom)});
 			}
 			if(isExecutable(newCom)) {
-				Matcher mat=StartDirPattern.matcher(Tools.clear(newCom));
+				Matcher mat=StartDirPattern.matcher(InputCleaners.clear(newCom));
 				if(!mat.matches()) {
 					mat=StartDirPattern2.matcher(newCom);
 					mat.matches();

@@ -276,11 +276,25 @@
 				</lastDigit>
 			</s>
 		</TimeParser>
-		<stem classname="shani.Tools">
+		<InputCleaners classname="shani.tools.InputCleaners">
+			<stem>
 				<!-- Suffix indentical to suf attribute will be changed to value from rep attribute.-->
 				<tag suf="ie" rep=""/>
 				<tag suf="u" rep=""/>
 				<tag suf="ach" rep="e"/>
-		</stem>
+			</stem>
+			<nationalReplacement>
+				<!-- Pairs of char and it's replacement.-->
+				<tag let="ą" rep="a"/>
+				<tag let="ć" rep="c"/>
+				<tag let="ę" rep="e"/>
+				<tag let="ł" rep="l"/>
+				<tag let="ń" rep="n"/>
+				<tag let="ó" rep="o"/>
+				<tag let="ś" rep="s"/>
+				<tag let="ż" rep="z"/>
+				<tag let="ź" rep="z"/>
+			</nationalReplacement>
+		</InputCleaners>
 	</static>
 </shani>

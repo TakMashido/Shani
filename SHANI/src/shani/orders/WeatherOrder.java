@@ -24,8 +24,8 @@ import shani.SearchEngine.SearchResoults.SearchResoult;
 import shani.SentenceGenerator;
 import shani.SentenceMatcher;
 import shani.ShaniString;
-import shani.Tools;
 import shani.orders.templates.SentenceMatcherOrder;
+import shani.tools.SearchEngine;
 
 public class WeatherOrder extends SentenceMatcherOrder {
 	private static ShaniString notKnowLocationMessage;
@@ -203,7 +203,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				notKnowLocationMessage.printOut();
 				return false;
 			}
-			where=Tools.stem(where);
+			where=InputCleaners.stem(where);
 			
 			try {
 				ArrayList<DayWeather> weather=getWeather(where);
