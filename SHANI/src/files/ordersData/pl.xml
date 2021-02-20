@@ -240,7 +240,7 @@
 		</order>
 	</orders>
 	<static>
-		<TimeParser classname="shani.tools.Parsers">
+		<TimeParser classname="shani.tools.parsers.TimeParser">
 			<andWord>i*oraz*i*i</andWord>
 			<h>
 				<strict>
