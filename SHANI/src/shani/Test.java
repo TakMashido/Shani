@@ -10,8 +10,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import liblaries.DOMWalker;
-
 public class Test {
 	public static final String passed="OK";
 	public static final String notPassed="Failed";
@@ -72,7 +70,7 @@ public class Test {
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml"));
 		doc.getDocumentElement().normalize();
 		
-		var matcher=new SentenceMatcher(DOMWalker.walk(doc, "tests/sentenceMatcher/test"));
+		var matcher=new SentenceMatcher(Storage.getNode(doc, "tests.sentenceMatcher.test"));
 		
 		String[] data=new String[] {
 				"just data log",
