@@ -25,18 +25,16 @@ hs_err_pid*
 #eclipse data files
 .setting/
 bin/
+.classpath
 
-#SHANI data files
-SHANI/*.dat
+#IntelliJ project files
+/SHANI/nbproject/private/
+.idea/
+build.xml
+*.iml
 
 #temp javadoc files
 SHANI/doc
 
-#my personal configurarions
-SHANI/config.properties
-
 #required external liblaries
 !dependencies/*
-
-#Shani runtime file
-shaniData/
