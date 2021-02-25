@@ -1,11 +1,10 @@
 package takMashido.shani.tools;
 
-import java.util.regex.Pattern;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import takMashido.shani.core.Storage;
+
+import java.util.regex.Pattern;
 
 public class InputCleaners {
 	private static String[] stemSuffix;
@@ -33,7 +32,7 @@ public class InputCleaners {
 		nationalChar=new char[nodes.getLength()];
 		nationalReplacement=new char[nodes.getLength()];
 		
-		for(int i=0;i<stemSuffix.length;i++) {
+		for(int i=0;i<nationalChar.length;i++) {
 			Element elem=(Element)nodes.item(i);
 			nationalChar[i]=elem.getAttribute("let").charAt(0);
 			nationalReplacement[i]=elem.getAttribute("rep").charAt(0);
