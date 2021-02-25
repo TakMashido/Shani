@@ -2,12 +2,11 @@ package takMashido.shaniModules.inputFilters;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.filters.IntentFilter;
+import takMashido.shani.filters.TextFilter;
 
-public class WordTrashFilter extends IntentFilter {
+public class WordTrashFilter extends TextFilter {
 	private ShaniString words;
 	
 	public WordTrashFilter(Element e) {

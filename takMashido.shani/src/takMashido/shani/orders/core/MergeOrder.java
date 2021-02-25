@@ -1,18 +1,18 @@
 package takMashido.shani.orders.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.w3c.dom.Element;
-
 import takMashido.shani.Config;
 import takMashido.shani.Engine;
+import takMashido.shani.core.Intent;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.Action;
 import takMashido.shani.orders.Executable;
-import takMashido.shani.orders.Order;
+import takMashido.shani.orders.TextOrder;
 
-public class MergeOrder extends Order{
+import java.util.ArrayList;
+import java.util.List;
+
+public class MergeOrder extends TextOrder {
 	protected static ShaniString connectSuccessfulMessage;
 	public static ShaniString cantConnectMessage;
 	
@@ -34,7 +34,7 @@ public class MergeOrder extends Order{
 		short cost=matcher.getMatchedCost();
 		if(cost< Config.sentenseCompareTreshold) {
 			var unMatched=matcher.getUnmatched();
-			var executable=Engine.getExecutable(unMatched);
+			var executable=Engine.getExecutable(new Intent(unMatched));
 			if(Engine.getLastExecuted()!=null&&executable!=null) {
 				var list=new ArrayList<Executable>();
 				list.add(new MergeAction(unMatched,executable,Engine.getLastExecuted()).getExecutable((short)(cost+executable.cost)));

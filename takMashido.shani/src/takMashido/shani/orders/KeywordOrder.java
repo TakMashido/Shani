@@ -1,17 +1,16 @@
 package takMashido.shani.orders;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
+import takMashido.shani.Config;
+import takMashido.shani.Engine;
+import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.core.text.ShaniString.ShaniMatcher;
-import takMashido.shani.core.Storage;
-import takMashido.shani.Engine;
-import takMashido.shani.Config;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**Represents order activated by a single keyword.
  * Supports creating multiple targets with it's own keywords represented by {@code KeywordAction} class.
@@ -23,7 +22,7 @@ import takMashido.shani.Config;
  * 
  * @author TakMashido
  */
-public abstract class KeywordOrder extends Order {
+public abstract class KeywordOrder extends TextOrder {
 	protected ShaniString keyword;
 	protected ArrayList<KeywordActionNG> actions=new ArrayList<>();
 	

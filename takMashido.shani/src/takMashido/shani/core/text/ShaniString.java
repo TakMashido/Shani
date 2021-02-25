@@ -1,5 +1,6 @@
 package takMashido.shani.core.text;
 
+import takMashido.shani.core.IntentBase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -20,7 +21,7 @@ import takMashido.shani.core.Storage;
  * 
  * @author TakMashido
  */
-public class ShaniString {
+public class ShaniString implements IntentBase {
 	private static final Random random=new Random();
 	private static final Pattern stringDivider=Pattern.compile("(?:\\*)+");
 	private static byte[][] lookUpTable;				//~140KB of memory
@@ -630,8 +631,9 @@ public class ShaniString {
 	/**Create deep copy of this object.
 	 * @return Deep copy of this object.
 	 */
+	@Override
 	public ShaniString copy() {
-		return new ShaniString(value);
+		return new ShaniString(value.clone());
 	}
 	
 	/**Check if contain any not empty String(containing any character except white characters).

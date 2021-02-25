@@ -1,21 +1,20 @@
 package takMashido.shaniModules.inputFilters;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.filters.IntentFilter;
+import takMashido.shani.filters.TextFilter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**Changes word represented numbers to it's digit represetation.
  * "One" becomes 1, "three thousand forty seven" to 3047
  * @author TakMashido
  */
-public class NumberFilter extends IntentFilter {
+public class NumberFilter extends TextFilter {
 	private ArrayList<NumberElement> elements;
 	
 	public NumberFilter(Element e) {

@@ -1,5 +1,27 @@
 package takMashido.shani;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import takMashido.shani.core.Intent;
+import takMashido.shani.core.Storage;
+import takMashido.shani.core.text.ShaniString;
+import takMashido.shani.filters.IntentFilter;
+import takMashido.shani.libraries.ArgsDecoder;
+import takMashido.shani.orders.Executable;
+import takMashido.shani.orders.Order;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,29 +35,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import takMashido.shani.core.Storage;
-import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.libraries.ArgsDecoder;
-import takMashido.shani.filters.IntentFilter;
-import takMashido.shani.orders.Executable;
-import takMashido.shani.orders.Order;
 
 public class Engine {
 	public static PrintStream debug;
@@ -59,7 +58,7 @@ public class Engine {
 	
 	private static Executable lastExecuted;
 	
-	private static ShaniString lastCommand;
+	private static Intent lastCommand;
 	
 	/**When last command was executed in ms.*/
 	public static long lastExecutionTime=System.currentTimeMillis();				
@@ -360,17 +359,27 @@ public class Engine {
 		return interprete(new ShaniString(command));
 	}
 	public static Executable interprete(ShaniString command) {
-		if(command.isEmpty())return null;
-		
-		commands.println("\n"+command.toFullString()+':');
-		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+command.toFullString()+':');
-		for(IntentFilter filter:inputFilters)command=filter.filter(command);
-		commands.println("\t"+command.toFullString());
-		info.println("\t"+command.toFullString());
-		
-		lastCommand=command;
-		Executable toExec=getExecutable(command);
-		
+		return interprete(new Intent(command));
+	}
+	public static Executable interprete(Intent intent){
+//		if(intent.isEmpty())return null;
+
+		commands.println("\n"+intent.rawValue+':');
+		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+intent.rawValue+':');
+
+		for(IntentFilter filter:inputFilters) {
+			Intent newIntent = filter.filter(intent);
+			if(newIntent!=null) {
+				intent=newIntent;
+			}
+		}
+
+		commands.println("\t"+intent);
+		info.println("\t"+intent);
+
+		lastCommand=intent;
+		Executable toExec=getExecutable(intent);
+
 		if(toExec!=null&&toExec.cost<=Config.sentenseCompareTreshold) {
 			info.println("<Execution><Excution><Execution><Execution>");
 			toExec.execute();
@@ -378,14 +387,14 @@ public class Engine {
 			lastExecutionTime=System.currentTimeMillis();
 			return toExec;
 		} else {
-			Engine.debug.println("cannot execute: "+command);			
+			Engine.debug.println("cannot execute: "+intent.value);
 			return null;
 		}
 	}
 	public static boolean canExecute(ShaniString command) {
 		short minCost=Config.sentenseCompareTreshold;
 		for (Order order : orders) {
-			List<Executable> execs=order.getExecutables(command);
+			List<Executable> execs=order.getExecutables(new Intent(command));
 			if(execs==null)continue;
 			for(Executable exec:execs) {
 				if(exec.cost<minCost) {
@@ -396,14 +405,14 @@ public class Engine {
 		
 		return false;
 	}
-	public static Executable getExecutable(ShaniString command) {
+	public static Executable getExecutable(Intent intent) {
 		Executable Return=null;
 		float minCost=Short.MAX_VALUE;
 		
 		long time=System.nanoTime();
-		
+
 		for (Order order : orders) {
-			List<Executable> execs=order.getExecutables(command);
+			List<Executable> execs=order.getExecutables(intent);
 			if(execs==null)continue;
 			for(Executable exec:execs) {
 				if(Config.verbose)
@@ -432,7 +441,7 @@ public class Engine {
 		return lastExecuted;
 	}
 	
-	public static ShaniString getLastCommand() {
+	public static Intent getLastCommand() {
 		return lastCommand.copy();
 	}
 	

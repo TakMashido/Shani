@@ -1,20 +1,19 @@
 package takMashido.shani.orders.core;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-
 import org.w3c.dom.Element;
-
 import takMashido.shani.Engine;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.core.text.ShaniString.ShaniMatcher;
 import takMashido.shani.orders.Action;
 import takMashido.shani.orders.Executable;
-import takMashido.shani.orders.Order;
+import takMashido.shani.orders.TextOrder;
 
-public class MasterOrder extends Order {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+public class MasterOrder extends TextOrder {
 	private ShaniString notGoodTimeMessage;
 	
 	private enum ActionType{exit,save,autosaveTime};

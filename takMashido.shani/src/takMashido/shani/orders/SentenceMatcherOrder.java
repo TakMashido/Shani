@@ -1,15 +1,14 @@
 package takMashido.shani.orders;
 
+import org.w3c.dom.Element;
+import takMashido.shani.core.text.SentenceMatcher;
+import takMashido.shani.core.text.ShaniString;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.w3c.dom.Element;
-
-import takMashido.shani.core.text.SentenceMatcher;
-import takMashido.shani.core.text.ShaniString;
-
-public abstract class SentenceMatcherOrder extends Order{
+public abstract class SentenceMatcherOrder extends TextOrder{
 	protected SentenceMatcher matcher;
 	
 	public SentenceMatcherOrder(Element e) {
