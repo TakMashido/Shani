@@ -1,14 +1,14 @@
 package takMashido.shani.filters;
 
 import org.w3c.dom.Element;
-import takMashido.shani.core.Intent;
+import takMashido.shani.core.Intend;
 
 /**Shani module to filter input before trying to match it with Order.
  * @author TakMashido
  */
-public abstract class IntentFilter{
+public abstract class IntendFilter {
 	
-	public IntentFilter(Element e) {}
+	public IntendFilter(Element e) {}
 
-	public abstract Intent filter(Intent intent);
+	public abstract Intend filter(Intend intend);
 }

@@ -1,10 +1,10 @@
 package takMashido.shani.core;
 
-/**Interface for classes being intended to use as {@link Intent}
+/**Interface for classes being intended to use as {@link Intend}
  * @Author TakMashido
  */
-public interface IntentBase {
+public interface IntendBase {
     /**Performs deep copy of object.
      * @return Deep copy of this object.*/
-    IntentBase copy();
+    IntendBase copy();
 }

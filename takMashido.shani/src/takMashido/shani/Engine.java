@@ -6,10 +6,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import takMashido.shani.core.Intent;
+import takMashido.shani.core.Intend;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.filters.IntentFilter;
+import takMashido.shani.filters.IntendFilter;
 import takMashido.shani.libraries.ArgsDecoder;
 import takMashido.shani.orders.Executable;
 import takMashido.shani.orders.Order;
@@ -54,11 +54,11 @@ public class Engine {
 	/**Main document of templateFile*/
 	public static Document doc;
 	private static ArrayList<Order> orders = new ArrayList<Order>();
-	private static ArrayList<IntentFilter> inputFilters = new ArrayList<>();
+	private static ArrayList<IntendFilter> inputFilters = new ArrayList<>();
 	
 	private static Executable lastExecuted;
 	
-	private static Intent lastCommand;
+	private static Intend lastCommand;
 	
 	/**When last command was executed in ms.*/
 	public static long lastExecutionTime=System.currentTimeMillis();				
@@ -277,10 +277,10 @@ public class Engine {
 					continue;
 				}
 				long time=System.nanoTime();
-				IntentFilter module=(IntentFilter) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+				IntendFilter module=(IntendFilter) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
 				commands.printf("Filter %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 				
-				inputFilters.add((IntentFilter)module);
+				inputFilters.add((IntendFilter)module);
 			} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" filter from main file.");
 				ex.printStackTrace();
@@ -359,26 +359,26 @@ public class Engine {
 		return interprete(new ShaniString(command));
 	}
 	public static Executable interprete(ShaniString command) {
-		return interprete(new Intent(command));
+		return interprete(new Intend(command));
 	}
-	public static Executable interprete(Intent intent){
-//		if(intent.isEmpty())return null;
+	public static Executable interprete(Intend intend){
+//		if(intend.isEmpty())return null;
 
-		commands.println("\n"+intent.rawValue+':');
-		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+intent.rawValue+':');
+		commands.println("\n"+ intend.rawValue+':');
+		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+ intend.rawValue+':');
 
-		for(IntentFilter filter:inputFilters) {
-			Intent newIntent = filter.filter(intent);
-			if(newIntent!=null) {
-				intent=newIntent;
+		for(IntendFilter filter:inputFilters) {
+			Intend newIntend = filter.filter(intend);
+			if(newIntend !=null) {
+				intend = newIntend;
 			}
 		}
 
-		commands.println("\t"+intent);
-		info.println("\t"+intent);
+		commands.println("\t"+ intend);
+		info.println("\t"+ intend);
 
-		lastCommand=intent;
-		Executable toExec=getExecutable(intent);
+		lastCommand= intend;
+		Executable toExec=getExecutable(intend);
 
 		if(toExec!=null&&toExec.cost<=Config.sentenseCompareTreshold) {
 			info.println("<Execution><Excution><Execution><Execution>");
@@ -387,14 +387,14 @@ public class Engine {
 			lastExecutionTime=System.currentTimeMillis();
 			return toExec;
 		} else {
-			Engine.debug.println("cannot execute: "+intent.value);
+			Engine.debug.println("cannot execute: "+ intend.value);
 			return null;
 		}
 	}
 	public static boolean canExecute(ShaniString command) {
 		short minCost=Config.sentenseCompareTreshold;
 		for (Order order : orders) {
-			List<Executable> execs=order.getExecutables(new Intent(command));
+			List<Executable> execs=order.getExecutables(new Intend(command));
 			if(execs==null)continue;
 			for(Executable exec:execs) {
 				if(exec.cost<minCost) {
@@ -405,14 +405,14 @@ public class Engine {
 		
 		return false;
 	}
-	public static Executable getExecutable(Intent intent) {
+	public static Executable getExecutable(Intend intend) {
 		Executable Return=null;
 		float minCost=Short.MAX_VALUE;
 		
 		long time=System.nanoTime();
 
 		for (Order order : orders) {
-			List<Executable> execs=order.getExecutables(intent);
+			List<Executable> execs=order.getExecutables(intend);
 			if(execs==null)continue;
 			for(Executable exec:execs) {
 				if(Config.verbose)
@@ -441,7 +441,7 @@ public class Engine {
 		return lastExecuted;
 	}
 	
-	public static Intent getLastCommand() {
+	public static Intend getLastCommand() {
 		return lastCommand.copy();
 	}
 	

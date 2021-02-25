@@ -1,6 +1,6 @@
 package takMashido.shani.core.text;
 
-import takMashido.shani.core.IntentBase;
+import takMashido.shani.core.IntendBase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -21,7 +21,7 @@ import takMashido.shani.core.Storage;
  * 
  * @author TakMashido
  */
-public class ShaniString implements IntentBase {
+public class ShaniString implements IntendBase {
 	private static final Random random=new Random();
 	private static final Pattern stringDivider=Pattern.compile("(?:\\*)+");
 	private static byte[][] lookUpTable;				//~140KB of memory
