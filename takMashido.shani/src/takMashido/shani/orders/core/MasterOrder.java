@@ -19,7 +19,7 @@ public class MasterOrder extends Order {
 	
 	private enum ActionType{exit,save,autosaveTime};
 	
-	private int autoSaveTime=10;			//In minutes
+	private int autoSaveTime=5;				//In minutes
 	
 	private ShaniString exitKey;
 	private ShaniString saveKey;
@@ -60,19 +60,19 @@ public class MasterOrder extends Order {
 	}
 	
 	private class AutoSaver extends Thread{
-		private int lastSave=0;
 		private AutoSaver() {
 			setName("autoSaver");
 		}
 		public void run() {
+			long lastSaved=Engine.lastExecutionTime;
 			while(true) {
 				try {
-					Thread.sleep(60000);
-					if(++lastSave>=autoSaveTime) {
-						lastSave=0;
+					Thread.sleep(30000);
+					if(Engine.lastExecutionTime>lastSaved&&Engine.lastExecutionTime>System.currentTimeMillis()+autoSaveTime*60*1000) {
 						Engine.saveMainFile();
 						Engine.debug.flush();
 						Engine.info.flush();
+						System.gc();
 					}
 				} catch (InterruptedException e) {
 					return;

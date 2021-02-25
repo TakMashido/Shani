@@ -61,6 +61,9 @@ public class Engine {
 	
 	private static ShaniString lastCommand;
 	
+	/**When last command was executed in ms.*/
+	public static long lastExecutionTime=System.currentTimeMillis();				
+	
 	private static boolean initialized=false;
 	private static boolean LOADING_ERROR=false;
 	
@@ -303,7 +306,7 @@ public class Engine {
 				
 				long time=System.nanoTime();
 				Class.forName(className).getMethod("staticInit", Element.class).invoke(null, e);
-				commands.printf("Static initializer %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+				commands.printf("Static initializer %-27s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
 			} catch(ClassNotFoundException | IllegalArgumentException | NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException ex) {
 				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" static initilizer from main file.");
 				ex.printStackTrace();
@@ -372,7 +375,7 @@ public class Engine {
 			info.println("<Execution><Excution><Execution><Execution>");
 			toExec.execute();
 			info.println("<End><End><End><End><End><End><End><End><End>");
-			System.gc();
+			lastExecutionTime=System.currentTimeMillis();
 			return toExec;
 		} else {
 			Engine.debug.println("cannot execute: "+command);			
