@@ -36,6 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**Main class of shani. Responsible for all data loading and data flow.
+ * @author TakMashido
+ */
 public class Engine {
 	public static PrintStream debug;
 	public static PrintStream info;
@@ -119,7 +122,7 @@ public class Engine {
 					try {
 						Thread.sleep(60*1000*integer);
 						exit();
-					} catch (InterruptedException e) {}
+					} catch (InterruptedException ignored) {}
 				}
 			};
 			closingThread.setDaemon(true);
@@ -488,8 +491,8 @@ public class Engine {
 	 * false for negative/unagriding (no,nope),
 	 * or false for unrecognized one.
 	 * Actual positive/negative pattern depends on value stored in config file(TODO move to mainFile)
-	 * @param input
-	 * @return
+	 * @param input ShaniString to check if is positive response.
+	 * @return If given input indicates positive response (return true), negative (returns false) or is unknown(null).
 	 */
 	public static Boolean isInputPositive(ShaniString input) {
 		if(input.isEmpty())return null;
@@ -503,7 +506,7 @@ public class Engine {
 		System.out.println(closeMessage);
 		try {
 			Thread.sleep(700);
-		} catch (InterruptedException e) {}
+		} catch (InterruptedException ignored) {}
 		System.exit(0);
 	}
 	/**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out*/

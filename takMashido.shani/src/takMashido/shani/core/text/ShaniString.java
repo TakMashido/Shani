@@ -244,7 +244,7 @@ public class ShaniString implements IntendBase {
 	
 	/**Load ShaniString from xml node.
 	 * Equivalent to {@link Storage#getShaniString(Node, String)}.
-	 * @param where Base node for search.
+	 * @param doc Document to inside which search is performed.
 	 * @param path Path to ShaniString inside node.*/
 	public static ShaniString loadString(Document doc,String path) {
 		return Storage.getShaniString(doc.getDocumentElement(), path);
@@ -900,7 +900,7 @@ public class ShaniString implements IntendBase {
 			if(index>=costBias.length)return Short.MAX_VALUE;
 			return getCost(costBias[index],wordCost[index]);
 		}
-		/**Returns minimum cost of comparison with {@link shani.ShaniString ShaniString's} given by apply(ShaniString) method.
+		/**Returns minimum cost of comparison with {@link takMashido.shani.core.text.ShaniString ShaniString's} given by apply(ShaniString) method.
 		 * @return Comparison cost.
 		 */
 		public short getCost() {
@@ -909,7 +909,7 @@ public class ShaniString implements IntendBase {
 			for(int i=1;i<costBias.length;i++)if((cost=getCost(i))<min)min=cost;
 			return min;
 		}
-		/**Returns minimum cost of comparison with {@link shani.ShaniString ShaniString's} given by apply(ShaniString) method.
+		/**Returns minimum cost of comparison with {@link takMashido.shani.core.text.ShaniString ShaniString's} given by apply(ShaniString) method.
 		 * Ignore unmatched words cost.
 		 * @return Comparison cost.
 		 */

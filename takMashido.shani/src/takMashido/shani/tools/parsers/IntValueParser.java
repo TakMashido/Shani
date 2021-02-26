@@ -1,13 +1,12 @@
 package takMashido.shani.tools.parsers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import takMashido.shani.core.text.ShaniString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**Changes int value to it's representation string. Eg. 1 into "minute", 2 into "2 minutes". Based on date from initialing xml Node.
  * <br>Data are stored in following form:
@@ -105,7 +104,11 @@ public class IntValueParser{
 		rules.trimToSize();
 		return rules;
 	}
-	
+
+	/**Format given int.
+	 * @param value Int to format.
+	 * @return Int in enhanced String representation.
+	 */
 	public String parse(int value) {
 		if(isDump)return Integer.toString(value);
 		
@@ -130,6 +133,11 @@ public class IntValueParser{
 		int begin;
 		int end;
 		ShaniString value;
+
+		/**Check if rule applies to given int.
+		 * @param value Int to check.
+		 * @return If this Rule applies to given value.
+		 */
 		protected boolean inRange(int value) {
 			return value>=begin&&value<=end;
 		}

@@ -12,7 +12,8 @@ public abstract class Order {
 	/**Xml element containing Order data. Description, key words responses.*/
 	protected Element templateFile;
 	
-	/**Constructor loading order from xml node*/
+	/**Constructor loading order from xml node
+	 * @param e XML node containing data for order creation.*/
 	public Order(Element e) {}
 	
 	/**Prepares list of executables which are respond for given command query.

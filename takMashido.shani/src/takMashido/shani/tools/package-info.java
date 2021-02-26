@@ -1,4 +1,4 @@
 /**
- * Package for additional tools for manipulating Shani files.
+ * Package for additional tools for Shani.
  */
 package takMashido.shani.tools;

@@ -1,0 +1,10 @@
+module:takMashido.shani
+takMashido.shani
+takMashido.shani.core
+takMashido.shani.core.text
+takMashido.shani.filters
+takMashido.shani.libraries
+takMashido.shani.orders
+takMashido.shani.orders.core
+takMashido.shani.tools
+takMashido.shani.tools.parsers

@@ -23,7 +23,9 @@ import java.util.List;
  * @author TakMashido
  */
 public abstract class KeywordOrder extends TextOrder {
+	/**Keyword indicating user intent is for this Order instance.*/
 	protected ShaniString keyword;
+	/**List of possible to execute actions initialized with their specific keywords.*/
 	protected ArrayList<KeywordActionNG> actions=new ArrayList<>();
 	
 	/**If true then exact matching of targets keywords({@link ShaniMatcher#exactApply(ShaniString...)}) is applied, otherwise standard fuzzy ShaniString matching({@link ShaniMatcher#apply(ShaniString...)})*/
@@ -57,6 +59,7 @@ public abstract class KeywordOrder extends TextOrder {
 	}
 	
 	/**Override if you want do some initializations to your module.
+	 * @param e Xml element containing initialization data for this order.
 	 * @return If successfully initialized
 	 */
 	protected boolean initialize(Element e) {return true;}
@@ -200,8 +203,8 @@ public abstract class KeywordOrder extends TextOrder {
 		}
 		
 		/**
-		 * Classes overriding {@link shani.orders.KeywordOrder.KeywordAction} shouldn't override this method. Use {@link #keywordExecute()} instead.
-		 * @see shani.orders.Order.Action#execute()
+		 * Classes overriding {@link takMashido.shani.orders.KeywordOrder.KeywordActionNG} shouldn't override this method. Use {@link #keywordExecute()} instead.
+		 * @see takMashido.shani.orders.Action#execute()
 		 */
 		@Override
 		public boolean execute() {

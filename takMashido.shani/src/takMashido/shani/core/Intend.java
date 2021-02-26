@@ -1,7 +1,12 @@
 package takMashido.shani.core;
 
+/**Representes user intend. It's interpreted by shani to get {@link takMashido.shani.orders.Action} to execute.
+ * @author TakMashido
+ */
 public class Intend {
+    /**Raw user input.*/
     public IntendBase rawValue;
+    /**User input after applying all {@link takMashido.shani.filters.IntendFilter input filters}.*/
     public IntendBase value;
 
     public Intend(IntendBase value){

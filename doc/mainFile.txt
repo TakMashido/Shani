@@ -1,0 +1,12 @@
+XML file containing all sentece templates, printable strings and other initialization data.
+
+subnodes:
+-engine
+	contain all data releted directly to engine
+-modules
+	date used to load modules. All subtags names has to be "module" and contain classname attribute pointing towards module class
+-orders
+	like modules but for orders. Subtags name is "order"
+-static
+	Initialize data for static classes data. Each subtag points to one class and has to have classname attribute pointing to class to initialize.
+	method "staticInit" with this xml Element is called on given class

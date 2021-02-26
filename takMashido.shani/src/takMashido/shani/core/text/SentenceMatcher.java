@@ -1,18 +1,17 @@
 package takMashido.shani.core.text;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import takMashido.shani.libraries.Pair;
 import takMashido.shani.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.core.text.SentenceMatcher.Tokenizer.SentenceToken;
 import takMashido.shani.core.text.SentenceMatcher.Tokenizer.SentenceToken.Type;
+import takMashido.shani.libraries.Pair;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**More powerful matching engine than ShaniMatcher.
  * <pre>
@@ -98,10 +97,12 @@ public class SentenceMatcher {
 			sentences=sentencesList.toArray(sentences);
 		}
 	}
-	
+
+	/**Works like {@link #process(String)} but returns only best match.*/
 	public SentenceResult processBest(String string) {
 		return processBest(new ShaniString(string,false));
 	}
+	/**Works like {@link #process(ShaniString)} but returns only best match.*/
 	public SentenceResult processBest(ShaniString string) {
 		return getBestMatch(process(string));
 	}
@@ -114,8 +115,8 @@ public class SentenceMatcher {
 		return process(new ShaniString(string,false));
 	}
 	/**Process given ShaniString.
-	 * @param string {@code ShaniString} in which engine search for matches.
-	 * @return Array of {@code Sentenceresult} object representing results of successful matching.
+	 * @param string {@code ShaniString} in which engine searches for matches.
+	 * @return Array of {@Link #SentenceResult} object containing all matched sentences.
 	 */
 	public synchronized SentenceResult[] process(ShaniString string) {
 		var str=string.split(false);
@@ -169,7 +170,6 @@ public class SentenceMatcher {
 		
 		return ret;
 	}
-	
 	
 	/**Tokenizer for parsing sentence templates.
 	 * Not thread save, can parse only one at time.*/
@@ -280,7 +280,8 @@ public class SentenceMatcher {
 		}
 		/**Merges or and optional tokens with it's target
 		 * @param str Just for debug, to print whole sentence template to System.err if error occurs 
-		 * @param tokensSet of tokens to filter
+		 * @param tokens of tokens to filter.
+		 * @return merged tokens tree ready being ready sentence template.
 		 */
 		private List<SentenceToken> mergeTokens(String str, List<SentenceToken> tokens) {
 			for(int i=0;i<tokens.size();i++) {
@@ -789,7 +790,7 @@ public class SentenceMatcher {
 	
 	/**Object containing result of matching ShaniString by SentenceMatcher.*/
 	public static class SentenceResult{
-		/**Map containing words appeared in return node position.*/
+		/**Map containing words mached into sentence elements.*/
 		public final HashMap<String,String> data=new HashMap<String,String>();
 		protected short cost;
 		protected short importanceBias;
@@ -879,7 +880,11 @@ public class SentenceMatcher {
 			super(message);
 		}
 	}
-	
+
+	/**Debug method for printing SentenceTokens tree.
+	 * @param tokens Tree of SentenceTokens.
+	 * @param depth Actual depth in tree for indentation. Should be 0 during call from outside code.
+	 */
 	public static void printTokens(List<SentenceToken> tokens, int depth) {
 		String depthMarker="";
 		for(int i=0;i<depth;i++)depthMarker+="\t";
