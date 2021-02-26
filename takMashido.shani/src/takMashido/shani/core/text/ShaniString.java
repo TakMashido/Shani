@@ -1,18 +1,19 @@
 package takMashido.shani.core.text;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import takMashido.shani.Config;
 import takMashido.shani.core.IntendBase;
+import takMashido.shani.core.Storage;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import takMashido.shani.Config;
-import takMashido.shani.core.Storage;
 
 /**Object used to represent string values in SHANI.
  * 
@@ -31,21 +32,20 @@ public class ShaniString implements IntendBase {
 	protected char[][][] stemmedValue=null;											//[a][b][c]: a->wordsSet, b->word, c->letter
 	/**Node containing this ShaniString data.*/
 	private Node origin;
-	
-	static {
-		createLookUpTable();
+
+	public static void staticInit(Element e){
+		createLookUpTable(e);
 	}
-	private static void createLookUpTable(){
-		char[][] nationalLettersTable=new char[][] {
-			{'a','ą'},
-			{'c','ć'},
-			{'e','ę'},
-			{'l','ł'},
-			{'n','ń'},
-			{'o','ó'},
-			{'s','ś'},
-			{'z','ż','ź'},
-		};
+	private static void createLookUpTable(Element e){
+		NodeList nodes=Storage.getNodes(e, "nationalSimilar.tag");
+
+		char[][] nationalLettersTable=new char[nodes.getLength()][2];
+
+		for(int i=0;i<nationalLettersTable.length;i++) {
+			Element elem=(Element)nodes.item(i);
+			nationalLettersTable[i][0]=elem.getAttribute("let").charAt(0);
+			nationalLettersTable[i][1]=elem.getAttribute("rep").charAt(0);
+		}
 		
 		char[][] qwertyTable=new char[][] {
 			{'1','2','3','4','5','6','7','8','9','0','-'},
