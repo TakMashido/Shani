@@ -1,14 +1,13 @@
 package takMashido.shani.tools;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import takMashido.shani.core.ShaniCore;
+import takMashido.shani.tools.SearchEngine.SearchResoults.SearchResoult;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-
-import takMashido.shani.Engine;
-import takMashido.shani.tools.SearchEngine.SearchResoults.SearchResoult;
 
 /**<p>Class automating web search.</p>
  * 
@@ -39,8 +38,8 @@ public class SearchEngine {
 	public static SearchResoults search(String query) throws IOException {
 		var Return=new SearchResoults();
 		
-		if(!Engine.getLicenseConfirmation("JSOUP")
-		  ||!Engine.getLicenseConfirmation("duckduckgo.com"))
+		if(!ShaniCore.getLicenseConfirmation("JSOUP",true,false)
+		  ||!ShaniCore.getLicenseConfirmation("duckduckgo.com",true,false))
 			return LICENSENOTCONFIRMED;
 		
 		query.replaceAll(":", "%3A");

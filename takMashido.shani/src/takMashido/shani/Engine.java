@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import takMashido.shani.core.Intend;
 import takMashido.shani.core.IntendGetter;
+import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.filters.IntendFilter;
@@ -40,7 +41,8 @@ import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**Main class of shani. Responsible for all data loading and data flow.
+/**Main class of shani. Responsible for all data loading and intends flow.
+ * For service functions it contains only core of implementation, all helper code and methods with different args are in {@link takMashido.shani.core.ShaniCore} class.
  * @author TakMashido
  */
 public class Engine {
@@ -56,8 +58,8 @@ public class Engine {
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
 
-	public static BlockingQueue<Intend> intends=new LinkedBlockingQueue<>();
-	public static BlockingQueue<Intend> filteredIntends=new LinkedBlockingQueue<>();
+	private static BlockingQueue<Intend> intends=new LinkedBlockingQueue<>();
+	private static BlockingQueue<Intend> filteredIntends=new LinkedBlockingQueue<>();
 
 	/**Main document of templateFile*/
 	public static Document doc;
@@ -66,8 +68,6 @@ public class Engine {
 	private static ArrayList<IntendFilter> inputFilters = new ArrayList<>();
 	
 	private static Executable lastExecuted;
-	
-	private static Intend lastCommand;
 	
 	/**When last command was executed in ms.*/
 	public static long lastExecutionTime=System.currentTimeMillis();				
@@ -294,7 +294,6 @@ public class Engine {
 			getter.start();
 		}
 	}
-
 	/**Initialize modules by xml node and return their instances.
 	 * @param where Document containing initializers.
 	 * @param groupName Name of parent node containing subnodes of modules to initialize.
@@ -395,7 +394,6 @@ public class Engine {
 		commands.println("\t"+ intend);
 		info.println("\t"+ intend);
 
-		lastCommand= intend;
 		Executable toExec=getExecutable(intend);
 
 		if(toExec!=null&&toExec.cost<=Config.sentenseCompareTreshold) {
@@ -408,20 +406,6 @@ public class Engine {
 			Engine.debug.println("cannot execute: "+ intend.value);
 			return null;
 		}
-	}
-	public static boolean canExecute(ShaniString command) {
-		short minCost=Config.sentenseCompareTreshold;
-		for (Order order : orders) {
-			List<Executable> execs=order.getExecutables(new Intend(command));
-			if(execs==null)continue;
-			for(Executable exec:execs) {
-				if(exec.cost<minCost) {
-					return true;
-				}
-			}
-		}
-		
-		return false;
 	}
 	public static Executable getExecutable(Intend intend) {
 		Executable Return=null;
@@ -454,27 +438,32 @@ public class Engine {
 		
 		return Return;
 	}
-	
+
+	/**Registers new intend.
+	 * @param intend Intend to register.
+	 */
+	public static void registerIntend(Intend intend){
+		intends.add(intend);
+	}
+	/**Get filtered intend. It's blocking method, if no intend available wait's until it comes.
+	 * @return The oldest registered intend.
+	 * @throws InterruptedException If thread is interrupted during waiting for new Intend.
+	 */
+	public static Intend getIntend() throws InterruptedException {
+		return filteredIntends.take();
+	}
+
+	/**Return previously executed Executable.
+	 * @return Look above.
+	 */
 	public static Executable getLastExecuted() {
 		return lastExecuted;
 	}
-	
-	public static Intend getLastCommand() {
-		return lastCommand.copy();
-	}
-	
-	/**Checks if user confirmed given license. If not send license confirmation message to user.
-	 * Equivalent to {@link #getLicenseConfirmation(String,boolean) getLicenseConfirmation(name,true)}.
-	 * @param name Name of license which confirmation are being checked.
-	 * @return If license corfirmed
-	 */
-	public static boolean getLicenseConfirmation(String name) {
-		return getLicenseConfirmation(name,true);
-	}
+
 	/**Checks if user confirmed given license.
 	 * @param name Name of license which confirmation are being checked.
 	 * @param displayConfirmation If ask user for confirmation if not already getted.
-	 * @return If license corfirmed
+	 * @return If license confirmed.
 	 */
 	public static boolean getLicenseConfirmation(String name,boolean displayConfirmation) {
 		String nameToSearch=name.replace('.', '-').toLowerCase();
@@ -482,24 +471,12 @@ public class Engine {
 		if(confirmed)return true;
 		if(!displayConfirmation)return false;
 		
-		@SuppressWarnings("resource")
-		Scanner in=new Scanner(System.in);													//TODO check if can use Engine.in there
-		System.out.printf(licenseConfirmationMessage.toString(),name);
-		System.out.println();
-		String nextLine;
-		while((nextLine=in.nextLine()).isEmpty());
-		Boolean confirmed2=isInputPositive(new ShaniString(nextLine));
+		System.out.printf(licenseConfirmationMessage.toString()+"%n",name);
+
+		Boolean confirmed2=isInputPositive((ShaniString) ShaniCore.getIntend(ShaniString.class).value);
 		if(confirmed2==null)return false;
 		if(confirmed2)Storage.writeUserData("acceptedLicences."+nameToSearch, true);
 		return confirmed2;
-	}
-	/**Checks if input is positive response.
-	 * Equivalent to {@link Engine#isInputPositive(ShaniString)}.
-	 * @param input value to check.
-	 * @return true if positive, false if negative, null if unrecognized./.
-	 */
-	public static Boolean isInputPositive(String input) {
-		return isInputPositive(new ShaniString(input,false));
 	}
 	/**Checks if input is positive response.
 	 * Return true for positive/agreeding one (yes,youp),
@@ -515,7 +492,8 @@ public class Engine {
 		if(Config.negativeResponeKey.equals(input))return false;
 		return null;
 	}
-	
+
+	/**Safely close shani.*/
 	public static void exit() {
 		debug.println("exit\n");
 		System.out.println(closeMessage);
