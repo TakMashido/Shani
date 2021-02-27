@@ -33,6 +33,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -239,83 +240,63 @@ public class Engine {
 		licenseConfirmationMessage=ShaniString.loadString(engineNode, "licenseConfirmationMessage");
 		licensesNotConfirmedMessage=ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
 		
+		orders.addAll(readModules(doc,"orders","Order",false));
+
+		inputFilters.addAll(readModules(doc,"inputFilters","Input filter",false));
+
+		readModules(doc,"static","Static",true);
+
+	}
+
+	/**Initialize modules by xml node and return their instances.
+	 * @param where Document containing initializers.
+	 * @param groupName Name of parent node containing subnodes of modules to initialize.
+	 * @param printableName Name to print in logs.
+	 * @param staticInit If these modules all initialized on static way. If true static method "staticInit" is called, constructor is called. Both take one parameter - xml Element
+	 * @param <T> Type of modules to return. Ignored if staticInit is true.
+	 * @return List of initialized modules instances. It's always empty if staticInit is true.
+	 */
+	private static <T> List<T> readModules(Document where,String groupName, String printableName, boolean staticInit){
+		List<T> ret=new LinkedList<T>();
+
+		String timePrintTemplate=printableName+" %-"+(45-printableName.length())+"s loaded in \t%8.3f ms.%n";
+		//for "order" noduleName it should be "Order %-40s loaded in \t%8.3f ms.%n"
+
 		long bigTime=System.nanoTime();
-		NodeList ordersNode = ((Element)doc.getElementsByTagName("orders").item(0)).getElementsByTagName("order");
+		NodeList ordersNode = ((Element)where.getElementsByTagName(groupName).item(0)).getChildNodes();
 		for (int i = 0; i < ordersNode.getLength(); i++) {
 			Node node = ordersNode.item(i);
-			
+
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element e = (Element) node;
 				try {
 					String className=e.getAttribute("classname");
 					if(className.equals("")) {
-						System.out.println("Error in mainfile found");
-						System.err.println("Classname of an order is not specyfied.");
+						registerLoadException();
+						System.err.println("Classname of an "+printableName+" is not specified.");
 						continue;
 					}
 					long time=System.nanoTime();
-					
-					Order order = (Order) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
-					orders.add(order);
-					
-					commands.printf("Order %-40s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
+
+					if(staticInit){
+						Class.forName(className).getMethod("staticInit", Element.class).invoke(null, e);
+					} else {
+						T module = (T) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+						ret.add(module);
+					}
+
+					commands.printf(timePrintTemplate,className,(System.nanoTime()-time)/1000000f);
 				} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 					Engine.registerLoadException();
-					System.err.println("Failed to parse \""+e.getAttribute("classname")+"\" order from main file.");
+					System.err.println("Failed to parse \""+e.getAttribute("classname")+"\" "+printableName+" from main file.");
 					ex.printStackTrace();
 				}
 			}
 		}
-		commands.printf("Orders loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
-		
-		bigTime=System.nanoTime();
-		NodeList moduleNodes=((Element)doc.getElementsByTagName("inputFilters").item(0)).getElementsByTagName("filter");
-		for(int i=0;i<moduleNodes.getLength();i++) {
-			Element e=(Element)moduleNodes.item(i);
-			try {
-				String className=e.getAttribute("classname");
-				if(className.equals("")) {
-					System.out.println("Error in mainfile found");
-					System.err.println("Classname of an order is not specyfied.");
-					continue;
-				}
-				long time=System.nanoTime();
-				IntendFilter module=(IntendFilter) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
-				commands.printf("Filter %-39s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-				
-				inputFilters.add((IntendFilter)module);
-			} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" filter from main file.");
-				ex.printStackTrace();
-			}
-		}
-		commands.printf("Input filters loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
-		
-		bigTime=System.nanoTime();
-		moduleNodes=((Element)doc.getElementsByTagName("static").item(0)).getChildNodes();
-		for(int i=0;i<moduleNodes.getLength();i++) {
-			Node n=moduleNodes.item(i);
-			if(n.getNodeType()!=Node.ELEMENT_NODE) continue;
-			Element e=(Element)moduleNodes.item(i);
-			
-			try {
-				String className=e.getAttribute("classname");
-				if(className.equals("")) {
-					System.out.println("Error in mainfile found");
-					System.err.println("Classname of an static init is not specyfied.");
-					continue;
-				}
-				
-				long time=System.nanoTime();
-				Class.forName(className).getMethod("staticInit", Element.class).invoke(null, e);
-				commands.printf("Static initializer %-27s loaded in \t%8.3f ms.%n",className,(System.nanoTime()-time)/1000000f);
-			} catch(ClassNotFoundException | IllegalArgumentException | NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException ex) {
-				System.out.println("Failed to parse \""+e.getAttribute("classname")+"\" static initilizer from main file.");
-				ex.printStackTrace();
-			}
-		}
-		commands.printf("Static data loaded in \t%8.3f ms.%n", (System.nanoTime()-bigTime)/1000000f);
-		
+
+		commands.printf(printableName+" loaded in \t%8.3f ms.%n",(System.nanoTime()-bigTime)/1000000f);
+
+		return ret;
 	}
 	public static void saveMainFile(){
 		for(var order:orders)order.save();									//Flush all orders save data
