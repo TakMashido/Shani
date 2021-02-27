@@ -1,15 +1,14 @@
 package takMashido.shaniModules.orders;
 
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.w3c.dom.Element;
-
+import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.KeywordOrder;
 import takMashido.shani.tools.InputCleaners;
-import takMashido.shani.core.ShaniCore;
+
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExecuteOrder extends KeywordOrder {
 	private static ShaniString successfulMessage;
@@ -136,10 +135,11 @@ public class ExecuteOrder extends KeywordOrder {
 		public boolean execute() {
 			System.out.println(notKnowMessage);
 			
-			String newCom=ShaniCore.in.nextLine().trim();
+			String newCom=ShaniCore.getIntend(ShaniString.class).value.toString();
 			Boolean positive=ShaniCore.isInputPositive(new ShaniString(newCom,false));
 			if(positive!=null&&!positive)
 				return false;
+
 			if(isPath(newCom)) {
 				return createAction(unmatched,"dir",new String[] {InputCleaners.clear(newCom)});
 			}

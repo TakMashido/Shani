@@ -5,7 +5,6 @@ import takMashido.shani.Engine;
 import takMashido.shani.core.text.ShaniString;
 
 import java.io.PrintStream;
-import java.util.Scanner;
 
 /**Core shani methods accessible from out side of module.
  * @author TakMashido
@@ -13,9 +12,6 @@ import java.util.Scanner;
 public class ShaniCore {
     /**Default stream for debug text*/
     public static final PrintStream debug=Engine.debug;
-
-    /**Scanner connected into shani text input stream(stdin by default)*/
-    public static final Scanner in=Engine.in;
 
     /**Error message to print if something bad happened to inform user about it.*/
     public static final ShaniString errorMessage=Engine.errorMessage;
@@ -71,5 +67,23 @@ public class ShaniCore {
      */
     public static void interpret(IntendBase intend){
         Engine.intends.add(new Intend(intend));
+    }
+
+    /**Get intend provided by user.
+     * @param type Class of same type you want Type of intent, you do not want Gesture intend when asking for name of something.
+     * @return {@link Intend} containing user input of specified type.
+     */
+    public static Intend getIntend(Class<? extends IntendBase> type){
+        try {
+            while(true){
+                Intend intend=Engine.filteredIntends.take();
+
+                if(type.isInstance(intend.value)){
+                    return intend;
+                }
+            }
+        } catch (InterruptedException ignored) {}
+
+        return null;
     }
 }

@@ -1,5 +1,18 @@
 package takMashido.shaniModules.orders;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.w3c.dom.Node;
+import takMashido.shani.core.ShaniCore;
+import takMashido.shani.core.text.SentenceGenerator;
+import takMashido.shani.core.text.SentenceMatcher;
+import takMashido.shani.core.text.ShaniString;
+import takMashido.shani.orders.SentenceMatcherOrder;
+import takMashido.shani.tools.InputCleaners;
+import takMashido.shani.tools.SearchEngine;
+import takMashido.shani.tools.SearchEngine.SearchResoults.SearchResoult;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -11,20 +24,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.w3c.dom.Node;
-
-import takMashido.shani.core.ShaniCore;
-import takMashido.shani.core.text.SentenceGenerator;
-import takMashido.shani.core.text.SentenceMatcher;
-import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.SentenceMatcherOrder;
-import takMashido.shani.tools.InputCleaners;
-import takMashido.shani.tools.SearchEngine;
-import takMashido.shani.tools.SearchEngine.SearchResoults.SearchResoult;
 
 public class WeatherOrder extends SentenceMatcherOrder {
 	private static ShaniString notKnowLocationMessage;
@@ -138,7 +137,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 			}
 			
 			int index=-1;
-			String response=ShaniCore.in.nextLine();
+			String response=ShaniCore.getIntend(ShaniString.class).value.toString();
 			try {
 				index=Integer.parseInt(response);
 				if(index<0||index>=sr.size()) {

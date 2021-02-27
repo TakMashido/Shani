@@ -56,8 +56,6 @@ public class Engine {
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
 
-	public static final Scanner in=new Scanner(System.in);
-
 	public static BlockingQueue<Intend> intends=new LinkedBlockingQueue<>();
 	public static BlockingQueue<Intend> filteredIntends=new LinkedBlockingQueue<>();
 
