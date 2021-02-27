@@ -213,7 +213,7 @@ public class Engine {
 					while(true){
 						Intend intend=intends.take();
 
-						info.println("Filtering "+intend.rawValue);
+						info.println("Filtering \""+intend.rawValue+'"');
 						long time=System.currentTimeMillis();
 
 						for(IntendFilter filter:inputFilters) {
@@ -224,7 +224,7 @@ public class Engine {
 						}
 
 						filteredIntends.put(intend);
-						info.printf("%s filtered in @.2f ms.%n",intend.toString(),(System.currentTimeMillis()-time)/1000f);
+						info.printf("\"%s\" filtered in %.2f ms.%n",intend.toString(),(System.currentTimeMillis()-time)/1000f);
 					}
 				} catch(InterruptedException ignored){}
 			}

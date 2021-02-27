@@ -15,7 +15,7 @@ public abstract class TextFilter extends IntendFilter {
     @Override
     public Intend filter(Intend intend) {
         if(intend.value instanceof ShaniString) {
-            var newValue=(ShaniString) intend.value;
+            ShaniString newValue=filter((ShaniString)intend.value);
             if(newValue!=null)
                 intend.value = newValue;
         }
