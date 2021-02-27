@@ -5,6 +5,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import takMashido.shani.Config;
 import takMashido.shani.Engine;
+import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.core.text.ShaniString.ShaniMatcher;
@@ -211,7 +212,7 @@ public abstract class KeywordOrder extends TextOrder {
 			boolean Return=keywordExecute();
 			if(!Return)return false;
 			for(var command:mergedActions.getArray()) {
-				Engine.interprete(command);
+				ShaniCore.interpret(command);
 			}
 			return true;
 		}

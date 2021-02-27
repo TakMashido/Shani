@@ -59,4 +59,17 @@ public class ShaniCore {
 
         return ret;
     }
+
+    /**Add new intend to interpretation queue.
+     * @param str String to interpret.
+     */
+    public static void interpret(String str){
+        interpret(new ShaniString(str));
+    }
+    /**Add new intend to interpretation queue.
+     * @param intend Intend to interpret.
+     */
+    public static void interpret(IntendBase intend){
+        Engine.intends.add(new Intend(intend));
+    }
 }

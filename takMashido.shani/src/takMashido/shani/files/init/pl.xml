@@ -311,4 +311,7 @@
 			</nationalSimilar>
 		</ShaniString>
 	</static>
+	<IntendGetters>
+		<getter classname="takMashido.shaniModules.intendGetters.StdinGetter"/>
+	</IntendGetters>
 </shani>

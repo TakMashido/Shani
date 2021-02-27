@@ -4,4 +4,5 @@ module takMashido.shaniModules {
 
     exports takMashido.shaniModules.orders;
     exports takMashido.shaniModules.inputFilters;
+    exports takMashido.shaniModules.intendGetters;
 }

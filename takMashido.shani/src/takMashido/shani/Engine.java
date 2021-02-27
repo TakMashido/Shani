@@ -7,6 +7,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import takMashido.shani.core.Intend;
+import takMashido.shani.core.IntendGetter;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.filters.IntendFilter;
@@ -36,6 +37,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**Main class of shani. Responsible for all data loading and data flow.
  * @author TakMashido
@@ -52,11 +55,15 @@ public class Engine {
 	
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
-	
+
 	public static final Scanner in=new Scanner(System.in);
-	
+
+	public static BlockingQueue<Intend> intends=new LinkedBlockingQueue<>();
+	public static BlockingQueue<Intend> filteredIntends=new LinkedBlockingQueue<>();
+
 	/**Main document of templateFile*/
 	public static Document doc;
+	private static ThreadGroup inputGetters=new ThreadGroup("inputGetters");
 	private static ArrayList<Order> orders = new ArrayList<Order>();
 	private static ArrayList<IntendFilter> inputFilters = new ArrayList<>();
 	
@@ -195,36 +202,74 @@ public class Engine {
 		
 		commands.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<go>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 	}
-	/**Runs Shani on current thread */
+	/**Start shani threads.*/
 	public static void start() {
 		if(!initialized) initialize(new String[0]);
 		
-		System.out.println(helloMessage);
-		while (in.hasNextLine()) {
-			String str=in.nextLine().trim().toLowerCase();
-			
-			if(str.length()==0)continue;
-			long time=System.nanoTime();
-			ShaniString command=new ShaniString(str,false);
-			try {
-				Executable exec=interprete(command);
-				
-				if (exec==null) {
-					System.out.println(notUnderstandMessage);
-					commands.println("Can't execute");
-				} else {
-					commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms");
-					
-					if(exec.isSuccesful()) lastExecuted=exec;
-				}
-			} catch(Exception ex) {
-				ex.printStackTrace();
-				
-				commands.println("execution time = "+(System.nanoTime()-time)/1000/1000f+" ms. Error ocured.");
-				
-				errorMessage.printOut();
+		helloMessage.printOut();
+
+		Thread shaniFiltering=new Thread(){
+			@Override
+			public void run(){
+				try{
+					while(true){
+						Intend intend=intends.take();
+
+						info.println("Filtering "+intend.rawValue);
+						long time=System.currentTimeMillis();
+
+						for(IntendFilter filter:inputFilters) {
+							Intend newIntend = filter.filter(intend);
+							if(newIntend !=null) {
+								intend = newIntend;
+							}
+						}
+
+						filteredIntends.put(intend);
+						info.printf("%s filtered in @.2f ms.%n",intend.toString(),(System.currentTimeMillis()-time)/1000f);
+					}
+				} catch(InterruptedException ignored){}
 			}
-		}
+		};
+		shaniFiltering.setName("shaniFiltering");
+		shaniFiltering.setDaemon(true);
+		shaniFiltering.start();
+
+		Thread shaniInterpreter=new Thread() {
+			@Override
+			public void run() {
+				try {
+					while (true) {
+						Intend intend = filteredIntends.take();
+
+						long time = System.nanoTime();
+						try {
+							Executable exec = interpret(intend);
+
+							if (exec == null) {
+								System.out.println(notUnderstandMessage);
+								commands.println("Can't execute");
+							} else {
+								commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms");
+
+								if (exec.isSuccesful()) lastExecuted = exec;
+							}
+						} catch (Exception ex) {
+							ex.printStackTrace();
+
+							commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms. Error ocured.");
+
+							errorMessage.printOut();
+						}
+					}
+				} catch (InterruptedException ignored) {
+				}
+			}
+		};
+		shaniInterpreter.setName("shaniInterpreter");
+		shaniInterpreter.setDaemon(false);
+		shaniInterpreter.start();
+
 	}
 	
 	private static void parseMainFile() throws SAXException, IOException, ParserConfigurationException {
@@ -239,13 +284,17 @@ public class Engine {
 		errorMessage=ShaniString.loadString(engineNode, "errorMessage");
 		licenseConfirmationMessage=ShaniString.loadString(engineNode, "licenseConfirmationMessage");
 		licensesNotConfirmedMessage=ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
-		
-		orders.addAll(readModules(doc,"orders","Order",false));
-
-		inputFilters.addAll(readModules(doc,"inputFilters","Input filter",false));
 
 		readModules(doc,"static","Static",true);
+		inputFilters.addAll(readModules(doc,"inputFilters","Input filter",false));
+		orders.addAll(readModules(doc,"orders","Order",false));
 
+		List<IntendGetter> getters=readModules(doc,"IntendGetters","Intend getter",false);
+		for(IntendGetter getterTemplate:getters){
+			Thread getter=new Thread(inputGetters,getterTemplate,getterTemplate.getterName);
+			getter.setDaemon(true);
+			getter.start();
+		}
 	}
 
 	/**Initialize modules by xml node and return their instances.
@@ -339,24 +388,11 @@ public class Engine {
 		System.err.flush();
 	}
 	
-	public static Executable interprete(String command) {
-		return interprete(new ShaniString(command));
-	}
-	public static Executable interprete(ShaniString command) {
-		return interprete(new Intend(command));
-	}
-	public static Executable interprete(Intend intend){
+	public static Executable interpret(Intend intend){
 //		if(intend.isEmpty())return null;
 
 		commands.println("\n"+ intend.rawValue+':');
 		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+ intend.rawValue+':');
-
-		for(IntendFilter filter:inputFilters) {
-			Intend newIntend = filter.filter(intend);
-			if(newIntend !=null) {
-				intend = newIntend;
-			}
-		}
 
 		commands.println("\t"+ intend);
 		info.println("\t"+ intend);
@@ -485,6 +521,9 @@ public class Engine {
 	public static void exit() {
 		debug.println("exit\n");
 		System.out.println(closeMessage);
+
+		inputGetters.interrupt();
+
 		try {
 			Thread.sleep(700);
 		} catch (InterruptedException ignored) {}
@@ -499,7 +538,8 @@ public class Engine {
 	 * Invoked on application close
 	 */
 	protected static void shutdownHook() {
-		saveMainFile();
+		inputGetters.interrupt();
 		flushBuffers();
+		saveMainFile();
 	}
 }
