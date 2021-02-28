@@ -33,13 +33,13 @@ public class TranslateOrder extends KeywordOrder{
 		connectionFailedMessage=ShaniString.loadString(e,"connectionFailedMessage");
 	}
 	
-	public KeywordActionNG actionFactory(org.w3c.dom.Element element) {return null;}
+	public KeywordAction actionFactory(org.w3c.dom.Element element) {return null;}
 	
-	public UnmatchedActionNG getUnmatchedAction() {
+	public UnmatchedAction getUnmatchedAction() {
 		return new TranslationAction();
 	}
 	
-	private class TranslationAction extends UnmatchedActionNG{
+	private class TranslationAction extends UnmatchedAction {
 		@Override
 		public boolean connectAction(String action) {
 			assert false:"Can't connect action to shani.orders.TranslatorOrder";

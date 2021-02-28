@@ -27,14 +27,14 @@ public abstract class KeywordOrder extends TextOrder {
 	/**Keyword indicating user intent is for this Order instance.*/
 	protected ShaniString keyword;
 	/**List of possible to execute actions initialized with their specific keywords.*/
-	protected ArrayList<KeywordActionNG> actions=new ArrayList<>();
+	protected ArrayList<KeywordAction> actions=new ArrayList<>();
 	
 	/**If true then exact matching of targets keywords({@link ShaniMatcher#exactApply(ShaniString...)}) is applied, otherwise standard fuzzy ShaniString matching({@link ShaniMatcher#apply(ShaniString...)})*/
 	protected boolean targetExactMatch=false;
 	
 	protected Node targetDataNode;
 	
-	/**Where to search for targets. Each subnode under given path is treated as differed target, and {@link KeywordACtionNG} is created for it.
+	/**Where to search for targets. Each subnode under given path is treated as differed target, and {@link KeywordACtion} is created for it.
 	 * @return String[] containing paths to use.*/
 	protected abstract String getDataLocation();
 	
@@ -69,7 +69,7 @@ public abstract class KeywordOrder extends TextOrder {
 	 * @param element Element containing Action data
 	 * @return Ready to use Action
 	 */
-	public abstract KeywordActionNG actionFactory(Element element);
+	public abstract KeywordAction actionFactory(Element element);
 	
 	@Override
 	public List<Executable> getExecutables(ShaniString command) {
@@ -78,10 +78,10 @@ public abstract class KeywordOrder extends TextOrder {
 		ShaniMatcher matcher=command.getMatcher().apply(keyword);
 		
 		short minCost=Short.MAX_VALUE;
-		KeywordActionNG minAction=null;
+		KeywordAction minAction=null;
 		
 		Engine.info.printf("KeywordOrderNG: %s:\n",keyword.toFullString());
-		for(KeywordActionNG action:actions) {
+		for(KeywordAction action:actions) {
 			ShaniMatcher actionMatcher=matcher.clone();
 			if(targetExactMatch) 
 				actionMatcher.exactApply(action.actionKeyword);
@@ -115,9 +115,9 @@ public abstract class KeywordOrder extends TextOrder {
 		
 		return Return;
 	}
-	protected KeywordActionNG getAction(ShaniString command) {
+	protected KeywordAction getAction(ShaniString command) {
 		short minCost=Short.MAX_VALUE;
-		KeywordActionNG minAction=null;
+		KeywordAction minAction=null;
 		
 		for(var action:actions) {
 			short cost=action.actionKeyword.getCompareCost(command);
@@ -145,13 +145,14 @@ public abstract class KeywordOrder extends TextOrder {
 	 * @param unmatched Input command without key of this Order.
 	 * @return Custom order for handling unmatched data.
 	 */
-	protected UnmatchedActionNG getUnmatchedAction(ShaniString unmatched) {return getUnmatchedAction();}
+	protected UnmatchedAction getUnmatchedAction(ShaniString unmatched) {return getUnmatchedAction();}
 	/**Use to handle inputs matching key of order, but not matching any target
 	 * @return Custom order for handling unmatched data.
 	 */
-	protected UnmatchedActionNG getUnmatchedAction() {return null;}
+	protected UnmatchedAction getUnmatchedAction() {return null;}
 	
-	public abstract class UnmatchedActionNG extends Action {
+	public abstract class UnmatchedAction extends Action {
+		/**Value corresponding to this action. It's original intend except used keyword of Order.*/
 		protected ShaniString unmatched;
 		
 		@Override
@@ -161,22 +162,23 @@ public abstract class KeywordOrder extends TextOrder {
 			return false;
 		}
 		
-		protected void setUnmatched(ShaniString newUnmatched) {
+		/**Set value corresponding to this action. It's original intend except used keyword of Order.*/
+		protected final void setUnmatched(ShaniString newUnmatched) {
 			unmatched=newUnmatched;
 		}
 	}
 	/**Keyword based action.
-	 * Override {@link KeywordActionNG#keywordExecute()} to define behavior.
+	 * Override {@link KeywordAction#keywordExecute()} to define behavior.
 	 * @author TakMashido
 	 */
-	public abstract class KeywordActionNG extends Action{
+	public abstract class KeywordAction extends Action{
 		protected ShaniString actionKeyword;
 		protected ShaniString mergedActions;
 		
 		/**Super constructor for loading Action.
 		 * @param elem Element representing this Action.
 		 */
-		protected KeywordActionNG(Element elem) {
+		protected KeywordAction(Element elem) {
 			actionFile=elem;
 			actionKeyword=new ShaniString(elem.getElementsByTagName("key").item(0));
 			mergedActions=new ShaniString(elem.getElementsByTagName("merged").item(0));
@@ -184,7 +186,7 @@ public abstract class KeywordOrder extends TextOrder {
 		/**SuperConstructor for creating new Action.
 		 * @param keyword Keyword for new Action.
 		 */
-		protected KeywordActionNG(ShaniString keyword) {
+		protected KeywordAction(ShaniString keyword) {
 			var doc=targetDataNode.getOwnerDocument();
 			
 			actionFile=doc.createElement("executable");
@@ -204,7 +206,7 @@ public abstract class KeywordOrder extends TextOrder {
 		}
 		
 		/**
-		 * Classes overriding {@link takMashido.shani.orders.KeywordOrder.KeywordActionNG} shouldn't override this method. Use {@link #keywordExecute()} instead.
+		 * Classes overriding {@link KeywordAction} shouldn't override this method. Use {@link #keywordExecute()} instead.
 		 * @see takMashido.shani.orders.Action#execute()
 		 */
 		@Override

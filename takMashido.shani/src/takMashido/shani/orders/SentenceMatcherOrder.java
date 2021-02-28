@@ -23,13 +23,6 @@ public abstract class SentenceMatcherOrder extends TextOrder{
 	 */
 	protected boolean initialize(Element e) {return true;}
 	
-	/**Override to do some initializations in your module.
-	 * @return If successfully initialized.
-	 * @deprecated Use initialize(Element) instead.
-	 */
-	@Deprecated
-	protected boolean initialize() {return true;}
-	
 	@Override
 	public List<Executable> getExecutables(ShaniString command) {
 		var resoults=matcher.process(command);
@@ -67,7 +60,9 @@ public abstract class SentenceMatcherOrder extends TextOrder{
 		private String sentenceName;
 		private HashMap<String,String> returnValues;
 		
-		public short cost=0;							//Cost and importance bias calculated by child class, added to values determined by underlying SeteceMatcher
+		/**Cost calculated by child class, added to values determined by underlying SentenceMatcher*/
+		public short cost=0;
+		/**Importance bias calculated by child class, added to values determined by underlying SentenceMatcher*/
 		public short importanceBias=0;
 		
 		private void init(String sentenceName, HashMap<String,String> returnValues) {

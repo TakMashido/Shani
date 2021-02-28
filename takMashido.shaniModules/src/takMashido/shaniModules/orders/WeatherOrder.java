@@ -173,7 +173,11 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		
 		Document doc=Jsoup.connect(resoult.url).get();
 		
-		var elems=doc.getElementsByClass("forecast-fiveday").get(0).getElementsByClass("clickable");
+		var elems=doc.getElementsByClass("forecast-fiveday");
+		if(elems.size()==0)
+			return null;
+		
+		elems=elems.get(0).getElementsByClass("clickable");
 		for(var elem:elems) {
 			Return.add(new DayWeather(elem));
 		}

@@ -233,15 +233,6 @@ public class ShaniString implements IntendBase {
 		return Return;
 	}
 	
-	/**Loads string from storage section.
-	 * @param path Path to String representation of ShaniString in storage.
-	 * @return New ShaniString object containing data pointed by path.
-	 * @deprecated MainFile and it's storage node is now deprecated. Use {@link #loadString(Node, String)} instead. ShaniString responses should be stored directly inside order template node.
-	 */
-	public static ShaniString loadString(String path) {
-		return Storage.getString(path);
-	}
-	
 	/**Load ShaniString from xml node.
 	 * Equivalent to {@link Storage#getShaniString(Node, String)}.
 	 * @param doc Document to inside which search is performed.
@@ -673,8 +664,8 @@ public class ShaniString implements IntendBase {
 		return new ShaniMatcher(this);
 	}
 	/**
-	 * An engine that performs match operations on a {@linkplain shani.ShaniString ShaniString}.
-	 * Warning: Not thread save, Some methods can give error when original {@linkplain shani.ShaniString ShaniString} change after creation. 
+	 * An engine that performs match operations on a {@linkplain ShaniString ShaniString}.
+	 * Warning: Not thread save, Some methods can give error when original {@linkplain ShaniString ShaniString} change after creation.
 	 * @author TakMashido
 	 */
 	public class ShaniMatcher{

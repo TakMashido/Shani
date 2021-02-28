@@ -58,7 +58,9 @@ public class Engine {
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
 
+	/**Freshly registered intends.*/
 	private static BlockingQueue<Intend> intends=new LinkedBlockingQueue<>();
+	/**Filtered intends ready to execution or to give to currently executed order as data.*/
 	private static BlockingQueue<Intend> filteredIntends=new LinkedBlockingQueue<>();
 
 	/**Main document of templateFile*/
@@ -384,8 +386,12 @@ public class Engine {
 		System.out.flush();
 		System.err.flush();
 	}
-	
-	public static Executable interpret(Intend intend){
+
+	/**Interpret given intend.
+	 * @param intend Intend to interpret.
+	 * @return executed Executable matching this Intend.
+	 */
+	private static Executable interpret(Intend intend){
 //		if(intend.isEmpty())return null;
 
 		commands.println("\n"+ intend.rawValue+':');
@@ -407,6 +413,10 @@ public class Engine {
 			return null;
 		}
 	}
+	/**Get executable matching given Intend.
+	 * @param intend Intend used to search for executable.
+	 * @return Executable with best match to given Intend.
+	 */
 	public static Executable getExecutable(Intend intend) {
 		Executable Return=null;
 		float minCost=Short.MAX_VALUE;

@@ -29,11 +29,11 @@ public class ExecuteOrder extends KeywordOrder {
 	}
 	
 	@Override
-	public KeywordActionNG actionFactory(Element element) {
+	public KeywordAction actionFactory(Element element) {
 		return new ExecuteAction(element);
 	}
 	@Override
-	public UnmatchedActionNG getUnmatchedAction() {
+	public UnmatchedAction getUnmatchedAction() {
 		return new AddExecuteAction();
 	}
 	
@@ -52,7 +52,7 @@ public class ExecuteOrder extends KeywordOrder {
 		return PathPattern.matcher(InputCleaners.removeNational(com)).matches();
 	}
  	
-	protected class ExecuteAction extends KeywordActionNG{
+	protected class ExecuteAction extends KeywordAction {
 		private String targetType;
 		private String[] target;
 		
@@ -128,8 +128,8 @@ public class ExecuteOrder extends KeywordOrder {
 			}
 		}
 	}
-	protected class AddExecuteAction extends UnmatchedActionNG{
-		private KeywordActionNG readyAction;
+	protected class AddExecuteAction extends UnmatchedAction {
+		private KeywordAction readyAction;
 		
 		@Override
 		public boolean execute() {
@@ -158,7 +158,7 @@ public class ExecuteOrder extends KeywordOrder {
 				return createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
 			}
 			
-			KeywordActionNG exec=getAction(new ShaniString(newCom,false));				//Input is not valid program/file/URL. Check if it's one of already existing keys.
+			KeywordAction exec=getAction(new ShaniString(newCom,false));				//Input is not valid program/file/URL. Check if it's one of already existing keys.
 			if(exec!=null) {
 				exec.addKey(unmatched);
 				exec.execute();
@@ -169,7 +169,7 @@ public class ExecuteOrder extends KeywordOrder {
 			return false;
 		}
 		private boolean createAction(ShaniString key, String targetType, String[] target) {
-			KeywordActionNG action=new ExecuteAction(key,targetType,target);
+			KeywordAction action=new ExecuteAction(key,targetType,target);
 			action.execute();
 			readyAction=action;
 			return true;

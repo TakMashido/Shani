@@ -1,15 +1,12 @@
 package takMashido.shaniModules.orders;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
 import org.w3c.dom.Element;
-
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.KeywordOrder;
-import takMashido.shani.orders.KeywordOrder.KeywordActionNG;
-import takMashido.shani.orders.KeywordOrder.UnmatchedActionNG;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class CMDOrder extends KeywordOrder{
 	private ShaniString executeMessage;
@@ -27,11 +24,11 @@ public class CMDOrder extends KeywordOrder{
 	}
 	
 	@Override
-	public KeywordActionNG actionFactory(Element element) {
+	public KeywordAction actionFactory(Element element) {
 		return new MergedCMDAction(element);
 	}
 	@Override
-	public UnmatchedActionNG getUnmatchedAction() {
+	public UnmatchedAction getUnmatchedAction() {
 		return new CMDAction();
 	}
 	
@@ -81,7 +78,7 @@ public class CMDOrder extends KeywordOrder{
 		} catch (InterruptedException e) {}
 	}
 	
-	private class MergedCMDAction extends KeywordActionNG{
+	private class MergedCMDAction extends KeywordAction {
 		private final String command;
 		
 		protected MergedCMDAction(Element elem) {
@@ -103,7 +100,7 @@ public class CMDOrder extends KeywordOrder{
 			return true;
 		}
 	}
-	private class CMDAction extends UnmatchedActionNG{
+	private class CMDAction extends UnmatchedAction {
 		private MergedCMDAction mergedAction=null;  
 		
 		@Override

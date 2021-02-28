@@ -1,22 +1,20 @@
 package takMashido.shani.core;
 
-import java.io.IOException;
-import java.util.Scanner;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import takMashido.shani.Config;
 import takMashido.shani.Engine;
-import takMashido.shani.orders.Order;
 import takMashido.shani.core.text.ShaniString;
+import takMashido.shani.orders.Order;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**Class for getting and saving data in Shani data files.
  * 
@@ -91,7 +89,17 @@ public class Storage {
 	@SuppressWarnings("resource")
 	private static NodeList getNodes(Node where, String path, boolean createNodes) {
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
-		Element previousNode=(Element)where;								//TODO Handle ClassCastException when "where" is Document instance.
+		
+		Element previousNode;
+		if(where instanceof Document) {
+			previousNode = ((Document) where).getDocumentElement();
+			if(!previousNode.getNodeName().equals(scanner.next())){
+				if(createNodes)
+					System.err.println("Creation on another root node ion Document is not supported.");
+				return null;
+			}
+		}else
+			previousNode=(Element) where;
 		
 		NodeList Return=null;
 		while(scanner.hasNext()) {

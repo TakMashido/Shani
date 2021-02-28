@@ -7,8 +7,12 @@ import takMashido.shani.core.Intend;
  * @author TakMashido
  */
 public abstract class IntendFilter {
-	
+	/**Load intend filter data from XML node.*/
 	public IntendFilter(Element e) {}
-
+	
+	/**Filter given intend. Clear unnecessary data, change to more accessible for, or whatever else child class wants to do.
+	 * @param intend Intend to filter.
+	 * @return Filtered intend.
+	 */
 	public abstract Intend filter(Intend intend);
 }

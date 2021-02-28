@@ -5,7 +5,7 @@ package takMashido.shani.core;
  */
 public class Intend {
     /**Raw user input.*/
-    public IntendBase rawValue;
+    public final IntendBase rawValue;
     /**User input after applying all {@link takMashido.shani.filters.IntendFilter input filters}.*/
     public IntendBase value;
 

@@ -116,7 +116,7 @@ public class SentenceMatcher {
 	}
 	/**Process given ShaniString.
 	 * @param string {@code ShaniString} in which engine searches for matches.
-	 * @return Array of {@Link #SentenceResult} object containing all matched sentences.
+	 * @return Array of {@link #SentenceResult} object containing all matched sentences.
 	 */
 	public synchronized SentenceResult[] process(ShaniString string) {
 		var str=string.split(false);

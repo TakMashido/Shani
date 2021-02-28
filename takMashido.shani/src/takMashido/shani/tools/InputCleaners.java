@@ -43,7 +43,7 @@ public class InputCleaners {
 	 * @param dat String to stem
 	 * @return string with suffixes replaces on all words*/
 	public static String stem(String dat) {
-		final Pattern whiteSplitRegex=Pattern.compile("\\w");
+		final Pattern whiteSplitRegex=Pattern.compile("\\s");
 		
 		String[] words=whiteSplitRegex.split(dat);
 		words:
