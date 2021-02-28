@@ -97,24 +97,14 @@
 				<day>dzień*dni</day>
 			</daychooser>
 			<weathersentence>
-				<template name="weather">weather comma break1 tempMin break2 tempMax degree dot</template>
-				<template name="weather">weather comma tempMin singleDegree dot</template>
-				<template name="weather">weather comma tempMax singleDegree dot</template>
-				<template name="temperature">break1 tempMin break2 tempMax degree dot</template>
-				<template name="windSpeed">windSpeed speed</template>
-				<template name="negativeRespond">yes</template>
-				<template name="positiveRespond">no</template>
-				<yes>tak *youp </yes>
-				<no>nie *niet *nope </no>
-				<is>jest</is>
-				<speed> km na godzinę* km/h</speed>
-				<degree> stopni* celcjuszów</degree>
-				<singleDegree> stopnie* stopnie celcjusza</singleDegree>
-				<comma>, </comma>
-				<dot>.</dot>
-				<break1>od </break1>
-				<break2> do </break2>
-				<weather>Pogoda </weather>
+				<template name="weather">{weather}, od {tempMin} do {tempMax} {degree}.</template>
+				<template name="weather">{weather}, {tempMin} {degree}.</template>
+				<template name="weather">{weather}, {tempMax} {degree}.</template>
+				<template name="temperature">Od {tempMin} do {tempMax} {degree}.</template>
+				<template name="windSpeed">{windSpeed} [km na godzinę* km/h]</template>
+				<template name="negativeRespond">[tak*youp]</template>
+				<template name="positiveRespond">[nie*niet*nope]</template>
+				<degree>stopni*celcjuszów</degree>
 			</weathersentence>
 			<weatherResponses>
 				<!-- '_' in tag name gets replaced with ' ' and '-' with '/'-->
