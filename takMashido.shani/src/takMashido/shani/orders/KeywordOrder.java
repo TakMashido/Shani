@@ -4,7 +4,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import takMashido.shani.Config;
-import takMashido.shani.Engine;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
@@ -80,7 +79,7 @@ public abstract class KeywordOrder extends TextOrder {
 		short minCost=Short.MAX_VALUE;
 		KeywordAction minAction=null;
 		
-		Engine.info.printf("KeywordOrderNG: %s:\n",keyword.toFullString());
+		ShaniCore.info.printf("KeywordOrderNG: %s:\n",keyword.toFullString());
 		for(KeywordAction action:actions) {
 			ShaniMatcher actionMatcher=matcher.clone();
 			if(targetExactMatch) 
@@ -95,9 +94,9 @@ public abstract class KeywordOrder extends TextOrder {
 			}
 			
 			if(cost<Config.sentenseCompareTreshold*1.5f)
-				Engine.info.println(action.actionKeyword.toFullString()+"= "+cost);
+				ShaniCore.info.println(action.actionKeyword.toFullString()+"= "+cost);
 		}
-		Engine.info.println();
+		ShaniCore.info.println();
 		
 		if(minCost<Config.sentenseCompareTreshold) {
 			Return.add(new Executable(minAction,minCost));

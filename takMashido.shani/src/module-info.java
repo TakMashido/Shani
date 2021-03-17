@@ -1,7 +1,8 @@
 module takMashido.shani {
     requires transitive java.xml;
     requires org.jsoup;
-
+    
+    exports takMashido.shani.libraries;
     exports takMashido.shani.core;
     exports takMashido.shani.core.text;
     exports takMashido.shani.tools;

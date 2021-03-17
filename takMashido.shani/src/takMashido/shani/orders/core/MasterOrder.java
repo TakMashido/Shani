@@ -2,6 +2,7 @@ package takMashido.shani.orders.core;
 
 import org.w3c.dom.Element;
 import takMashido.shani.Engine;
+import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.core.text.ShaniString.ShaniMatcher;
 import takMashido.shani.orders.Action;
@@ -41,13 +42,13 @@ public class MasterOrder extends TextOrder {
 	}
 	
 	private void invokeSave() {
-		Engine.debug.println("save");
+		ShaniCore.debug.println("save");
 		Engine.saveMainFile();
 		Engine.flushBuffers();
 	}
 	@SuppressWarnings("resource")
 	private void setAutosaveTime(String time) {
-		Engine.debug.println("autosaveTimeChange");
+		ShaniCore.debug.println("autosaveTimeChange");
 		try {
 			autoSaveTime=new Scanner(time).nextInt();
 		} catch(NoSuchElementException ex) {
@@ -69,8 +70,7 @@ public class MasterOrder extends TextOrder {
 					Thread.sleep(30000);
 					if(Engine.lastExecutionTime>lastSaved&&Engine.lastExecutionTime>System.currentTimeMillis()+autoSaveTime*60*1000) {
 						Engine.saveMainFile();
-						Engine.debug.flush();
-						Engine.info.flush();
+						Engine.flushBuffers();
 						System.gc();
 					}
 				} catch (InterruptedException e) {

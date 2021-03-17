@@ -3,6 +3,7 @@ package takMashido.shani.core;
 import takMashido.shani.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.core.text.ShaniString;
+import takMashido.shani.libraries.Logger;
 
 import java.io.PrintStream;
 
@@ -12,8 +13,10 @@ import java.io.PrintStream;
  */
 public class ShaniCore {
     /**Default stream for debug text*/
-    public static final PrintStream debug=Engine.debug;
-
+    public static final PrintStream debug= Logger.getStream("debug");
+    /**Default stream low level debug messages*/
+    public static final PrintStream info= Logger.getStream("info");
+    
     /**Error message to print if something bad happened to inform user about it.*/
     public static final ShaniString errorMessage=Engine.errorMessage;
 

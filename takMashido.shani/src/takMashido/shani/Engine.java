@@ -13,6 +13,7 @@ import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.filters.IntendFilter;
 import takMashido.shani.libraries.ArgsDecoder;
+import takMashido.shani.libraries.Logger;
 import takMashido.shani.orders.Executable;
 import takMashido.shani.orders.Order;
 
@@ -24,9 +25,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -46,8 +45,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author TakMashido
  */
 public class Engine {
-	public static PrintStream debug;
-	public static PrintStream info;
+	private static PrintStream info;
+	private static PrintStream debug;
 	private static PrintStream commands;
 	
 	private static ShaniString helloMessage;												//Have to be initialized after loading doc.
@@ -102,24 +101,22 @@ public class Engine {
 			System.out.println("New args set. Running shani with it.");
 		}
 		
+		try {
+			Logger.setDefaultLogDirectory(Config.logsDirectory);
+		} catch (IOException e) {
+			registerLoadException();
+			System.err.println("Failed to setup logging directory.");
+			e.printStackTrace();
+		}
+		Logger.setStreamOpenMessage("<<<<<<<<<<<<<<<<<<shani>>>>>>>>>>>>>>>>>>");
+		
 		if(argsDec.containFlag("-d","--debug")) {		//debug
-			debug=System.out;
+			Logger.addStream(System.out,"debug");
 		} else if(argsDec.containFlag("-dd")){
-			debug=System.out;
-			commands=System.out;
+			Logger.addStream(System.out,"commands");
+			Logger.addStream(System.out,"debug");
 		} else {
-			try {
-				System.setErr(new PrintStream(new FileOutputStream(Config.errorsLogFileLocation,true)));
-			} catch (FileNotFoundException e1) {
-				System.out.println("Failed to set err file");
-				e1.printStackTrace();
-			}
-			try {
-				debug=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.debugLogFileLocation),1024));
-			} catch (FileNotFoundException e1) {
-				System.out.println("Failed to set debug file");
-				e1.printStackTrace();
-			}
+			System.setErr(Logger.getStream("error",false));
 		}
 		
 		Integer integer;
@@ -148,23 +145,6 @@ public class Engine {
 			System.exit(0);
 		}
 		
-		try {
-			Config.infoLogFileLocation.delete();
-			info=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.infoLogFileLocation),1024));
-		} catch (FileNotFoundException e1) {
-			System.out.println("Failed to set info file");
-			e1.printStackTrace();
-		}
-		
-		if(commands==null) {
-			try {
-				commands=new PrintStream(new BufferedOutputStream(new FileOutputStream(Config.commandsLogFileLocation,true)));
-			} catch (FileNotFoundException e) {
-				System.out.println("Failed to set commands file");
-				e.printStackTrace();
-			}
-		}
-		
 		if(Config.socksProxyHost!=null) {											//Set up before initializing orders
 			System.setProperty("socksProxyHost", Config.socksProxyHost);
 			System.setProperty("socksProxyPort", Integer.toString(Config.socksProxyPort));
@@ -173,6 +153,10 @@ public class Engine {
 			System.setProperty("http.proxyHost", Config.HTTPProxyHost);
 			System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
 		}
+		
+		commands= Logger.getStream("commands");
+		debug=Logger.getStream("debug");
+		info=Logger.getStream("info");
 		
 		commands.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<startup>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");				//Make startup place visible inside commands file
 		commands.println();
@@ -380,9 +364,7 @@ public class Engine {
 		}
 	}
 	public static void flushBuffers() {
-		debug.flush();
-		info.flush();
-		commands.flush();
+		Logger.flush();
 		System.out.flush();
 		System.err.flush();
 	}
