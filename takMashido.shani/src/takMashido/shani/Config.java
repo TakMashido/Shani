@@ -1,5 +1,7 @@
 package takMashido.shani;
 
+import takMashido.shani.core.text.ShaniString;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,8 +14,6 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Scanner;
-
-import takMashido.shani.core.text.ShaniString;
 
 /**Set of constants for SHANI API.
  * @author TakMashido
@@ -242,8 +242,6 @@ public class Config {
 	public static final int socksProxyPort;
 	public static final String HTTPProxyHost;
 	public static final int HTTPProxyPort;
-	
-	public static boolean verbose=false;
 	
 	/**Multiple value by parameter depending on another one.
 	 * @author TakMashido

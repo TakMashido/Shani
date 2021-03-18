@@ -134,10 +134,6 @@ public class Engine {
 			closingThread.start();
 		}
 		
-		if(argsDec.containFlag("-v","--verbose")) {
-			Config.verbose=true;
-		}
-		
 		if(!argsDec.isProcesed()) {														//End of args processing
 			System.out.println("Program input contain unrecognized parameters:");
 			var unmatched=argsDec.getUnprocesed();
@@ -404,13 +400,13 @@ public class Engine {
 		float minCost=Short.MAX_VALUE;
 		
 		long time=System.nanoTime();
-
+		
+		info.println(intend+":");
 		for (Order order : orders) {
 			List<Executable> execs=order.getExecutables(intend);
 			if(execs==null)continue;
 			for(Executable exec:execs) {
-				if(Config.verbose)
-					commands.println(exec.action.getClass().toString()+" "+exec.cost+":"+exec.importanceBias);
+				info.println("\t"+exec.action.getClass().toString()+" "+exec.cost+":"+exec.importanceBias);
 				
 				if(exec.cost>Config.sentenseCompareTreshold)
 					continue;
