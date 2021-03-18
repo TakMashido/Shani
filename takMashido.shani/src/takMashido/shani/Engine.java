@@ -142,12 +142,22 @@ public class Engine {
 		}
 		
 		if(Config.socksProxyHost!=null) {											//Set up before initializing orders
-			System.setProperty("socksProxyHost", Config.socksProxyHost);
-			System.setProperty("socksProxyPort", Integer.toString(Config.socksProxyPort));
+			if(Config.socksProxyPort!=0) {
+				System.setProperty("socksProxyHost", Config.socksProxyHost);
+				System.setProperty("socksProxyPort", Integer.toString(Config.socksProxyPort));
+			} else {
+				registerLoadException();
+				System.err.println("Please specify port for socks proxy using \"socksProxyPort\" entry in config file.");
+			}
 		}
 		if(Config.HTTPProxyHost!=null) {
-			System.setProperty("http.proxyHost", Config.HTTPProxyHost);
-			System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
+			if(Config.HTTPProxyPort!=0) {
+				System.setProperty("http.proxyHost", Config.HTTPProxyHost);
+				System.setProperty("http.proxyPort", Integer.toString(Config.HTTPProxyPort));
+			} else {
+				registerLoadException();
+				System.err.println("Please specify port for http proxy using \"HTTPProxyPort\" entry in config file.");
+			}
 		}
 		
 		commands= Logger.getStream("commands");
