@@ -36,5 +36,9 @@ build.xml
 #temp javadoc files
 SHANI/doc
 
+#Shani runtime data
+shaniData/
+run/
+
 #required external liblaries
 !dependencies/*

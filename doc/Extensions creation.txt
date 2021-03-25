@@ -1,0 +1,38 @@
+Shani is java 15 module application with additional featureas loaded from .jar extension files with all neccessary data. Their will be discussed in following document.
+
+All extension are made from set of modules(reffered later as shani module to differ from java module), and set of init files containing initialization data for shani modules them.
+
+Currently shani modules types are:
+-IntendGetter -> It's child class of Runnable. Is invoced on separated thread and provides Intends for shani from differed sources. E.g. it can read stdin, or get text from gui(no, no gui is implemented right now).
+-IntendFilter -> Filters Intends provided by IntendGetters to clean and extract most important information. E.g WordTrashFilter deletes words like "please" to make text better understandable by machine in further steps.
+-Order -> Takes input data(intend) and creates List of Actions it would like to execute. It's most important shani module resposible for parsing of all intends .
+	-SentenceMatcherOrder -> Subclass of Order. It's designed to match text based intends and get data from them on sentece level using precreated sentence templates in regex like language. Refer to SenceMatcher and SentenceMatcherOrder java doc for more info.
+	-KeywordOrder -> Simple matcher for text intends. It is designed to run certain action on one of multiple targets provided by user and saved into file for later use.
+			E.g Excuting programs keyword is "run". Rest of sentence is compared against list of currently know programs, if no match found user get question about given program path.
+
+Every shani module template has java doc so please look there for more info.
+For more information about Intends flow look into "Intend flow.svg" file.
+
+All of them are loaded based on information strored in init file. This is designed to provide easy dynamic loading of modules, and to give them data required to work in specyfic language.
+It's xml file with shani modules data stored in differed xml nodes. Every one have to have "classname" attribute containing full classpath of module so shani could easily find it and load. Given element is used also as class constructor argument so data can be read.
+Init files of custom modules should be stored in "shani.init" package with naming "<lang>.xml" where <lang> is shourtcut of language name, e.g. "en", "pl".
+
+For more info about it look into "Init file.txt" file.
+
+module-info.java has to export all directly used shani modules and open package containing init files.
+Sample file can look like this.
+
+module foo.bar {
+    requires takMashido.shani;
+    
+    opens shani.init;
+    
+    exports foo.bar.modules;
+}
+
+During development you need to include recent release Shani-development.jar file or code from this repository.
+You also have to have main method invocing "Launcher.run(args);". It's going to trigger default shani loading without need for packing your new extension to separate .jar file.
+Please do not refer into any of core files before calling this becouse it can and is going to mess up with static initalization of clases.
+Best to have main in separate class used only to this propouse to avoid it. All your code has to load by default shani pipeline, load instructions in init file invocing all your initalizations, and shani modules creation.
+
+When releasing extension you don't have to export any of core shani files or main method. Not runnable jar with code and init file after placing in extensions directory will be loaded dynamically on runtime.

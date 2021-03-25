@@ -1,0 +1,37 @@
+It's xml file used to load all shani extensions information.
+
+It's location and name is fully specyfied. It has to be located in "shani.init" package with name "<lang>.xml" where lang is shortcut of language for which file is created. E.g. "pl.xml" and "eng.xml" are vali file names.
+It's also possible to store it in differed package bu requires to include config .properties file with property "initFileLocation" set to your custom package name. It can't be stored in extension .jar so user will have to copy it to cofing directory by himself.
+All extensions are loaded using it's own ClassLoader so there shouldn't be any collision with other extensions, unless multiple occurs in ided during development. That's why core extension have init files stored in "shani.coreInit" package.
+
+All shani module root elments has to contain "classname" attribute with full classpath of given module.
+During loading given class is instanced with constructor using that xml element as argument.
+
+Minimal file contaiing all nodes look like this:
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<shani>
+	<version>v1</version>
+	<orders>
+		<order classname="takMashido.shani.orders.core.MergeOrder">
+		</order>
+	</orders>
+    <intendFilters>
+        <filter classname="takMashido.shaniModules.inputFilters.WordTrashFilter">
+        </filter>
+    </intendFilters>
+    <intendGetters>
+        <getter classname="takMashido.shaniModules.intendGetters.StdinGetter"/>
+    </intendGetters>
+	<static>
+		<ShaniString classname="takMashido.shani.core.text.ShaniString">
+		</ShaniString>
+	</static>
+</shani>
+
+"orders" subnode contain all orders definitions. "intendFilters", "intendGetters" also works on the same way.
+Only differed is for "static" node this is used for "static" initialization. public static method named "staticInit(Element e)" of class
+given by "classname" attribute is called to initialize static language based data. E.g. for ShaniString it's used to load pairs of nationaly similar letters ("śs","ąa",..).
+
+For fully working examples refer to "takMashido.shani/src/takMashido/shani/files/init" and "takMashido.shaniModules/src/shani/coreInit" directories of this repository.
+But remember that packages are a little different whan what custom modules shoud have.

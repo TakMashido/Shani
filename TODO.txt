@@ -1,14 +1,38 @@
-Add JavaDoc to Engine class!!!!!!!!!!!!!!!!
-Add option of creating main file without restarting whole app(or automate restart).
-Move TimerOrder to SentenceMatcher
+<refactor>
+move engine node data in main file to static section???
+move userData from data file into storage node
+inputFilters from init file into intendFilter
+IntendGetter from init file into intendGetter
+do something with MergeOrder to make Intends merging automatic, not depended on implementation in every order.
+Fix all typos in code
+</refactor
+
+<minor>
+log string comparing data in ShaniString and SentenceMatcher
+</minor>
+
+<major>
+rebuild permission system, each order has permissions and ensure correct usage by java Security
+initialize shani from general and specific language file + second language??
+filters for sentence generator?? Better parsers interface
+</major>
+
+<bugs>
+Execute order do not recognize path "C:\portablePrograms\IDE'y\idealC\bin\idea64.exe" when adding new execution target.
+Weather order crashes if it can't find city.
+Handle errors of executing app/opening file in ExecuteOrder.
+in execute order during adding new entry, space in file name make query unrecognized
+Move positive/negative responses from config file to mainFile.
+Fix error caused by different character encoding in cmd and java. Refer only to national characters like "¿". (Handled by using -Dfile.encoding=IBM852 in run bat file)
+</bugs>
+
+<old>
 Add module changing date description words (number of day, month, week day) to one form(exact date).
-Add option to choose beetwen multiple matched Orders not choose one witch smallest cost.
-Add option of choosing propability of ShaniString part to print.
+Add option to choose between multiple matched Orders not choose one with smallest cost.
+Add option of choosing probability of ShaniString part to print.
 Override xml parser to add doc changed flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
-Intern long-life String (keywords/responses) during some SHANI inactivity time.
 Add loops detection system for MergeOrder
-Make project name a shortcut (Simple Heurestic n a Interpreter)
-Move respones keys from config file to main file. And perform other data movements. (store data of each Order in one xml node, except some data which be changen(user/computer dependet)(this should be in another file))
+Move responses keys from config file to main file.
 Add option of compressing data files.
 
 
@@ -27,3 +51,4 @@ WikipediaOrder: Downloads wikipedia page and prints its content(Base description
 To update:
 Finish weather order.
 Let NumberFilter parse queries like "dwatysi¹ce" (no " " beetwen number parts)
+</old>
