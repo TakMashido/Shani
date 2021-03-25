@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<shani>
+    <version>v1</version>
+    <inputFilters>
+        <filter classname="takMashido.shaniModules.inputFilters.NumberFilter">
+            <_1000000000>miliard</_1000000000>
+            <_1000000>milion</_1000000>
+            <_1000>tysiąc</_1000>
+            <_900>dziewięćset</_900>
+            <_800>osiemset</_800>
+            <_700>siedemset</_700>
+            <_600>sześćset</_600>
+            <_500>pięćset</_500>
+            <_400>czterysta</_400>
+            <_300>trzysta</_300>
+            <_200>dwieście</_200>
+            <_100>sto</_100>
+            <_90>dziewięćdziesiąt</_90>
+            <_80>osiemdziesiąt</_80>
+            <_70>siedemdziesiąt</_70>
+            <_60>sześćdziesiąt</_60>
+            <_50>pięćdziesiąt</_50>
+            <_40>czterdzieści</_40>
+            <_30>trzydzieści</_30>
+            <_20>dwadzieścia</_20>
+            <_19>dziewiętnaście</_19>
+            <_18>osienaście</_18>
+            <_17>siedemnaście</_17>
+            <_16>szesnaście</_16>
+            <_15>piętnaście</_15>
+            <_14>czternaście</_14>
+            <_13>trzynaście</_13>
+            <_12>dwanaście</_12>
+            <_11>jedenaście</_11>
+            <_10>dziesięć*dziesiątka</_10>
+            <_9>dziewięć*dziewiątka</_9>
+            <_8>osiem*ósemka*ósmy</_8>
+            <_7>siedem*siódemka*siódmy</_7>
+            <_6>sześć*szóstka*szósty*sześciu</_6>
+            <_5>pięć*piątka*piąty*pięciu</_5>
+            <_4>cztery*czwórka*czwarty*czterech</_4>
+            <_3>trzy*trójka*trzeci*trzech</_3>
+            <_2>dwa*dwójka*drugi*dwóch</_2>
+            <_1>jeden*raz*pierwszy</_1>
+        </filter>
+        <filter classname="takMashido.shaniModules.inputFilters.WordTrashFilter">
+            <please>proszę*uprzejmie proszę</please>
+            <faster>natychmiast*ale już*w tym momencie*szybko</faster>
+        </filter>
+    </inputFilters>
+    <orders>
+        <order classname="takMashido.shaniModules.orders.WeatherOrder">
+
+            <notKnowLocationMessage val="Nie wiem dla jakiego miejsca podać pogodę"/>
+            <cannotProcessDayMessage val="Nie wiem o jaki dzień ci chodzi.*Nie wiem kiedy to jest."/>
+            <cannotParseDayNumberMessage val="Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie."/>
+            <noForecastFoundMessage val="Nie znalazłam prognozy*Pogoda nie znaleziona"/>
+            <whichCityMessage val="Które miasto mam wybrać?*Z kąd podać pogodę?*Proszę podaj numer miasta dla którego chcesz uzyskać pogodę."/>
+            <cityOutOfBoundsMessage val="Nieprawidłowy numer miasta.*Wyszedłeś po za listę."/>
+            <unmatchingCityMessage val="Nie wiem które miasto wybrać.*Możesz powtórzyć?"/>
+            <connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
+            <connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
+            <sentence>
+                <template name="weather">$ask *?when $weather *$where ?where</template>
+                <template name="weather">$ask ?where $weather</template>
+                <template name="temperature">$ask *?when $temperature *$where ?where</template>
+                <template name="windSpeed">$ask *?when $wind *$where ?where</template>
+                <template name="humidity">$ask *?when $humidity *$where ?where</template>
+                <template name="badWeather">$ask $where ?where $badWeather *$weather</template>
+                <template name="goodWeather">$ask $where ?where $goodWeather *$weather</template>
+                <where>w</where>
+                <temperature>temperaturę*temperatura*stopni</temperature>
+                <weather>pogoda*pogodę*</weather>
+                <wind>wiatr*prętkość wiatru*szybkość wiatru</wind>
+                <humidity>wilgotność</humidity>
+                <badWeather>będzie brzydko*jest brzydko</badWeather>
+                <goodWeather>będzie ładnie*jest ładnie</goodWeather>
+                <ask>czy*jaka jest*jak jest*jaka będzie*podaj*pokaż*ile jest*ile będzie</ask>
+            </sentence>
+            <daychooser>
+                <template name="0">$day0</template>
+                <template name="1">$day1</template>
+                <template name="2">$day2</template>
+                <template name="n">$break ?number $day</template>
+                <day0>dzisiaj*disiejsza*wieczorem</day0>
+                <day1>jutro*jutrzejsza</day1>
+                <day2>pojutrze</day2>
+                <break>za</break>
+                <day>dzień*dni</day>
+            </daychooser>
+            <weathersentence>
+                <template name="weather">{weather}, od {tempMin} do {tempMax} {degree}.</template>
+                <template name="weather">{weather}, {tempMin} {degree}.</template>
+                <template name="weather">{weather}, {tempMax} {degree}.</template>
+                <template name="temperature">Od {tempMin} do {tempMax} {degree}.</template>
+                <template name="windSpeed">{windSpeed} [km na godzinę* km/h]</template>
+                <template name="negativeRespond">[tak*youp]</template>
+                <template name="positiveRespond">[nie*niet*nope]</template>
+                <degree>stopni*celcjuszów</degree>
+            </weathersentence>
+            <weatherResponses>
+                <!-- '_' in tag name gets replaced with ' ' and '-' with '/'-->
+                <AM_Clouds-PM_Sun>pochmurny poranek</AM_Clouds-PM_Sun>
+                <AM_Fog-PM_Sun>poranna mgła</AM_Fog-PM_Sun>
+                <AM_Light_Rain>poranny lekki deszcz</AM_Light_Rain>
+                <AM_Rain>poranny deszcz</AM_Rain>
+                <AM_Showers>poranne deszcze</AM_Showers>
+                <Clear>czyste niebo</Clear>
+                <Cloudy>pochmurnie</Cloudy>
+                <Few_Showers>deszczowo</Few_Showers>
+                <Fog_Late>późne mgły</Fog_Late>
+                <Light_Rain>lekki deszcz</Light_Rain>
+                <Isolated_Thunderstorms>samotne burze</Isolated_Thunderstorms>
+                <Mostly_Clear>głównie czyste niebo</Mostly_Clear>
+                <Mostly_Cloudy>glównie zachmurzenie</Mostly_Cloudy>
+                <Mostly_Sunny>w większości słonecznie</Mostly_Sunny>
+                <Partly_Cloudy>częściowe zachmurzonie</Partly_Cloudy>
+                <Partly_Sunny>lekko słonecznie</Partly_Sunny>
+                <PM_Light_Rain-Wind>popoudniowy lekki deszcz i wiatr</PM_Light_Rain-Wind>
+                <PM_Rain>popoudniowy deszcz</PM_Rain>
+                <PM_Showers>popołudniowe deszcze</PM_Showers>
+                <PM_Thunderstorms>wieczorne burze</PM_Thunderstorms>
+                <Rain>deszcz</Rain>
+                <Rain-Snow_Showers>śnieg z deszczem</Rain-Snow_Showers>
+                <Rain-Wind>deszczowo i wietrznie</Rain-Wind>
+                <Scattered_Thunderstorms>rozproszone burze</Scattered_Thunderstorms>
+                <Showers>lekki deszcz</Showers>
+                <Showers_Late>wieczorny deszczyk</Showers_Late>
+                <Showers-Wind>zlewa i wiatr</Showers-Wind>
+                <Sunny>słonecznie</Sunny>
+                <Sunny-Wind>słonecznie i wietrznie</Sunny-Wind>
+                <Thundershowers>burza</Thundershowers>
+                <Thunderstorms>burze</Thunderstorms>
+            </weatherResponses>
+            <badWeather>
+                <temperature>10</temperature>
+                <windSpeed>5</windSpeed>
+                <weatherTypes>Rain</weatherTypes>
+            </badWeather>
+        </order>
+        <order classname="takMashido.shaniModules.orders.TimerOrder">
+            <sentence>
+                <template name="start">$start $timer ?name</template>
+                <template name="stop">$stop $timer ?name</template>
+                <template name="show">$show $timer ?name</template>
+                <template name="reset">$reset $timer ?name</template>
+                <timer>timer*zegar</timer>
+                <start>odpal*start*włącz</start>
+                <stop>stop*wyłącz*zatrzymaj</stop>
+                <show>wyświetl*show*pokaż ile zliczył*podaj ile zliczył*ile zliczył</show>
+                <reset>reset*zeruj*wyzeruj</reset>
+            </sentence>
+            <startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
+            <alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
+            <stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
+            <alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
+            <resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
+            <printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
+            <nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
+            <nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
+            <nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
+            <nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
+            <config>
+                <noTimerImportanceBias val="-20"/>
+            </config>
+        </order>
+        <order classname="takMashido.shaniModules.orders.ExecuteOrder">
+            <keywords val="odpal*włącz*otwórz*pokaż*show*start*uruchom"/>
+            <successfulMessage val="Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia"/>
+            <notKnowMessage val="Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?"/>
+            <unrecognizedMessage val="Przykro mi nie potrafię tego włączyć.*Nie wiem gdzie to znaleźć.*nie mam pojęcia jak to włączyć."/>
+            <cantConnectMessage val="Wybacz nie wiem co zrobić.*Nie mogę połączyć tych akcji."/>
+        </order>
+        <order classname="takMashido.shaniModules.orders.TranslateOrder">
+            <keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
+            <maxLineSize>70</maxLineSize>
+            <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
+            <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
+            <connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
+            <connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
+        </order>
+        <order classname="takMashido.shaniModules.orders.CalculateOrder">
+            <calculationResoultMessage val="Wynik to %f.*%f*Po podliczeniu mamy %f."/>
+            <calculationFailedMessage val="Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć."/>
+            <sentence>
+                <template name="power">$power ?power1 $connect ?power2</template>
+                <template name="power">?power1 $power ?power2</template>
+                <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
+                <template name="multiply">$count ?multiply1 $multiply ?multiply2</template>
+                <template name="divide">$divide ?divide1 $connect ?divide2</template>
+                <template name="divide">$count ?divide1 $divide ?divide2</template>
+                <template name="add">$add ?add1 $connect ?add2</template>
+                <template name="add">$count ?add1 $add ?add2</template>
+                <template name="substract">$substract ?substract1 $connect ?substract2</template>
+                <template name="substract">$count ?substract2 $substract ?substract1</template>
+                <template name="count">$count ?count</template>
+                <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
+                <power>potęga*do*do potęgi</power>
+                <multiply>pomnórz*iloczyn*razy</multiply>
+                <divide>podziel*iloraz*przez*na</divide>
+                <add>dodaj*suma*plus</add>
+                <substract>odejmij*różnica*minus</substract>
+                <connect>przez*od*do*i*na</connect>
+            </sentence>
+        </order>
+        <order classname="takMashido.shaniModules.orders.CMDOrder">
+            <keywords>cmd</keywords>
+            <executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
+            <runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
+            <endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>
+        </order>
+    </orders>
+    <IntendGetters>
+        <getter classname="takMashido.shaniModules.intendGetters.StdinGetter"/>
+    </IntendGetters>
+</shani>

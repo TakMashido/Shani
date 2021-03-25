@@ -14,11 +14,14 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**Set of constants for SHANI API.
  * @author TakMashido
  */
 public class Config {
+	private static final Pattern stringSplitRegex= Pattern.compile("\\*");
+	
 	private Config() {}
 	
 	private static boolean ignoreMissingPropertyErrors=false;
@@ -36,6 +39,9 @@ public class Config {
 		}
 		
 		language=getProperty(props,"language");
+		
+		extensionsDirectory=getFileProperty(props, "extensionsDirectory");
+		initFileLocation=split(getAdditiveProperty(props, "initFileLocation"));
 		
 		dataFile=getFileProperty(props, "dataFile", Config.class.getResourceAsStream("/takMashido/shani/files/templates/shaniData.xml"));
 		
@@ -80,6 +86,8 @@ public class Config {
 			}
 		}
 	}
+	
+	//<loaders><loaders><loaders><loaders><loaders><loaders><loaders><loaders><loaders>
 	private static final String getProperty(Properties props[], String key) {
 		for(int i=0;i<props.length;i++) {
 			String val=props[i].getProperty(key);
@@ -91,6 +99,22 @@ public class Config {
 		
 		return null;
 	}
+	/**Works line {@link #getProperty(Properties[], String)} but instead returning single property from most important config file returns array of values from all config files containing this one.
+	 * @param props Properties object to load from.
+	 * @param key Key to search for.
+	 * @return All found occurrences of given key in props objects.
+	 */
+	private static final String[] getAdditiveProperty(Properties[] props, String key){
+		ArrayList<String> ret=new ArrayList<>();
+		
+		for(int i=0;i<props.length;i++) {
+			String val=props[i].getProperty(key);
+			if(val!=null)
+				ret.add(val);
+		}
+		
+		return ret.toArray(new String[ret.size()]);
+	}
 	
 	private static final File getFileProperty(Properties props[], String key) {
 		return getFileProperty(props, key, null);
@@ -101,9 +125,19 @@ public class Config {
 			return null;			//Error already handled in getProperty(...) and end of static initializer block
 		
 		File ret = new File(source);
-		File parent=ret.getParentFile();
-		if(parent!=null&&!parent.exists()) {
-			parent.mkdirs();
+		
+		if(ret.isDirectory()||source.endsWith("/")) {
+			if (!ret.exists()) {
+				if (!ret.mkdirs()) {
+					Engine.registerLoadException();
+					System.err.println("Failed to create config directory: " + ret.getAbsolutePath());
+				}
+			}
+		} else {
+			File parent = ret.getParentFile();
+			if (parent != null && !parent.exists()) {
+				parent.mkdirs();
+			}
 		}
 		
 		if(defaultFileContent!=null&&!ret.exists()) {
@@ -203,7 +237,29 @@ public class Config {
 		return ret.toArray(new Properties[ret.size()]);
 	}
 	
+	//<helpers><helpers><helpers><helpers><helpers><helpers><helpers>
+	/**Split all elemnts of array based on {@link #stringSplitRegex}.
+	 * @param strs Strings to split
+	 * @return Array of splitted strings.
+	 */
+	private static String[] split(String ... strs){
+		ArrayList<String> ret=new ArrayList<>();
+		
+		for(String str:strs){
+			String[] parts=stringSplitRegex.split(str);
+			
+			for(String part:parts)
+				ret.add(part);
+		}
+		
+		return ret.toArray(new String[ret.size()]);
+	}
+	
+	//<values><values><values><values><values><values><values><values><values>
 	public static final String language;
+	
+	public static final File extensionsDirectory;
+	public static final String[] initFileLocation;
 	
 	public static final File dataFile;
 	

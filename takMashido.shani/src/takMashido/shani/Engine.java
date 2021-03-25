@@ -32,6 +32,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -39,6 +42,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Function;
 
 /**Main class of shani. Responsible for all data loading and intends flow.
  * For service functions it contains only core of implementation, all helper code and methods with different args are in {@link takMashido.shani.core.ShaniCore} class.
@@ -175,6 +179,8 @@ public class Engine {
 			return;
 		}
 		
+		loadExtensions(Config.extensionsDirectory);
+		
 		if(LOADING_ERROR) {
 			ShaniString loadingErrorMessage=ShaniString.loadString(doc,"engine.loadingErrorMessage");
 			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
@@ -262,24 +268,121 @@ public class Engine {
 
 	}
 	
+	/**Load core information from file in shani core jar*/
 	private static void parseMainFile() throws SAXException, IOException, ParserConfigurationException {
-		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Engine.class.getResourceAsStream("/takMashido/shani/files/init/"+Config.language+".xml"));
+		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Engine.class.getResourceAsStream("/takMashido/shani/files/init/" + Config.language + ".xml"));
 		doc.getDocumentElement().normalize();
 		
-		Node engineNode=doc.getElementsByTagName("engine").item(0);
+		Node engineNode = doc.getElementsByTagName("engine").item(0);
 		
-		helloMessage=ShaniString.loadString(engineNode, "helloMessage");
-		closeMessage=ShaniString.loadString(engineNode, "closeMessage");
-		notUnderstandMessage=ShaniString.loadString(engineNode, "notUnderstandMessage");
-		errorMessage=ShaniString.loadString(engineNode, "errorMessage");
-		licenseConfirmationMessage=ShaniString.loadString(engineNode, "licenseConfirmationMessage");
-		licensesNotConfirmedMessage=ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
+		helloMessage = ShaniString.loadString(engineNode, "helloMessage");
+		closeMessage = ShaniString.loadString(engineNode, "closeMessage");
+		notUnderstandMessage = ShaniString.loadString(engineNode, "notUnderstandMessage");
+		errorMessage = ShaniString.loadString(engineNode, "errorMessage");
+		licenseConfirmationMessage = ShaniString.loadString(engineNode, "licenseConfirmationMessage");
+		licensesNotConfirmedMessage = ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
+		
+		parseModules(doc,Engine.class.getClassLoader());				//Master modules
+		
+		loadExtension(Engine.class.getClassLoader());					//Any other compiled together with shani engine
+	}
+	
+	/**
+	 * Parse modules from given file. If it's directory every .jar file in it will be treated as extension to load.
+	 * @param file .jar file or directory from which load modules.
+	 */
+	private static void loadExtensions(File file) {
+		if(file.isDirectory()){
+			info.println("Loading extensions dir \""+file.getAbsolutePath()+'"');
+			for(File f:file.listFiles()){
+				if(!f.getName().endsWith(".jar")||
+						f.isDirectory()) {
+					continue;
+				}
+				
+				loadExtensions(f);
+			}
+			return;
+		}
+		
+		info.println("Loading extension \""+file.getAbsolutePath()+'"');
+		
+		if(!file.getName().endsWith(".jar")) {
+			System.err.println('"'+file.getName()+"\" is not valid extensions. Only .jar files can be provided.");
+			Engine.registerLoadException();
+			return;
+		}
+		
+		try {
+			String fileName=file.getName();
+			commands.println("\nLoading extension \""+fileName.substring(0,fileName.length()-4)+'"');
+			long time=System.nanoTime();
+			
+			URLClassLoader loader=new URLClassLoader(new URL[]{file.toURI().toURL()}, Engine.class.getClassLoader());
+			loadExtension(loader);
+		} catch (MalformedURLException e) {
+			System.err.println("Failed to read \"" + file.getName() + "\" extension file.");
+			e.printStackTrace();
+			Engine.registerLoadException();
+		}
+	}
+	
+	/**Load extension from given class loader.
+	 * @param loader Loader to use to load extension
+	 */
+	private static void loadExtension(ClassLoader loader){
+		/**Finds possible init files directories using given class loader. Every directory with name starting with "init" is considered as init files location.
+		 * @param l Class loader used to get resources directories.
+		 */
+		Function<ClassLoader,List<URL>> getPossibleLocations=(ClassLoader l)->{
+			if(l==null)
+				return null;
+			
+			List<URL> ret=new ArrayList<>();
+			
+			String nameBase=Config.language+".xml";
+			for(String loc:Config.initFileLocation){
+				URL res=l.getResource(loc+'/'+nameBase);
+				
+				if(res!=null)
+					ret.add(res);
+			}
+			
+			return ret;
+		};
+		
+		var possible=getPossibleLocations.apply(loader);
+		var fromParent=getPossibleLocations.apply(loader.getParent());
+		
+		if(possible==null){
+			System.err.println("Can't list files in module \""+loader.getName()+"\"to find init files.");
+			return;
+		}
+		
+		if(fromParent!=null)						//Class loader gives results from itself and parent. We want only ones from this specific class loader
+			possible.removeAll(fromParent);
+		
+		for(URL url:possible){
+			try {
+				Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream());
 
-		readModules(doc,"static","Static",true);
-		inputFilters.addAll(readModules(doc,"inputFilters","Input filter",false));
-		orders.addAll(readModules(doc,"orders","Order",false));
+				parseModules(doc,loader);
+			} catch (SAXException | IOException | ParserConfigurationException e) {
+				System.err.println("Failed to load init file \""+url+"\" from extension \""+loader.getName()+'"');
+				e.printStackTrace();
+			}
+		}
+	}
+	/**Parse modules from given document using given class loader
+	 * @param doc XML document containing modules description.
+	 * @param loader Class loader to use to obtain Modules classes. Usually ClassLoader loading from same jar file as doc data are stored.
+	 * */
+	private static void parseModules(Document doc, ClassLoader loader){
+		readModules(doc,"static","Static",loader,true);
+		inputFilters.addAll(readModules(doc,"inputFilters","Input filter",loader,false));
+		orders.addAll(readModules(doc,"orders","Order",loader,false));
 
-		List<IntendGetter> getters=readModules(doc,"IntendGetters","Intend getter",false);
+		List<IntendGetter> getters=readModules(doc,"IntendGetters","Intend getter",loader,false);
 		for(IntendGetter getterTemplate:getters){
 			Thread getter=new Thread(inputGetters,getterTemplate,getterTemplate.getterName);
 			getter.setDaemon(true);
@@ -290,18 +393,24 @@ public class Engine {
 	 * @param where Document containing initializers.
 	 * @param groupName Name of parent node containing subnodes of modules to initialize.
 	 * @param printableName Name to print in logs.
+	 * @param loader Class loader to use to get modules classes
 	 * @param staticInit If these modules all initialized on static way. If true static method "staticInit" is called, constructor is called. Both take one parameter - xml Element
 	 * @param <T> Type of modules to return. Ignored if staticInit is true.
 	 * @return List of initialized modules instances. It's always empty if staticInit is true.
 	 */
-	private static <T> List<T> readModules(Document where,String groupName, String printableName, boolean staticInit){
+	private static <T> List<T> readModules(Document where,String groupName, String printableName, ClassLoader loader, boolean staticInit){
 		List<T> ret=new LinkedList<T>();
 
 		String timePrintTemplate=printableName+" %-"+(45-printableName.length())+"s loaded in \t%8.3f ms.%n";
 		//for "order" noduleName it should be "Order %-40s loaded in \t%8.3f ms.%n"
 
 		long bigTime=System.nanoTime();
-		NodeList ordersNode = ((Element)where.getElementsByTagName(groupName).item(0)).getChildNodes();
+		
+		Node modulesNode=where.getElementsByTagName(groupName).item(0);
+		if(modulesNode==null)
+			return ret;
+		NodeList ordersNode = ((Element)modulesNode).getChildNodes();
+		
 		for (int i = 0; i < ordersNode.getLength(); i++) {
 			Node node = ordersNode.item(i);
 
@@ -315,11 +424,12 @@ public class Engine {
 						continue;
 					}
 					long time=System.nanoTime();
-
+					
 					if(staticInit){
-						Class.forName(className).getMethod("staticInit", Element.class).invoke(null, e);
+						Class.forName(className, true, loader).getMethod("staticInit", Element.class).invoke(null, e);
 					} else {
-						T module = (T) Class.forName(className).getDeclaredConstructor(Element.class).newInstance(e);
+						T module = (T) loader.loadClass(className).getDeclaredConstructor(Element.class).newInstance(e);
+//						T module = (T) Class.forName(className, true, loader).getDeclaredConstructor(Element.class).newInstance(e);
 						ret.add(module);
 					}
 
