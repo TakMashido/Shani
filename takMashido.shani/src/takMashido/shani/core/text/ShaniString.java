@@ -86,12 +86,10 @@ public class ShaniString implements IntendBase {
 		
 		lookUpTable=new byte[maxID+1][maxID+1];
 		for(int i=0;i<lookUpTable.length;i++) {
-			for(int j=0;j<lookUpTable[i].length;j++) {
-				lookUpTable[i][j]=Config.diffrendCharacterCost;
-			}
+			Arrays.fill(lookUpTable[i],Config.differentCharacterCost);
 		}
 		
-		for(int i=0;i<qwertyTable.length;i++) {				//TODO it use keys distace without looking for shift of rows. Fix if;
+		for(int i=0;i<qwertyTable.length;i++) {				//TODO it use keys distance without looking for shift of rows. Fix if;
 			for(int j=0;j<qwertyTable[i].length;j++) {
 				for(int k=-1;k<2;k++) {
 					int index=i+k;
@@ -124,7 +122,7 @@ public class ShaniString implements IntendBase {
 		this("");
 	}
 	/**Creates new ShaniString.
-	 * @param origin String containing ShaniString data. Will be cutted on '*' occurrences.
+	 * @param origin String containing ShaniString data. Will be cut on '*' occurrences.
 	 */
 	public ShaniString(String origin) {
 		this(origin,true);
@@ -138,7 +136,7 @@ public class ShaniString implements IntendBase {
 		else value=new String[] {origin};
 	}
 	/**Creates new ShaniString.
-	 * @param origin Strings containing data. All of them will be cutted on '*' occurrences.
+	 * @param origin Strings containing data. All of them will be cut on '*' occurrences.
 	 */
 	public ShaniString(String... origin) {
 		this(true,origin);
@@ -161,7 +159,7 @@ public class ShaniString implements IntendBase {
 	 */
 	public ShaniString(Node origin) {
 		if(origin==null) {
-			assert false:"Origin node can't be null. Propably node is missing in shani main file.";
+			assert false:"Origin node can't be null. Probably node is missing in shani main file.";
 			value=new String[] {"MISSING_SHANI_STRING"};
 		}
 		
@@ -204,7 +202,7 @@ public class ShaniString implements IntendBase {
 	 * @param cut If cut given ShaniString on each occurrence of '*'
 	 * @return Array[][] of words. Each entry is single word.
 	 */
-	public ShaniString[][] split(boolean cut){										//For further optimalization can store once splitted val somewhere. It needs changes in ShaniString to make immutable. Any change on it have to be applied on new object like in original string.
+	public ShaniString[][] split(boolean cut){										//For further optimization can store once splitted val somewhere. It needs changes in ShaniString to make immutable. Any change on it have to be applied on new object like in original string.
 		var Return=new ShaniString[value.length][];
 		
 		for(int i=0;i<value.length;i++) {
@@ -411,7 +409,7 @@ public class ShaniString implements IntendBase {
 		stem();
 		str.stem();
 		
-		return getCompareCost(str)<Config.sentenseCompareTreshold;
+		return getCompareCost(str)<Config.sentenceCompareThreshold;
 	}
 	
 	/**Tries to find optimal match between two {@linkplain ShaniString} arrays using dtw algorithm.
@@ -554,7 +552,7 @@ public class ShaniString implements IntendBase {
 									  val[x1][y-1]+compareChar(a[x-1],b[y-1]));
 				if(x>1&&y>1) {
 					short swapCost=(short) (compareChar(a[x-1],b[y-2])+compareChar(a[x-2],b[y-1]));
-					if(swapCost<Config.characterSwapTreshold) {
+					if(swapCost<Config.characterSwapThreshold) {
 						val[x][y]=(short) min(val[x-2][y-2]+swapCost+Config.characterSwapCost,
 											  val[x][y]);
 					}
@@ -580,7 +578,7 @@ public class ShaniString implements IntendBase {
 	
 	private static byte compareChar(char a,char b) {
 		if(a>lookUpTable.length||b>lookUpTable[a].length) {
-			return Config.diffrendCharacterCost;
+			return Config.differentCharacterCost;
 		}
 		return lookUpTable[a][b];
 	}
@@ -600,7 +598,7 @@ public class ShaniString implements IntendBase {
 		System.out.println(toString());
 	}
 	
-	/**Returns full String representation. Contain each underlying String splitted with '*' character.
+	/**Returns full String representation. Contain each underlying String split with '*' character.
 	 * new ShaniString(oldShaniString.toFullString()) should give object identical to oldShaniString.
 	 * @return String representing this ShaniString.
 	 */
@@ -749,7 +747,7 @@ public class ShaniString implements IntendBase {
 				for(int k=0;k<comparable.stemmedValue[j].length;k++) {			//words in comparable
 					for(int l=0;l<data.stemmedValue[index].length;l++) {
 						short cost=charCompare(data.stemmedValue[index][l],comparable.stemmedValue[j][k]);
-						if(cost<Config.wordCompareTreshold) 
+						if(cost<Config.wordCompareThreshold)
 							resoults.add(new CompareResoult(cost,l));
 					}
 					if(resoults.isEmpty()) {
@@ -846,17 +844,17 @@ public class ShaniString implements IntendBase {
 			return this;
 		}
 		
-		/**Check if cost of compare is smaller then Config.senetenceCompareTreshold.
+		/**Check if cost of compare is smaller then Config.sentenceCompareThreshold.
 		 * @return If underlying ShaniString is equal to all applied data.
 		 */
 		public boolean isEqual() {
-			return getCost()<Config.sentenseCompareTreshold;
+			return getCost()<Config.sentenceCompareThreshold;
 		}
 		/**Check if applied data are presented in underlying ShaniString. Skip unmatched words.
 		 * @return Look above.
 		 */
 		public boolean isSemiEqual() {
-			return getMatchedCost()<Config.sentenseCompareTreshold&&getMatchedNumber()>0;
+			return getMatchedCost()<Config.sentenceCompareThreshold &&getMatchedNumber()>0;
 		}
 		
 		/**Returns ShaniString containing all unmatched data.
@@ -868,7 +866,7 @@ public class ShaniString implements IntendBase {
 			for(int i=0;i<wordCost.length;i++) {
 				buffer=new StringBuffer();
 				for(int j=0;j<wordCost[i].length;j++) {
-					if(wordCost[i][j]>=Config.wordCompareTreshold)
+					if(wordCost[i][j]>=Config.wordCompareThreshold)
 						buffer.append(data.stemmedValue[i][j]).append(' ');
 				}
 				if(buffer.length()>0)buffer.substring(0,buffer.length()-1);
@@ -908,7 +906,7 @@ public class ShaniString implements IntendBase {
 			short minCost=Short.MAX_VALUE;
 			for(int i=0;i<wordCost.length;i++) {
 				short cost=costBias[i];
-				for(int j=0;j<wordCost[i].length;j++)if(wordCost[i][j]<Config.wordCompareTreshold)cost+=wordCost[i][j];
+				for(int j=0;j<wordCost[i].length;j++)if(wordCost[i][j]<Config.wordCompareThreshold)cost+=wordCost[i][j];
 				if(cost<minCost)minCost=cost;
 			}
 			return minCost;
@@ -920,7 +918,7 @@ public class ShaniString implements IntendBase {
 			int Return=0;
 			for(int i=0;i<wordCost.length;i++) {
 				int matched=0;
-				for(int j=0;j<wordCost[i].length;j++)if(wordCost[i][j]<Config.wordCompareTreshold)matched++;
+				for(int j=0;j<wordCost[i].length;j++)if(wordCost[i][j]<Config.wordCompareThreshold)matched++;
 				if(matched>Return)Return=matched;
 			}
 			return Return;

@@ -47,21 +47,21 @@ public class Config {
 		
 		logsDirectory=getFileProperty(props, "logsDirectory");
 		
-		positiveResponeKey=new ShaniString(getProperty(props,"positiveResponeKey"));
-		negativeResponeKey=new ShaniString(getProperty(props,"negativeResponeKey"));
+		positiveResponseKey =new ShaniString(getProperty(props,"positiveResponseKey"));
+		negativeResponseKey =new ShaniString(getProperty(props,"negativeResponseKey"));
 		
-		diffrendCharacterCost=(byte)getIntProperty(props,"diffrendCharacterCost");
+		differentCharacterCost =(byte)getIntProperty(props,"differentCharacterCost");
 		qwertyNeighbourCost=(byte)getIntProperty(props,"qwertyNeighbourCost");
 		nationalSimilarityCost=(byte)getIntProperty(props,"nationalSimilarityCost");
 		
-		wordCompareTreshold=(short)getIntProperty(props,"wordCompareTreshold");
+		wordCompareThreshold =(short)getIntProperty(props,"wordCompareThreshold");
 		characterCompareCostMultiplier=new Multiplier(getProperty(props,"characterCompareCostMultiplier"));
 		characterDeletionCost=(short)getIntProperty(props,"characterDeletionCost");
 		characterInsertionCost=(short)getIntProperty(props,"characterInsertionCost");
-		characterSwapTreshold=(short)getIntProperty(props,"characterSwapTreshold");
+		characterSwapThreshold =(short)getIntProperty(props,"characterSwapThreshold");
 		characterSwapCost=(short)getIntProperty(props,"characterSwapCost");
 		
-		sentenseCompareTreshold=(short)getIntProperty(props,"sentenseCompareTreshold");
+		sentenceCompareThreshold =(short)getIntProperty(props,"sentenceCompareThreshold");
 		wordInsertionCost=(short)getIntProperty(props,"wordInsertionCost");
 		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost");
 		
@@ -238,9 +238,9 @@ public class Config {
 	}
 	
 	//<helpers><helpers><helpers><helpers><helpers><helpers><helpers>
-	/**Split all elemnts of array based on {@link #stringSplitRegex}.
+	/**Split all elements of array based on {@link #stringSplitRegex}.
 	 * @param strs Strings to split
-	 * @return Array of splitted strings.
+	 * @return Array of split strings.
 	 */
 	private static String[] split(String ... strs){
 		ArrayList<String> ret=new ArrayList<>();
@@ -266,24 +266,24 @@ public class Config {
 	public static final File logsDirectory;
 	
 	/*Basic responses*/												//TODO move to main file
-	public static final ShaniString positiveResponeKey;
-	public static final ShaniString negativeResponeKey;
+	public static final ShaniString positiveResponseKey;
+	public static final ShaniString negativeResponseKey;
 	
 	/*Characters cost*/
-	public static final byte diffrendCharacterCost;
+	public static final byte differentCharacterCost;
 	public static final byte qwertyNeighbourCost;
 	public static final byte nationalSimilarityCost;						//a,�||c,�...
 	
 	/*Character matching costs*/
-	public static final short wordCompareTreshold;
+	public static final short wordCompareThreshold;
 	public static final Multiplier characterCompareCostMultiplier;					//Multiplier of cost for distance between short strings, val[length-1]
 	public static final short characterDeletionCost;
 	public static final short characterInsertionCost;
-	public static final short characterSwapTreshold;
+	public static final short characterSwapThreshold;
 	public static final short characterSwapCost;
 	
 	/*Words matching cost*/
-	public static final short sentenseCompareTreshold;
+	public static final short sentenceCompareThreshold;
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
 	

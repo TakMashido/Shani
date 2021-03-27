@@ -33,7 +33,7 @@ public abstract class KeywordOrder extends TextOrder {
 	
 	protected Node targetDataNode;
 	
-	/**Where to search for targets. Each subnode under given path is treated as differed target, and {@link KeywordACtion} is created for it.
+	/**Where to search for targets. Each subnode under given path is treated as differed target, and {@link KeywordAction} is created for it.
 	 * @return String[] containing paths to use.*/
 	protected abstract String getDataLocation();
 	
@@ -93,19 +93,19 @@ public abstract class KeywordOrder extends TextOrder {
 				minAction=action;
 			}
 			
-			if(cost<Config.sentenseCompareTreshold*1.5f)
+			if(cost<Config.sentenceCompareThreshold *1.5f)
 				ShaniCore.info.println(action.actionKeyword.toFullString()+"= "+cost);
 		}
 		ShaniCore.info.println();
 		
-		if(minCost<Config.sentenseCompareTreshold) {
+		if(minCost<Config.sentenceCompareThreshold) {
 			Return.add(new Executable(minAction,minCost));
 		} else if(matcher.isSemiEqual()) {
 			ShaniString unmatched=matcher.getUnmatched();
 			var add=getUnmatchedAction(unmatched);
 			if(add!=null) {
 				add.setUnmatched(unmatched);
-				Return.add(add.getExecutable(Config.sentenseCompareTreshold-1));
+				Return.add(add.getExecutable(Config.sentenceCompareThreshold -1));
 			}
 		}
 		
@@ -127,7 +127,7 @@ public abstract class KeywordOrder extends TextOrder {
 			}
 		}
 		
-		if(minCost<Config.sentenseCompareTreshold)
+		if(minCost<Config.sentenceCompareThreshold)
 			return minAction;
 		return null;
 	}

@@ -83,7 +83,7 @@ public class Test {
 				"hog sentente",
 				"witam pana genera�a pu�kownika",
 				"must kolege piotra ryb� hello world"};
-		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.diffrendCharacterCost,0,(short)(Config.nationalSimilarityCost)};
+		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.differentCharacterCost,0,(short)(Config.nationalSimilarityCost)};
 		short[] importanceBias=new short[] {
 				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
 				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),

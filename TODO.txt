@@ -1,13 +1,17 @@
 <refactor>
 move engine node data in main file to static section???
 move userData from data file into storage node
-inputFilters from init file into intendFilter
-IntendGetter from init file into intendGetter
-do something with MergeOrder to make Intends merging automatic, not depended on implementation in every order.
 Fix all typos in code
-</refactor
+
+    <MergeOrder>
+    make it automatic, not depended on implementation in every order.
+    Add loops detection system for MergeOrder
+    </MergeOrder>
+
+</refactor>
 
 <minor>
+Logging deletes all previously existing files. Fix it.
 log string comparing data in ShaniString and SentenceMatcher
 </minor>
 
@@ -15,6 +19,7 @@ log string comparing data in ShaniString and SentenceMatcher
 rebuild permission system, each order has permissions and ensure correct usage by java Security
 initialize shani from general and specific language file + second language??
 filters for sentence generator?? Better parsers interface
+Make sentence matcher push values matched by ShaniStringElement, RegexElement etc. into return map
 </major>
 
 <bugs>
@@ -23,24 +28,21 @@ Weather order crashes if it can't find city.
 Handle errors of executing app/opening file in ExecuteOrder.
 in execute order during adding new entry, space in file name make query unrecognized
 Move positive/negative responses from config file to mainFile.
-Fix error caused by different character encoding in cmd and java. Refer only to national characters like "¿". (Handled by using -Dfile.encoding=IBM852 in run bat file)
 </bugs>
+
+<ideas>
+Add compression to logger library, similar way to linux logs retention
+Add option of compressing data files.
+</ideas>
 
 <old>
 Add module changing date description words (number of day, month, week day) to one form(exact date).
 Add option to choose between multiple matched Orders not choose one with smallest cost.
 Add option of choosing probability of ShaniString part to print.
-Override xml parser to add doc changed flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
-Add loops detection system for MergeOrder
 Move responses keys from config file to main file.
-Add option of compressing data files.
-
 
 SentenceMatcher:
-If two or more return blocks presents near each other return all posible cofigurations of matched sentence, not report error like now.
 Add option of matching sub sentence
-Add return value optional checking by regex/ShaniString.
-Add 'or' option to two or more elements.
 
 Orders to add:
 StorageOrder
@@ -49,6 +51,5 @@ AliasOrder: Set up aliases for other commands
 WikipediaOrder: Downloads wikipedia page and prints its content(Base description + Contests and allows also to print their content)
 
 To update:
-Finish weather order.
 Let NumberFilter parse queries like "dwatysi¹ce" (no " " beetwen number parts)
 </old>

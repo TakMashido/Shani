@@ -32,7 +32,7 @@ public class MergeOrder extends TextOrder {
 		var matcher=command.getMatcher().apply(connectKey);
 		//System.out.println("a");
 		short cost=matcher.getMatchedCost();
-		if(cost< Config.sentenseCompareTreshold) {
+		if(cost< Config.sentenceCompareThreshold) {
 			var unMatched=matcher.getUnmatched();
 			var executable=Engine.getExecutable(new Intend(unMatched));
 			if(Engine.getLastExecuted()!=null&&executable!=null) {
@@ -70,7 +70,7 @@ public class MergeOrder extends TextOrder {
 			else System.out.println(cantConnectMessage);
 			newO.execute();
 			
-			return false;				//Always returns false to prevent from connectiong order to this order
+			return false;				//Always returns false to prevent from connecting order to this order
 		}
 	}
 }

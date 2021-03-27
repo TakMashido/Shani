@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class SentenceMatcherOrder extends TextOrder{
-	/**{@link SentenceMatcher} used by this SenteseMatcherOrder for matching input sentences.
+	/**{@link SentenceMatcher} used by this SentenceMatcherOrder for matching input sentences.
 	 */
 	protected SentenceMatcher matcher;
 	
@@ -18,20 +18,15 @@ public abstract class SentenceMatcherOrder extends TextOrder{
 		matcher=new SentenceMatcher(e.getElementsByTagName("sentence").item(0));
 	}
 	
-	/**Override to do some initializations in your module.
-	 * @return If successfully initialized.
-	 */
-	protected boolean initialize(Element e) {return true;}
-	
 	@Override
 	public List<Executable> getExecutables(ShaniString command) {
-		var resoults=matcher.process(command);
+		var results=matcher.process(command);
 		ArrayList<Executable> Return=new ArrayList<>();
 		
-		for(var resoult:resoults) {
-			for(var action:actionFactoryList(resoult.getName(),resoult.data)) {
-				action.init(resoult.getName(),resoult.data);
-				Return.add(action.getExecutable(resoult.getCost(),resoult.getImportanceBias()));
+		for(var result:results) {
+			for(var action:actionFactoryList(result.getName(),result.data)) {
+				action.init(result.getName(),result.data);
+				Return.add(action.getExecutable(result.getCost(),result.getImportanceBias()));
 			}
 		}
 		

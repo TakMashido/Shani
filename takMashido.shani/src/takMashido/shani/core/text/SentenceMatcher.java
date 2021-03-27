@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * You can specify "name" attribute in it for further recognizing which sentence given best match.
  * 
  * It's text content contain words representing Sentence Elements with additional special characters at from of each word to choose their type. Following word is name of sentence element.
- * $ means ShaniString. It'll perform normal ShaniStrig Matching with this element.
+ * $ means ShaniString. It'll perform normal ShaniString Matching with this element.
  * ? means return value. It'll store corresponding value from processed String in HashMap under given keyword.
  * ^ means regex. It'll try to match content with regex, works only for single words, additionally puts it's matched word into dataReturn HashMap.
  * * means optional match. Matching is with and without that element and better match is chosen.  
@@ -109,14 +109,14 @@ public class SentenceMatcher {
 	
 	/**Process given String.
 	 * @param string String in which engine search for matches.
-	 * @return Array of {@code Sentenceresult} object representing results of successful matching.
+	 * @return Array of {@code SentenceResult} object representing results of successful matching.
 	 */
 	public SentenceResult[] process(String string) {
 		return process(new ShaniString(string,false));
 	}
 	/**Process given ShaniString.
 	 * @param string {@code ShaniString} in which engine searches for matches.
-	 * @return Array of {@link #SentenceResult} object containing all matched sentences.
+	 * @return Array of {@link SentenceResult} object containing all matched sentences.
 	 */
 	public synchronized SentenceResult[] process(ShaniString string) {
 		var str=string.split(false);
@@ -124,7 +124,7 @@ public class SentenceMatcher {
 		ArrayList<SentenceResult> Return=new ArrayList<>();
 		for(Sentence sen:sentences) {
 			SentenceResult sr=sen.process(str);
-			if(sr!=null&&sr.cost<Config.sentenseCompareTreshold)Return.add(sr);
+			if(sr!=null&&sr.cost<Config.sentenceCompareThreshold)Return.add(sr);
 		}
 		
 		return Return.toArray(new SentenceResult[Return.size()]);
@@ -139,7 +139,7 @@ public class SentenceMatcher {
 		short minCost=Short.MAX_VALUE;
 		
 		for(var res:results) {
-			if(res!=null&&res.cost<Config.sentenseCompareTreshold) {
+			if(res!=null&&res.cost<Config.sentenceCompareThreshold) {
 				short tmpCost=res.getCombinedCost();
 				if(tmpCost<minCost) {
 					minCost=tmpCost;
@@ -159,7 +159,7 @@ public class SentenceMatcher {
 		short minCost=Short.MAX_VALUE;
 		
 		for(var res:results) {
-			if(res!=null&&res.cost<Config.sentenseCompareTreshold) {
+			if(res!=null&&res.cost<Config.sentenceCompareThreshold) {
 				short tmpCost=res.getCombinedCost();
 				if(tmpCost<minCost) {
 					minCost=tmpCost;
@@ -375,7 +375,7 @@ public class SentenceMatcher {
 			case AnyOrderGroup:
 				return new Pair<>(new AnyOrderGroup(parts, token),true);
 			default:
-				assert false:"Unknow token type encountered";
+				assert false:"Unknown token type encountered";
 			}
 			
 			return null;
@@ -390,7 +390,7 @@ public class SentenceMatcher {
 			int minIndex=-1;
 			short minCost=Short.MAX_VALUE;
 			for(int i=0;i<str.length;i++) {
-				if(Return[i].cost<Config.sentenseCompareTreshold) {
+				if(Return[i].cost<Config.sentenceCompareThreshold) {
 					short tmpCost=Return[i].getCombinedCost();
 					if(tmpCost<minCost) {
 						minCost=tmpCost;
@@ -454,13 +454,13 @@ public class SentenceMatcher {
 			
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
-				SentenceResult skippedresult=result.makeCopy();
+				SentenceResult skippedResult=result.makeCopy();
 				if(nextElement!=null)
-					nextElement.process(skippedresult, str, strIndex);
+					nextElement.process(skippedResult, str, strIndex);
 				
 				optionalElement.process(result, str, strIndex);
 				
-				result.setIfBetter(skippedresult);
+				result.setIfBetter(skippedResult);
 			}
 			
 			@Override
@@ -479,7 +479,7 @@ public class SentenceMatcher {
 			
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
-				assert !(nextElement instanceof DataReturnElement):"Two data return elements shouldn't apper next to each other.";
+				assert !(nextElement instanceof DataReturnElement):"Two data return elements shouldn't appear next to each other.";
 				
 				SentenceResult retresult=null;
 				int minIndex=-1;
@@ -492,7 +492,7 @@ public class SentenceMatcher {
 						var tempresult=result.makeCopy();
 						processNext(tempresult,str,i);
 						
-						if(tempresult.cost>=Config.sentenseCompareTreshold)continue;
+						if(tempresult.cost>=Config.sentenceCompareThreshold)continue;
 						short tempCost=tempresult.getCombinedCost();
 						
 						if(tempCost<minCost) {
@@ -513,12 +513,12 @@ public class SentenceMatcher {
 					result.data.put(returnKey, strBuf.toString());
 					result.importanceBias+=Config.sentenceMatcherWordReturnImportanceBias*(minIndex-strIndex);
 				} else
-					result.cost+=Config.sentenseCompareTreshold;				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later  
+					result.cost+=Config.sentenceCompareThreshold;				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later
 			}
 			
 			@Override
 			protected void getInsertionCost(SentenceResult result) {
-				result.cost+=Config.sentenseCompareTreshold;
+				result.cost+=Config.sentenceCompareThreshold;
 			}
 			
 			@Override
@@ -553,7 +553,7 @@ public class SentenceMatcher {
 				
 				for(int i=0;i<value.length;i++) {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
-					if(ret.cost<Config.wordCompareTreshold) {
+					if(ret.cost<Config.wordCompareThreshold) {
 						sr[i]=result.makeCopy();
 						sr[i].cost+=ret.cost;
 						processNext(sr[i],str,ret.endIndex);						//TODO do not check same sentenceIndex and String index multiple times. Store it somewhere.
@@ -563,7 +563,7 @@ public class SentenceMatcher {
 				int minIndex=-1;
 				short minCost=Short.MAX_VALUE;
 				for(int i=0;i<value.length;i++) {
-					if(sr[i]!=null&&sr[i].cost<Config.sentenseCompareTreshold) {
+					if(sr[i]!=null&&sr[i].cost<Config.sentenceCompareThreshold) {
 						short tmpCost=sr[i].getCombinedCost();
 						if(tmpCost<minCost) {
 							minCost=tmpCost;
@@ -574,7 +574,7 @@ public class SentenceMatcher {
 				
 				if(minIndex==-1) {
 					result.cost+=Config.wordInsertionCost;
-					if(result.cost<Config.sentenseCompareTreshold)
+					if(result.cost<Config.sentenceCompareThreshold)
 						processNext(result, str, strIndex);
 					return;
 				}
@@ -719,13 +719,13 @@ public class SentenceMatcher {
 			
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
-				if(result.cost>Config.sentenseCompareTreshold)
+				if(result.cost>Config.sentenceCompareThreshold)
 					return;
 				
 				if(treeLevel<optionalElements.length) {
 					SentenceResult[] sr=new SentenceResult[optionalElements.length];
 					SentenceResult[] srInsertion=null;
-					if(Config.wordInsertionCost<Config.sentenseCompareTreshold)
+					if(Config.wordInsertionCost<Config.sentenceCompareThreshold)
 						srInsertion=new SentenceResult[optionalElements.length];
 					
 					treeLevel++; 
@@ -733,7 +733,7 @@ public class SentenceMatcher {
 						if(!usedElements[i]) {
 							usedElements[i]=true;
 							
-							if(Config.wordInsertionCost<Config.sentenseCompareTreshold) {
+							if(Config.wordInsertionCost<Config.sentenceCompareThreshold) {
 								srInsertion[i]=result.makeCopy();
 								srInsertion[i].cost+=Config.wordInsertionCost;
 								process(srInsertion[i], str, strIndex);
@@ -746,9 +746,9 @@ public class SentenceMatcher {
 					treeLevel--;
 					
 					SentenceResult best=getBestMatch(sr);
-					if(Config.wordInsertionCost<Config.sentenseCompareTreshold) {
+					if(Config.wordInsertionCost<Config.sentenceCompareThreshold) {
 						SentenceResult best2=getBestMatch(srInsertion);
-						if(best2!=null&&best2.cost<Config.sentenseCompareTreshold&&best2.getCombinedCost()<best.getCombinedCost())
+						if(best2!=null&&best2.cost<Config.sentenceCompareThreshold &&best2.getCombinedCost()<best.getCombinedCost())
 							best=best2;
 					}
 					
@@ -772,7 +772,7 @@ public class SentenceMatcher {
 						for(int i=0;i<usedElements.length;i++) {
 							if(!usedElements[i]) {
 								optionalElements[i].getInsertionCost(result);
-								if(result.getCost()>Config.sentenseCompareTreshold) {
+								if(result.getCost()>Config.sentenceCompareThreshold) {
 									return;
 								}
 							}
@@ -790,7 +790,7 @@ public class SentenceMatcher {
 	
 	/**Object containing result of matching ShaniString by SentenceMatcher.*/
 	public static class SentenceResult{
-		/**Map containing words mached into sentence elements.*/
+		/**Map containing words matched into sentence elements.*/
 		public final HashMap<String,String> data=new HashMap<String,String>();
 		protected short cost;
 		protected short importanceBias;
@@ -815,7 +815,7 @@ public class SentenceMatcher {
 			return copy;
 		}
 		protected void set(SentenceResult sr) {
-			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
+			assert name==null?sr.name==null:name.equals(sr.name):"Probably trying to set values from very different element";
 			
 			if(sr==this)return;
 			
@@ -825,11 +825,11 @@ public class SentenceMatcher {
 			data.putAll(sr.data);
 		}
 		protected void setIfBetter(SentenceResult sr) {
-			if(sr.cost>=Config.sentenseCompareTreshold) {
-				if(cost<Config.sentenseCompareTreshold) {
+			if(sr.cost>=Config.sentenceCompareThreshold) {
+				if(cost<Config.sentenceCompareThreshold) {
 					return;
 				}
-			} else if(cost>=Config.sentenseCompareTreshold) {
+			} else if(cost>=Config.sentenceCompareThreshold) {
 				set(sr);
 				return;
 			}
@@ -839,7 +839,7 @@ public class SentenceMatcher {
 		}
 		
 		protected void add(SentenceResult sr) {
-			assert name==null?sr.name==null:name.equals(sr.name):"Propably trying to set values from very diffrend element";
+			assert name==null?sr.name==null:name.equals(sr.name):"Probably trying to set values from very diffrend element";
 			this.cost+=sr.cost;
 			this.importanceBias+=sr.importanceBias;
 			data.putAll(sr.data);

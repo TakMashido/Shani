@@ -22,11 +22,11 @@ public class ShaniCore {
 
     /**Current value of SentenceCompareThreshold.*/
     public static short getSentenceCompareThreshold(){
-        return Config.sentenseCompareTreshold;
+        return Config.sentenceCompareThreshold;
     }
     /**Current value of WordCompareThreshold.*/
     public static short getWordCompareThreshold(){
-        return Config.wordCompareTreshold;
+        return Config.wordCompareThreshold;
     }
 
     /** @see Engine#isInputPositive(ShaniString)*/
@@ -56,7 +56,7 @@ public class ShaniCore {
      * @return If license confirmed.
      */
     public static boolean getLicenseConfirmation(String name, boolean printConfirmationMessage, boolean informNotConfirmed) {
-        var ret= Engine.getLicenseConfirmation(name,true);
+        var ret= Engine.getLicenseConfirmation(name,printConfirmationMessage);
 
         if(!ret&&informNotConfirmed)
             Engine.licensesNotConfirmedMessage.printOut();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <shani>
     <version>v1</version>
-    <inputFilters>
+    <intendFilters>
         <filter classname="takMashido.shaniModules.inputFilters.NumberFilter">
             <_1000000000>miliard</_1000000000>
             <_1000000>milion</_1000000>
@@ -47,7 +47,7 @@
             <please>proszę*uprzejmie proszę</please>
             <faster>natychmiast*ale już*w tym momencie*szybko</faster>
         </filter>
-    </inputFilters>
+    </intendFilters>
     <orders>
         <order classname="takMashido.shaniModules.orders.WeatherOrder">
 
@@ -175,7 +175,7 @@
             <keywords>przetłumacz*co znaczy*jak jest*tłumacz</keywords>
             <maxLineSize>70</maxLineSize>
             <translationSuccessMessage>Znalazłam następujące tłumaczenia:*Oto tłumaczenie:*Słowo %s znaczy:</translationSuccessMessage>
-            <translationUnsuccessMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessMessage>
+            <translationUnsuccessfulMessage>Nie znalazłam żadnych tłumaczeń.*Nie wiem jak przetłumaczyć %s.*Nie znam słowa %s.</translationUnsuccessfulMessage>
             <connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
             <connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
         </order>
@@ -210,7 +210,7 @@
             <endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>
         </order>
     </orders>
-    <IntendGetters>
+    <intendGetters>
         <getter classname="takMashido.shaniModules.intendGetters.StdinGetter"/>
-    </IntendGetters>
+    </intendGetters>
 </shani>

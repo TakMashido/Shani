@@ -253,7 +253,7 @@ public class Engine {
 						} catch (Exception ex) {
 							ex.printStackTrace();
 
-							commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms. Error ocured.");
+							commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms. Error occurred.");
 
 							errorMessage.printOut();
 						}
@@ -379,10 +379,10 @@ public class Engine {
 	 * */
 	private static void parseModules(Document doc, ClassLoader loader){
 		readModules(doc,"static","Static",loader,true);
-		inputFilters.addAll(readModules(doc,"inputFilters","Input filter",loader,false));
+		inputFilters.addAll(readModules(doc,"intendFilters","Intend filter",loader,false));
 		orders.addAll(readModules(doc,"orders","Order",loader,false));
 
-		List<IntendGetter> getters=readModules(doc,"IntendGetters","Intend getter",loader,false);
+		List<IntendGetter> getters=readModules(doc,"intendGetters","Intend getter",loader,false);
 		for(IntendGetter getterTemplate:getters){
 			Thread getter=new Thread(inputGetters,getterTemplate,getterTemplate.getterName);
 			getter.setDaemon(true);
@@ -500,8 +500,8 @@ public class Engine {
 
 		Executable toExec=getExecutable(intend);
 
-		if(toExec!=null&&toExec.cost<=Config.sentenseCompareTreshold) {
-			info.println("<Execution><Excution><Execution><Execution>");
+		if(toExec!=null&&toExec.cost<=Config.sentenceCompareThreshold) {
+			info.println("<Execution><Execution><Execution><Execution>");
 			toExec.execute();
 			info.println("<End><End><End><End><End><End><End><End><End>");
 			lastExecutionTime=System.currentTimeMillis();
@@ -528,7 +528,7 @@ public class Engine {
 			for(Executable exec:execs) {
 				info.println("\t"+exec.action.getClass().toString()+" "+exec.cost+":"+exec.importanceBias);
 				
-				if(exec.cost>Config.sentenseCompareTreshold)
+				if(exec.cost>Config.sentenceCompareThreshold)
 					continue;
 				
 				short cost=(short)(exec.cost-exec.importanceBias*Config.importanceBiasMultiplier);
@@ -570,7 +570,7 @@ public class Engine {
 
 	/**Checks if user confirmed given license.
 	 * @param name Name of license which confirmation are being checked.
-	 * @param displayConfirmation If ask user for confirmation if not already getted.
+	 * @param displayConfirmation If ask user for confirmation if not already got.
 	 * @return If license confirmed.
 	 */
 	public static boolean getLicenseConfirmation(String name,boolean displayConfirmation) {
@@ -587,8 +587,8 @@ public class Engine {
 		return confirmed2;
 	}
 	/**Checks if input is positive response.
-	 * Return true for positive/agreeding one (yes,youp),
-	 * false for negative/unagriding (no,nope),
+	 * Return true for positive/agreeing one (yes,yup),
+	 * false for negative/disagreeing (no,nope),
 	 * or false for unrecognized one.
 	 * Actual positive/negative pattern depends on value stored in config file(TODO move to mainFile)
 	 * @param input ShaniString to check if is positive response.
@@ -596,8 +596,8 @@ public class Engine {
 	 */
 	public static Boolean isInputPositive(ShaniString input) {
 		if(input.isEmpty())return null;
-		if(Config.positiveResponeKey.equals(input))return true;
-		if(Config.negativeResponeKey.equals(input))return false;
+		if(Config.positiveResponseKey.equals(input))return true;
+		if(Config.negativeResponseKey.equals(input))return false;
 		return null;
 	}
 

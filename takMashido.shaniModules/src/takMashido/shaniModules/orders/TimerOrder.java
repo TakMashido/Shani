@@ -1,18 +1,17 @@
 package takMashido.shaniModules.orders;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import takMashido.shani.core.ShaniCore;
-import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.core.Storage;
+import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.SentenceMatcherOrder;
 import takMashido.shani.tools.parsers.TimeParser;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class TimerOrder extends SentenceMatcherOrder{
 	private ShaniString startMessage;                                          
@@ -91,7 +90,7 @@ public class TimerOrder extends SentenceMatcherOrder{
 		
 		private int timeCounted;						//In sec
 		private boolean isRunning;
-		private long lastTimeMeansure;					//currentTimeMillis					
+		private long lastTimeMeasure;					//currentTimeMillis
 		
 		private TimerAction(Element e) {
 			targetFile=e;
@@ -135,19 +134,14 @@ public class TimerOrder extends SentenceMatcherOrder{
 			return true;
 		}
 		
-		@SuppressWarnings("unused")						//Used using java reflecion API
-		private void start() {
-			start(true);
-		}
 		private void start(boolean echo) {
 			if(!isRunning) {
 				isRunning=true;
-				lastTimeMeansure=System.currentTimeMillis();
+				lastTimeMeasure =System.currentTimeMillis();
 				if(echo)System.out.printf(startMessage.toString(),keyword.toString());
 			}else if(echo)System.out.printf(alreadyRunningMessage.toString(),keyword.toString());
 			if(echo)System.out.println();
 		}
-		@SuppressWarnings("unused")						//Used using java reflecion API
 		private void stop() {
 			if(isRunning) {
 				updateTime();
@@ -156,14 +150,12 @@ public class TimerOrder extends SentenceMatcherOrder{
 			} else System.out.printf(alreadyStoppedMessage.toString(),keyword.toString());
 			System.out.println();
 		}
-		@SuppressWarnings("unused")						//Used using java reflecion API
 		private void reset() {
 			timeCounted=0;
 			isRunning=false;
 			System.out.printf(resetMessage.toString(),keyword.toString());
 			System.out.println();
 		}
-		@SuppressWarnings("unused")						//Used using java reflecion API
 		private void show() {
 			updateTime();
 			System.out.printf(printTimeMessage.toString(), TimeParser.parseTime(timeCounted));
@@ -173,8 +165,8 @@ public class TimerOrder extends SentenceMatcherOrder{
 		private void updateTime() {
 			if(!isRunning)return;
 			long time=System.currentTimeMillis();
-			timeCounted+=(time-lastTimeMeansure)/1000;
-			lastTimeMeansure=time;
+			timeCounted+=(time- lastTimeMeasure)/1000;
+			lastTimeMeasure =time;
 		}
 		private void save() {
 			updateTime();
@@ -215,7 +207,7 @@ public class TimerOrder extends SentenceMatcherOrder{
 				System.out.println();
 				break;
 			default:
-				System.err.println("Unknow sentence name in NoTimerAction: "+sentenceName);
+				System.err.println("Unknown sentence name in NoTimerAction: "+sentenceName);
 				ShaniCore.errorMessage.printOut();
 				return false;
 			}

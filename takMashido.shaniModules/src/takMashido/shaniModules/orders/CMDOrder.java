@@ -70,9 +70,9 @@ public class CMDOrder extends KeywordOrder{
 			
 			proc.waitFor();
 			endCMDSessionMessage.printOut();
-		} catch (IOException e) {							//Shoudn't occur
-			assert false:"Failed to launch cmd. It's propably missing.";
-			System.err.println("Failed to launch cmd.  It's propably missing.");
+		} catch (IOException e) {							//Shouldn't occur
+			assert false:"Failed to launch cmd. It's probably missing.";
+			System.err.println("Failed to launch cmd.  It's probably missing.");
 			System.out.println("Failed to launch cmd. Shani can't find it");
 			e.printStackTrace();
 		} catch (InterruptedException e) {}
@@ -108,6 +108,7 @@ public class CMDOrder extends KeywordOrder{
 			processCommand(unmatched.toFullString());
 			return true;
 		}
+		@Override
 		public boolean connectAction(String action) {
 			if(mergedAction==null) {
 				mergedAction=new MergedCMDAction(unmatched);

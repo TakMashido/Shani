@@ -1,23 +1,22 @@
 package takMashido.shaniModules.orders;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import takMashido.shani.core.ShaniCore;
+import takMashido.shani.core.text.ShaniString;
+import takMashido.shani.orders.KeywordOrder;
+
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import takMashido.shani.core.ShaniCore;
-import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.KeywordOrder;
-
 public class TranslateOrder extends KeywordOrder{
 	private int maxLineSize;
 	private ShaniString translationSuccessMessage;
-	private ShaniString translationUnsuccessMessage;
+	private ShaniString translationUnsuccessfulMessage;
 	
 	private ShaniString connectionTimeoutMessage;
 	private ShaniString connectionFailedMessage;
@@ -27,14 +26,16 @@ public class TranslateOrder extends KeywordOrder{
 		
 		maxLineSize=Integer.parseInt(ShaniString.loadString(e,"maxLineSize").toString());
 		translationSuccessMessage=ShaniString.loadString(e, "translationSuccessMessage");
-		translationUnsuccessMessage=ShaniString.loadString(e,"translationUnsuccessMessage");
+		translationUnsuccessfulMessage =ShaniString.loadString(e,"translationUnsuccessfulMessage");
 		
 		connectionTimeoutMessage=ShaniString.loadString(e,"connectionTimeoutMessage");
 		connectionFailedMessage=ShaniString.loadString(e,"connectionFailedMessage");
 	}
 	
+	@Override
 	public KeywordAction actionFactory(org.w3c.dom.Element element) {return null;}
 	
+	@Override
 	public UnmatchedAction getUnmatchedAction() {
 		return new TranslationAction();
 	}
@@ -59,7 +60,7 @@ public class TranslateOrder extends KeywordOrder{
 				System.out.printf(translationSuccessMessage.toString(),unmatched.toString());
 				System.out.println();
 			} else {
-				System.out.printf(translationUnsuccessMessage.toString(),unmatched.toString());
+				System.out.printf(translationUnsuccessfulMessage.toString(),unmatched.toString());
 				System.out.println();
 				return true;
 			}
