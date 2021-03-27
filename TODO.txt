@@ -9,8 +9,6 @@ Fix all typos in code
 </refactor>
 
 <minor>
-Logging deletes all previously existing files. Fix it.
-log string comparing data in ShaniString and SentenceMatcher
 </minor>
 
 <major>

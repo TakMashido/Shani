@@ -101,14 +101,14 @@ public class Logger {
 		if(ret==null){
 			try {
 				if(buffer)
-					ret=new PrintStream(new BufferedOutputStream(new FileOutputStream(logFile)));
+					ret=new PrintStream(new BufferedOutputStream(new FileOutputStream(logFile,true)));
 				else
-					ret=new PrintStream(new FileOutputStream(logFile));
+					ret=new PrintStream(new FileOutputStream(logFile,true));
 				
 				if(streamOpenMessage!=null)
 					ret.println(streamOpenMessage);
 			} catch (FileNotFoundException e) {
-				String errorMessage="File was checked for creation but somehow managed to go in there.";
+				String errorMessage="File was checked for creation but code somehow managed to go in there.";
 				assert false:errorMessage;
 				
 				System.err.println(errorMessage);
