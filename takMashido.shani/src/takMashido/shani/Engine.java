@@ -60,7 +60,16 @@ public class Engine {
 	
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
-
+	
+	public static void staticInit(Element e){
+		helloMessage = ShaniString.loadString(e, "helloMessage");
+		closeMessage = ShaniString.loadString(e, "closeMessage");
+		notUnderstandMessage = ShaniString.loadString(e, "notUnderstandMessage");
+		errorMessage = ShaniString.loadString(e, "errorMessage");
+		licenseConfirmationMessage = ShaniString.loadString(e, "licenseConfirmationMessage");
+		licensesNotConfirmedMessage = ShaniString.loadString(e, "licensesNotConfirmedMessage");
+	}
+	
 	/**Freshly registered intends.*/
 	private static BlockingQueue<Intend> intends=new LinkedBlockingQueue<>();
 	/**Filtered intends ready to execution or to give to currently executed order as data.*/
@@ -171,8 +180,13 @@ public class Engine {
 		commands.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<startup>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");				//Make startup place visible inside commands file
 		commands.println();
 		
-		try {
-			parseMainFile();
+		try {							//Load main init file
+			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Engine.class.getResourceAsStream("/takMashido/shani/files/init/" + Config.language + ".xml"));
+			doc.getDocumentElement().normalize();
+			
+			parseModules(doc,Engine.class.getClassLoader());				//Master modules
+			
+			loadExtension(Engine.class.getClassLoader());					//Any other compiled together with shani engine
 		} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException | SecurityException | DOMException e) {
 			System.out.println("Failed to parse main data file");
 			e.printStackTrace();
@@ -266,25 +280,6 @@ public class Engine {
 		shaniInterpreter.setDaemon(false);
 		shaniInterpreter.start();
 
-	}
-	
-	/**Load core information from file in shani core jar*/
-	private static void parseMainFile() throws SAXException, IOException, ParserConfigurationException {
-		doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Engine.class.getResourceAsStream("/takMashido/shani/files/init/" + Config.language + ".xml"));
-		doc.getDocumentElement().normalize();
-		
-		Node engineNode = doc.getElementsByTagName("engine").item(0);
-		
-		helloMessage = ShaniString.loadString(engineNode, "helloMessage");
-		closeMessage = ShaniString.loadString(engineNode, "closeMessage");
-		notUnderstandMessage = ShaniString.loadString(engineNode, "notUnderstandMessage");
-		errorMessage = ShaniString.loadString(engineNode, "errorMessage");
-		licenseConfirmationMessage = ShaniString.loadString(engineNode, "licenseConfirmationMessage");
-		licensesNotConfirmedMessage = ShaniString.loadString(engineNode, "licensesNotConfirmedMessage");
-		
-		parseModules(doc,Engine.class.getClassLoader());				//Master modules
-		
-		loadExtension(Engine.class.getClassLoader());					//Any other compiled together with shani engine
 	}
 	
 	/**

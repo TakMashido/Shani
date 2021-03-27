@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <shani>
 	<version>v1</version>
-	<engine>
-		<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
-		<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
-		<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
-		<loadingErrorMessage>Wystąpił błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
-		<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
-		<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
-		<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
-	</engine>
 	<orders>
 		<order classname="takMashido.shani.orders.core.MasterOrder">
 			<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
@@ -94,5 +85,14 @@
 				<tag let="ź" rep="z"/>
 			</nationalSimilar>
 		</ShaniString>
+		<Engine classname="takMashido.shani.Engine">
+			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
+			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
+			<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+			<loadingErrorMessage>Wystąpił błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
+			<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
+			<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
+			<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
+		</Engine>
 	</static>
 </shani>

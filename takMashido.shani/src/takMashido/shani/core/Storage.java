@@ -95,7 +95,7 @@ public class Storage {
 			previousNode = ((Document) where).getDocumentElement();
 			if(!previousNode.getNodeName().equals(scanner.next())){
 				if(createNodes)
-					System.err.println("Creation on another root node ion Document is not supported.");
+					System.err.println("Creation of another root node in Document is not permitted.");
 				return null;
 			}
 		}else
@@ -229,12 +229,18 @@ public class Storage {
 			
 			shaniDataNode=doc.getElementsByTagName("shaniData").item(0);
 			storageNode=((Element)shaniDataNode).getElementsByTagName("storage").item(0);
-			userDataNode=((Element)shaniDataNode).getElementsByTagName("userdata").item(0);
-			ordersDataNode=((Element)shaniDataNode).getElementsByTagName("ordersdata").item(0);
+			userDataNode=((Element)storageNode).getElementsByTagName("userdata").item(0);
+			ordersDataNode=((Element)shaniDataNode).getElementsByTagName("ordersData").item(0);
 		} catch (SAXException | IOException | ParserConfigurationException e) {
 			e.printStackTrace();
 			Engine.registerLoadException();
 		}
+		
+		assert doc!=null:"ShaniData doc can't be load.";
+		assert shaniDataNode!=null:"shaniData node from data doc can't be load.";
+		assert storageNode!=null:"storage node from data doc can't be load.";
+		assert userDataNode!=null:"userData node from data doc can't be load.";
+		assert ordersDataNode!=null:"ordersData node from data doc can't be load.";
 		
 		shaniDataDoc=doc;
 		shaniData=shaniDataNode;
