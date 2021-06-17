@@ -147,11 +147,9 @@ public class ShaniString implements IntendBase {
 			for(String str:origin)processString(str,buf);
 			value=buf.toArray(new String[] {});
 		} else {
-			StringBuffer data=new StringBuffer();
-			for(String str:origin) {
-				data.append(' ').append(str);
-			}
-			value=new String[] {data.toString()};
+			value=new String[origin.length];
+			for(int i=0;i<value.length;i++)
+				value[i]=origin[i].strip();
 		}
 	}
 	/**Load ShaniString from xml node. Any change done to this object will also be pushed to given node.
@@ -187,7 +185,7 @@ public class ShaniString implements IntendBase {
 		@SuppressWarnings("resource")
 		Scanner in=new Scanner(str).useDelimiter(stringDivider);
 		
-		while(in.hasNext())out.add(in.next());
+		while(in.hasNext())out.add(in.next().strip());
 		
 		return out;
 	}
