@@ -39,7 +39,7 @@ public class ArgsDecoder {
 	 */
 	public String getString(String... flag) {
 		int index=getFlagIndex(flag);
-		if(index==-1||++index==args.length||used[index])return "";
+		if(index==-1||++index==args.length||used[index])return null;
 		used[index]=true;
 		return args[index];
 	}
@@ -49,7 +49,7 @@ public class ArgsDecoder {
 	 */
 	public Integer getInt(String...flag) {
 		String val=getString(flag);
-		if(val.equals(""))return null;
+		if(val==null)return null;
 		return Integer.parseInt(val);
 	}
 	/**Gets float value marked with specyfic flag.
@@ -58,7 +58,7 @@ public class ArgsDecoder {
 	 */
 	public Float getFloat(String...flag) {
 		String val=getString(flag);
-		if(val.equals(""))return null;
+		if(val==null)return null;
 		return Float.parseFloat(val);
 	}
 	/**Check if given args have specyfic flag included.

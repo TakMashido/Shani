@@ -94,4 +94,9 @@ public class ShaniCore {
 
         return null;
     }
+    
+    /**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out*/
+    public static void registerLoadException() {
+        Engine.registerLoadException();
+    }
 }

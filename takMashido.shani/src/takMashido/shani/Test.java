@@ -1,18 +1,17 @@
 package takMashido.shani;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
+import takMashido.shani.core.Launcher;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.SentenceMatcher;
 import takMashido.shani.core.text.ShaniString;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 
 public class Test {
 	public static final String passed="OK";
@@ -22,6 +21,8 @@ public class Test {
 	public static void main(String[]args) throws SAXException, IOException, ParserConfigurationException {
 		int globalErrors=0;
 		int errors=0;
+		
+		Launcher.run(args);
 		
 		if(false) {
 			errors=shaniStringComparingTest();
@@ -41,7 +42,7 @@ public class Test {
 		System.out.println("Testing single word ShaniString comapritions...");
 		int errors=0;
 		
-		Engine.initialize(new String[] {"-d"});
+		Launcher.run(new String[] {"-d"});
 		
 		var str=new ShaniString("w��cz");
 		
