@@ -3,7 +3,7 @@ package takMashido.shani.orders;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import takMashido.shani.Config;
+import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;

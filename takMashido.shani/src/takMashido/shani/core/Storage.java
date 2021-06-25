@@ -5,7 +5,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import takMashido.shani.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.Order;

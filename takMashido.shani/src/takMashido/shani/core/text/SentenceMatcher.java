@@ -2,7 +2,7 @@ package takMashido.shani.core.text;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import takMashido.shani.Config;
+import takMashido.shani.core.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.core.text.SentenceMatcher.Tokenizer.SentenceToken;
 import takMashido.shani.core.text.SentenceMatcher.Tokenizer.SentenceToken.Type;

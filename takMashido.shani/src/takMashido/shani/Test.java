@@ -2,6 +2,7 @@ package takMashido.shani;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import takMashido.shani.core.Config;
 import takMashido.shani.core.Launcher;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.SentenceMatcher;
@@ -86,7 +87,7 @@ public class Test {
 				"must kolege piotra ryb� hello world"};
 		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.differentCharacterCost,0,(short)(Config.nationalSimilarityCost)};
 		short[] importanceBias=new short[] {
-				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
+				(short) (Config.sentenceMatcherWordReturnImportanceBias+2* Config.sentenceMatcherRegexImportanceBias),
 				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
 				0,
 				Config.sentenceMatcherRegexImportanceBias,

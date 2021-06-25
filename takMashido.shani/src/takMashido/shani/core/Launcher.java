@@ -1,6 +1,5 @@
 package takMashido.shani.core;
 
-import takMashido.shani.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.libraries.ArgsDecoder;
 import takMashido.shani.libraries.Logger;
@@ -33,6 +32,18 @@ public class Launcher {
             args=argsList.toArray(new String[0]);
             argsDec=new ArgsDecoder(args);
             System.out.println("New args set. Running shani with it.");
+        }
+        
+        String property;                                                    //Parse all config overriding, args in form "--config key=value"
+        while((property=argsDec.getString("--config","-c"))!=null){
+            String[] prop=property.split("=");
+            
+            if(prop.length!=2){
+                System.err.println("\""+property+"\" is invalid config override. Should be in form \"key=value\"");
+                System.exit(0);
+            }
+            
+            argsOverride.put(prop[0],prop[1]);
         }
         
         try {                               //Setup Logger

@@ -23,6 +23,6 @@ public class Intend {
 
     @Override
     public String toString(){
-        return "intent: '"+rawValue+"':'"+value+'\'';
+        return "intend: '"+rawValue+"':'"+value+'\'';
     }
 }

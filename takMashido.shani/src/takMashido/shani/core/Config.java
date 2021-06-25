@@ -1,5 +1,6 @@
-package takMashido.shani;
+package takMashido.shani.core;
 
+import takMashido.shani.Engine;
 import takMashido.shani.core.text.ShaniString;
 
 import java.io.File;
@@ -89,6 +90,9 @@ public class Config {
 	
 	//<loaders><loaders><loaders><loaders><loaders><loaders><loaders><loaders><loaders>
 	private static final String getProperty(Properties props[], String key) {
+		if(Launcher.argsOverride.containsKey(key))
+			return Launcher.argsOverride.get(key);
+		
 		for(int i=0;i<props.length;i++) {
 			String val=props[i].getProperty(key);
 			if(val!=null)return val;
@@ -272,7 +276,7 @@ public class Config {
 	/*Characters cost*/
 	public static final byte differentCharacterCost;
 	public static final byte qwertyNeighbourCost;
-	public static final byte nationalSimilarityCost;						//a,�||c,�...
+	public static final byte nationalSimilarityCost;						//a,ą||c,ć||...
 	
 	/*Character matching costs*/
 	public static final short wordCompareThreshold;

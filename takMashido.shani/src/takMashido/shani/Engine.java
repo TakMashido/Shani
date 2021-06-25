@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import takMashido.shani.core.Config;
 import takMashido.shani.core.Intend;
 import takMashido.shani.core.IntendGetter;
 import takMashido.shani.core.ShaniCore;
@@ -447,7 +448,7 @@ public class Engine {
 			for(Executable exec:execs) {
 				info.println("\t"+exec.action.getClass().toString()+" "+exec.cost+":"+exec.importanceBias);
 				
-				if(exec.cost>Config.sentenceCompareThreshold)
+				if(exec.cost> Config.sentenceCompareThreshold)
 					continue;
 				
 				short cost=(short)(exec.cost-exec.importanceBias*Config.importanceBiasMultiplier);

@@ -1,6 +1,5 @@
 package takMashido.shani.core;
 
-import takMashido.shani.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.libraries.Logger;

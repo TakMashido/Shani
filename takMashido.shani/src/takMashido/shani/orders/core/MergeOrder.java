@@ -1,7 +1,7 @@
 package takMashido.shani.orders.core;
 
 import org.w3c.dom.Element;
-import takMashido.shani.Config;
+import takMashido.shani.core.Config;
 import takMashido.shani.Engine;
 import takMashido.shani.core.Intend;
 import takMashido.shani.core.text.ShaniString;
