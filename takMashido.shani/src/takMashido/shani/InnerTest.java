@@ -10,44 +10,49 @@ import takMashido.shani.core.text.ShaniString;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Test {
+public class InnerTest {
 	public static final String passed="OK";
 	public static final String notPassed="Failed";
 	
+	private InnerTest(){}
+	
 	@SuppressWarnings("unused")
 	public static void main(String[]args) throws SAXException, IOException, ParserConfigurationException {
+		Launcher.run(new String[] {"-d"});
+		
+		run();
+	}
+	
+	public static int run(){
 		int globalErrors=0;
 		int errors=0;
 		
-		Launcher.run(args);
+		System.out.println("Running ShaniString comparing test");
+		errors=shaniStringComparingTest();
+		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errros.":""));
+		globalErrors+=errors;
 		
-		if(false) {
-			errors=shaniStringComparingTest();
-			System.out.println("Test finished."+(errors!=0?" Found "+errors+" errros.":""));
-			globalErrors+=errors;
-		}
-		if(true) {
-			errors=sentenceMatcherTest();
-			System.out.println("Test finished."+(errors!=0?" Found "+errors+" errros.":""));
-			globalErrors+=errors;
-		}
+		System.out.println("Running SentenceMatcher test");
+		errors=sentenceMatcherTest();
+		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errros.":""));
+		globalErrors+=errors;
 		
 		System.out.println("\nAll tests finished"+(globalErrors!=0?". Found "+globalErrors+" errros.":" successfully - no errros found."));
+		
+		return globalErrors;
 	}
 	
 	public static int shaniStringComparingTest() {
 		System.out.println("Testing single word ShaniString comapritions...");
 		int errors=0;
 		
-		Launcher.run(new String[] {"-d"});
 		
-		var str=new ShaniString("w��cz");
+		var str=new ShaniString("włącz");
 		
-		String[] data=new String[]{"w��cz","�w�cz","lw�cz","w��cz"};
+		String[] data=new String[]{"włącz","łwącz","lwącz","wąłcz"};
 		short[] expected=new short[] {
 			0,
 			Config.characterSwapCost,
@@ -69,11 +74,18 @@ public class Test {
 		return errors;
 	}
 	
-	public static int sentenceMatcherTest() throws SAXException, IOException, ParserConfigurationException {
+	public static int sentenceMatcherTest(){
 		System.out.println("Testing sentence matcher...");
 		int errors=0;
 		
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml"));
+		Document doc = null;
+		try {
+			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InnerTest.class.getResourceAsStream("/takMashido/shani/files/test/innerTest.xml"));
+		} catch (SAXException|IOException|ParserConfigurationException e) {
+			System.out.println("Failed to load SentenceMatcher tests");
+			e.printStackTrace();
+			return 1;
+		}
 		doc.getDocumentElement().normalize();
 		
 		var matcher=new SentenceMatcher(Storage.getNode(doc, "tests.sentenceMatcher.test"));
@@ -83,8 +95,8 @@ public class Test {
 				"must work hog",
 				"temporayr sentence",
 				"hog sentente",
-				"witam pana genera�a pu�kownika",
-				"must kolege piotra ryb� hello world"};
+				"witam pana generała pułkownika",
+				"must kolege piotra rybę hello world"};
 		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.differentCharacterCost,0,(short)(Config.nationalSimilarityCost)};
 		short[] importanceBias=new short[] {
 				(short) (Config.sentenceMatcherWordReturnImportanceBias+2* Config.sentenceMatcherRegexImportanceBias),
@@ -100,8 +112,8 @@ public class Test {
 			{{"regex","must"},{"data","work"},{"regex2","hog"}},
 			{},
 			{{"regex2","hog"}},
-			{{"data","pu�kownika"}},
-			{{"regex","must"},{"data","piotra ryb�"}}
+			{{"data","pułkownika"}},
+			{{"regex","must"},{"data","piotra rybę"}}
 		};
 		
 		int length=data.length;
