@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Queue;
@@ -112,8 +113,11 @@ public class Config {
 	 * @return All found occurrences of given key in props objects.
 	 */
 	private static final String[] getAdditiveProperty(Properties[] props, String key){
-		//TODO add values from Launcher
 		ArrayList<String> ret=new ArrayList<>();
+		
+		if(Launcher.configOverride.containsKey(key)){
+			Collections.addAll(ret,split(Launcher.configOverride.get(key)));
+		}
 		
 		for(int i=0;i<props.length;i++) {
 			String val=props[i].getProperty(key);
