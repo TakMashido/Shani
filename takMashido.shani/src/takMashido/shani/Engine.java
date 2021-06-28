@@ -11,6 +11,7 @@ import takMashido.shani.core.Intend;
 import takMashido.shani.core.IntendGetter;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
+import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.filters.IntendFilter;
 import takMashido.shani.libraries.Logger;
@@ -60,6 +61,9 @@ public class Engine {
 	
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
+	
+	//Contain loaders of all loaded extensions.
+	private static ArrayList<ClassLoader> extensionLoaders =new ArrayList<>();
 	
 	public static void staticInit(Element e){
 		helloMessage = ShaniString.loadString(e, "helloMessage");
@@ -180,7 +184,10 @@ public class Engine {
 						long time = System.nanoTime();
 						try {
 							Executable exec = interpret(intend);
-
+							
+							if(Config.testMode)
+								Tests.testEnded(exec);
+							
 							if (exec == null) {
 								System.out.println(notUnderstandMessage);
 								commands.println("Can't execute");
@@ -196,15 +203,31 @@ public class Engine {
 
 							errorMessage.printOut();
 						}
+						
+						if(Config.testMode) {
+							if(!Tests.nextTest()){
+								Tests.printSummary();
+								Engine.exit();
+							}
+						}
 					}
-				} catch (InterruptedException ignored) {
-				}
+				} catch (InterruptedException ignored) {}
 			}
 		};
 		shaniInterpreter.setName("shaniInterpreter");
 		shaniInterpreter.setDaemon(false);
 		shaniInterpreter.start();
-
+		
+		if(Config.testMode) {
+			InnerTest.run();
+			
+			System.out.println("\n------------------------------");
+			Tests.addTests(extensionLoaders);
+			if(!Tests.nextTest()){
+				System.out.println("No end2end test run. You probably misconfigured something.");
+				Engine.exit();
+			}
+		}
 	}
 	
 	/**
@@ -251,7 +274,9 @@ public class Engine {
 	 * @param loader Loader to use to load extension
 	 */
 	private static void loadExtension(ClassLoader loader){
-		/**Finds possible init files directories using given class loader. Every directory with name starting with "init" is considered as init files location.
+		extensionLoaders.add(loader);
+		
+		/*Finds possible init files directories using given class loader. Every directory with name starting with "init" is considered as init files location.
 		 * @param l Class loader used to get resources directories.
 		 */
 		Function<ClassLoader,List<URL>> getPossibleLocations=(ClassLoader l)->{

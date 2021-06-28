@@ -3,6 +3,7 @@ module takMashido.shaniModules {
     requires org.jsoup;
     
     opens shani.coreInit;
+    opens shani.coreTests;
     
     exports takMashido.shaniModules.orders;
     exports takMashido.shaniModules.inputFilters;

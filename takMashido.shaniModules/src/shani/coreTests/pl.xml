@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<shaniTests>
+    <version>v1</version>
+
+    <end2end>
+        <test name="CalculateOrder.1">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="dodaj dwa do dwa"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <result type="double" val="4"/>
+            </responses>
+        </test>
+        <test name="CalculateOrder.2">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="ile jest 13*12 przez 6"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <result type="double" val="26"/>
+            </responses>
+        </test>
+        <test name="CalculateOrder.3">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="pomnórz 15 i 1.337"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <result type="double" val="20.055"/>
+            </responses>
+        </test>
+        <test name="CalculateOrder.4">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="ile jest 15*1.337"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <result type="double" val="20.055"/>
+            </responses>
+        </test>
+    </end2end>
+</shaniTests>

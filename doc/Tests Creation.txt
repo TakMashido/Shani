@@ -1,0 +1,47 @@
+Tests are described by XML document containing are necessary data to run it.
+It's located under classpath pointed by Config.testManifestLocation. Note that you have to add opens direcrive in module-info otherwise it will be not visible from shani module.
+By default it's shani/tests and shani/coreTests used by basic extension. You can add additional locations by adding config property pointng to them.
+
+It's basic structure is:
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<shaniTests>
+	<version>v1</version>
+
+	<end2end>																						//End to end test for whole interpretation pipeline
+		<test name="a">																				//Test node and *Name to print if error occurs.
+			<intend classname="takMashido.shani.core.text.ShaniString" val="Hello world"/>			//*Node used to create intend to call. Has to have classname atribute pointing to IntendBase class having constructor using XML Node as argument.
+			<responses>																				//Responses wchich you expect from running test
+				<actionClass val="takMashido.shani.ActionClass"/>									//*Class of expected action to validate if valid Action was executed
+				<key type="string" val="value"/>													//Other properties given by your Action to validate
+				<size type="int" val="10"/>
+				<length type="float" epsilon=".01" val="10.1"/>
+			</responses>
+		</test>
+		<test name="null_test">
+			<intend classname="takMashido.shani.core.text.ShaniString" val="It's junk"/>
+			<notExecution/>																			//Add instead of responses node if you do not want given Intend result in Action execution
+		</test>
+	</end2end>	
+</shaniTests>
+
+*(star) in comment means it's requaired if it's parent node exists.
+
+Obviously only one of <noExecution> and <responses> is requaired.
+
+Execution responses are provied by Action class. There are if form of pair of String key and Object being value.
+Decribing them in tests manifest look's like this:
+
+<key type="..." val="..."/>
+key if key/name of property
+type is one of boolean, integer, float, double, string. If not present string is assumed
+val contain string representation of value you want this property to have.
+For float and double you can also add epsilon="..." to change epsilon used for floating point comparing. By default it's .01 for float and .0001 for double.
+
+To provide this parameters during testing add call to Tests.addResults(String key,Object value) or Tests.addResults(String[] keys, Object[] values).
+
+After including your test manifest file and adding addResults calls in your Action run SHANI with "-c testMode=true" argument. or add ["-c","testMode=true"] Launcher.run(args) execution.
+
+After that all test manifest files pointed by Config.testManifestLocation from all modules will by run.
+Wchich means creationg instances of IntendBase from intend XML node, running it thru interpretation pipeline which in some point involves execution of Action and it's Tests.addResuts() pieces.
+After that results are checked and if any property from responses is not valid name of test and error description/s is printe to stdout. After all test amount of passed and failed is printed and Shani is closed.

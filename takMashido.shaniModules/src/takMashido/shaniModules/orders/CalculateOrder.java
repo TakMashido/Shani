@@ -1,13 +1,14 @@
 package takMashido.shaniModules.orders;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.w3c.dom.Element;
-
+import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
+import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.SentenceMatcherOrder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CalculateOrder extends SentenceMatcherOrder {
 	private static ShaniString calculationResoultMessage;
@@ -27,39 +28,42 @@ public class CalculateOrder extends SentenceMatcherOrder {
 	
 	public class CalculateAction extends SentenceMatcherAction{
 		@Override
+		@SuppressWarnings("ConstantConditions")							//Assert in case makes it not see success=false line and it thinks that it is always true
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			try {
-				switch(sentenceName) {
-				case "count":
-					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("count")));
-					return true;
-				case "power":
-					System.out.printf(calculationResoultMessage.toString(),Math.pow(calculate(returnValues.get("power1")), calculate(returnValues.get("power2"))));
-					return true;
-				case "multiply":
-					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("multiply1"))*calculate(returnValues.get("multiply2")));
-					return true;
-				case "divide":
-					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("divide1"))/calculate(returnValues.get("divide2")));
-					return true;
-				case "add":
-					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("add1"))+calculate(returnValues.get("add2")));
-					return true;
-				case "substract":
-					System.out.printf(calculationResoultMessage.toString(),calculate(returnValues.get("substract1"))-calculate(returnValues.get("substract2")));
-					return true;
-				default:
-					assert false:sentenceName+" is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";
-					System.err.println(sentenceName+" is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.");
+				boolean success=true;
+				double result=switch (sentenceName){
+					case "count" -> calculate(returnValues.get("count"));
+					case "power" ->Math.pow(calculate(returnValues.get("power1")), calculate(returnValues.get("power2")));
+					case "multiply" -> calculate(returnValues.get("multiply1"))*calculate(returnValues.get("multiply2"));
+					case "divide" -> calculate(returnValues.get("divide1"))/calculate(returnValues.get("divide2"));
+					case "add" -> calculate(returnValues.get("add1"))+calculate(returnValues.get("add2"));
+					case "substract" -> calculate(returnValues.get("substract1"))-calculate(returnValues.get("substract2"));
+					default -> {
+						assert false : sentenceName + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";
+						System.err.println(sentenceName + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.");
+						success = false;
+						yield 0;
+					}
+				};
+				
+				if(Config.testMode)
+					if(success)
+						Tests.addResults("result",result);
+					else
+						Tests.addResults("calculationFailed",true);
+				
+				if(success)
+					System.out.printf(calculationResoultMessage.toString(),result);
+				else
 					System.out.print(ShaniCore.errorMessage);
-					return false;
-				}
+				System.out.println();
+				
+				return success;
 			} catch (Exception e) {
 				System.out.print(calculationFailedMessage);
 				e.printStackTrace();
 				return false;
-			} finally {
-				System.out.println();
 			}
 		}
 	}

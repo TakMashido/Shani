@@ -79,6 +79,9 @@ public class Config {
 		HTTPProxyPort=getIntProperty(props,"HTTPProxyPort");
 		ignoreMissingPropertyErrors=false;
 		
+		testMode=getBooleanProperty(props,"testMode");
+		testManifestLocation=split(getAdditiveProperty(props, "testManifestLocation"));
+		
 		if(!errors.isEmpty()) {
 			Engine.registerLoadException();
 			System.err.println("Error during parsing config file:");
@@ -90,8 +93,8 @@ public class Config {
 	
 	//<loaders><loaders><loaders><loaders><loaders><loaders><loaders><loaders><loaders>
 	private static final String getProperty(Properties props[], String key) {
-		if(Launcher.argsOverride.containsKey(key))
-			return Launcher.argsOverride.get(key);
+		if(Launcher.configOverride.containsKey(key))
+			return Launcher.configOverride.get(key);
 		
 		for(int i=0;i<props.length;i++) {
 			String val=props[i].getProperty(key);
@@ -109,6 +112,7 @@ public class Config {
 	 * @return All found occurrences of given key in props objects.
 	 */
 	private static final String[] getAdditiveProperty(Properties[] props, String key){
+		//TODO add values from Launcher
 		ArrayList<String> ret=new ArrayList<>();
 		
 		for(int i=0;i<props.length;i++) {
@@ -182,6 +186,16 @@ public class Config {
 			errors.add('"'+str+"\" in property \""+key+"\" is not valid float.");
 		}
 		return 0;
+	}
+	private static final boolean getBooleanProperty(Properties[] props, String key){
+		String str=getProperty(props, key);
+		if(str==null)return false;
+		try {
+			return Boolean.parseBoolean(str);
+		} catch (NumberFormatException e) {
+			errors.add('"'+str+"\" in property \""+key+"\" is not valid float.");
+		}
+		return false;
 	}
 	
 	private static final Properties[] getProperties(URL resource) throws IOException {
@@ -302,6 +316,9 @@ public class Config {
 	public static final int socksProxyPort;
 	public static final String HTTPProxyHost;
 	public static final int HTTPProxyPort;
+	
+	public static final boolean testMode;
+	public static final String[] testManifestLocation;
 	
 	/**Multiple value by parameter depending on another one.
 	 * @author TakMashido
