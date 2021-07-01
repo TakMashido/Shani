@@ -38,7 +38,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 					case "multiply" -> calculate(returnValues.get("multiply1"))*calculate(returnValues.get("multiply2"));
 					case "divide" -> calculate(returnValues.get("divide1"))/calculate(returnValues.get("divide2"));
 					case "add" -> calculate(returnValues.get("add1"))+calculate(returnValues.get("add2"));
-					case "substract" -> calculate(returnValues.get("substract1"))-calculate(returnValues.get("substract2"));
+					case "subtract" -> calculate(returnValues.get("subtract1"))-calculate(returnValues.get("subtract2"));
 					default -> {
 						assert false : sentenceName + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";
 						System.err.println(sentenceName + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.");
@@ -48,9 +48,10 @@ public class CalculateOrder extends SentenceMatcherOrder {
 				};
 				
 				if(Config.testMode)
-					if(success)
-						Tests.addResults("result",result);
-					else
+					if(success){
+						Tests.addResults("operation", sentenceName);
+						Tests.addResults("result", result);
+					} else
 						Tests.addResults("calculationFailed",true);
 				
 				if(success)

@@ -191,8 +191,8 @@
                 <template name="divide">$count ?divide1 $divide ?divide2</template>
                 <template name="add">$add ?add1 $connect ?add2</template>
                 <template name="add">$count ?add1 $add ?add2</template>
-                <template name="substract">$substract ?substract1 $connect ?substract2</template>
-                <template name="substract">$count ?substract2 $substract ?substract1</template>
+                <template name="subtract">$substract ?subtract1 $connect ?subtract2</template>
+                <template name="subtract">$count ?subtract2 $substract ?subtract1</template>
                 <template name="count">$count ?count</template>
                 <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
                 <power>potęga*do*do potęgi</power>

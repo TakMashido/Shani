@@ -7,6 +7,7 @@
             <intend classname="takMashido.shani.core.text.ShaniString" val="dodaj dwa do dwa"/>
             <responses>
                 <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <operation val="add"/>
                 <result type="double" val="4"/>
             </responses>
         </test>
@@ -14,6 +15,7 @@
             <intend classname="takMashido.shani.core.text.ShaniString" val="ile jest 13*12 przez 6"/>
             <responses>
                 <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <operation val="count"/>
                 <result type="double" val="26"/>
             </responses>
         </test>
@@ -21,6 +23,7 @@
             <intend classname="takMashido.shani.core.text.ShaniString" val="pomnórz 15 i 1.337"/>
             <responses>
                 <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <operation val="multiply"/>
                 <result type="double" val="20.055"/>
             </responses>
         </test>
@@ -28,7 +31,24 @@
             <intend classname="takMashido.shani.core.text.ShaniString" val="ile jest 15*1.337"/>
             <responses>
                 <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <operation val="count"/>
                 <result type="double" val="20.055"/>
+            </responses>
+        </test>
+        <test name="CalculateOrder.5">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="odejmij 2 i 3"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <operation val="subtract"/>
+                <result type="double" val="-1"/>
+            </responses>
+        </test>
+        <test name="CalculateOrder.6">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="ile jest 3-2^2*12"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CalculateOrder.CalculateAction"/>
+                <operation val="count"/>
+                <result type="double" val="-45"/>
             </responses>
         </test>
     </end2end>
