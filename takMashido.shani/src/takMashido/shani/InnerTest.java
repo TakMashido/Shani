@@ -1,6 +1,7 @@
 package takMashido.shani;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import takMashido.shani.core.Config;
 import takMashido.shani.core.Launcher;
@@ -10,9 +11,12 @@ import takMashido.shani.core.text.ShaniString;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
+/**Class containing set of testing methods for single components.*/
 public class InnerTest {
 	public static final String passed="OK";
 	public static final String notPassed="Failed";
@@ -30,23 +34,72 @@ public class InnerTest {
 		int globalErrors=0;
 		int errors=0;
 		
-		System.out.println("Running ShaniString comparing test");
+		System.out.println("\nRunning ShaniString loading test");
+		errors=shaniStringLoadingTest();
+		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errors.":""));
+		globalErrors+=errors;
+		
+		System.out.println("\nRunning ShaniString comparing test");
 		errors=shaniStringComparingTest();
-		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errros.":""));
+		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errors.":""));
 		globalErrors+=errors;
 		
-		System.out.println("Running SentenceMatcher test");
+		System.out.println("\nRunning SentenceMatcher test");
 		errors=sentenceMatcherTest();
-		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errros.":""));
+		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errors.":""));
 		globalErrors+=errors;
 		
-		System.out.println("\nAll tests finished"+(globalErrors!=0?". Found "+globalErrors+" errros.":" successfully - no errros found."));
+		System.out.println("\n\nAll tests finished"+(globalErrors!=0?". Found "+globalErrors+" errors.":" successfully - no errors found."));
 		
 		return globalErrors;
 	}
 	
+	public static int shaniStringLoadingTest(){
+		int errors=0;
+		
+		String docData="""
+			<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+			<test>
+				<string val="simple ShaniString"/>
+				<string mode="raw" val="two*two"/>
+				<string mode="splitEscape" val="escaped\\*Shani\\\\String"/>
+				<string mode="splitEscape" val="mixed*Shani\\*String"/>
+				<string mode="splitEscape" val="escaped\\\\*\\*string"/>
+				<string mode="splitEscape" val="\\\\border string\\*"/>
+			</test>
+			""";
+		
+		String[][] testResults=new String[][]{
+				{"simple ShaniString"},
+				{"two*two"},
+				{"escaped*Shani\\String"},
+				{"mixed","Shani*String"},
+				{"escaped\\","*string"},
+				{"\\border string*"}
+		};
+		
+		try{
+			Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(docData.getBytes()));
+			
+			NodeList nodes=Storage.getNodes(doc,"test.string");
+			
+			for(int i=0;i<nodes.getLength();i++){
+				ShaniString str=new ShaniString(nodes.item(i));
+				
+				if(!Arrays.equals(testResults[i],str.getArray())){
+					System.out.printf("Error found on test %d. Expected %s got %s.\n",i+1,Arrays.toString(testResults[i]),Arrays.toString(str.getArray()));
+					errors++;
+				}
+			}
+		}catch(SAXException|IOException|ParserConfigurationException e){
+			e.printStackTrace();
+			errors++;
+		}
+		
+		return errors;
+	}
 	public static int shaniStringComparingTest() {
-		System.out.println("Testing single word ShaniString comapritions...");
+		System.out.println("Testing single word ShaniString comparisons...");
 		int errors=0;
 		
 		

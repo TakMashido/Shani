@@ -10,6 +10,7 @@ import takMashido.shani.core.Storage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 import java.util.Scanner;
@@ -23,16 +24,28 @@ import java.util.regex.Pattern;
  * @author TakMashido
  */
 public class ShaniString implements IntendBase {
+	//<StaticServiceFields><StaticServiceFields><StaticServiceFields><StaticServiceFields><StaticServiceFields>
 	private static final Random random=new Random();
 	private static final Pattern stringDivider=Pattern.compile("(?:\\*)+");
 	private static byte[][] lookUpTable;				//~140KB of memory
 	
+	/**Determines method used to change String into ShaniString.
+	 * raw -> do not perform any operations.
+	 * split -> split on '*' occurrences.
+	 * split_escape -> split on '*' occurrences, but allow to escape it with '\' to omit some. Use '\\' to insert '\'.
+	 */
+	public enum ParseMode{
+		raw, split, splitEscape;
+	};
+	
+	//<ShaniStringObjectFields><ShaniStringObjectFields><ShaniStringObjectFields><ShaniStringObjectFields>
 	protected String[] value;
 	protected String[][] words;
 	protected char[][][] stemmedValue=null;											//[a][b][c]: a->wordsSet, b->word, c->letter
 	/**Node containing this ShaniString data.*/
 	private Node origin;
 
+	//<InitializationCode><InitializationCode><InitializationCode><InitializationCode><InitializationCode>
 	public static void staticInit(Element e){
 		createLookUpTable(e);
 	}
@@ -117,6 +130,7 @@ public class ShaniString implements IntendBase {
 		}
 	}
 	
+	//<RestOfCode><RestOfCode><RestOfCode><RestOfCode><RestOfCode><RestOfCode><RestOfCode><RestOfCode>
 	/**Creates new empty ShaniString*/
 	public ShaniString() {
 		this("");
@@ -130,10 +144,11 @@ public class ShaniString implements IntendBase {
 	/**Creates new ShaniString.
 	 * @param origin String containing ShaniString data.
 	 * @param cut If cut based on '*' location.
+	 * @deprecated Use {@link #ShaniString(ParseMode,String...)}
 	 */
+	@Deprecated
 	public ShaniString(String origin,boolean cut) {
-		if(cut)value=processString(origin);
-		else value=new String[] {origin};
+		parseString(cut?ParseMode.split:ParseMode.raw,origin);
 	}
 	/**Creates new ShaniString.
 	 * @param origin Strings containing data. All of them will be cut on '*' occurrences.
@@ -141,16 +156,21 @@ public class ShaniString implements IntendBase {
 	public ShaniString(String... origin) {
 		this(true,origin);
 	}
+	/**Creates new ShaniString.
+	 * @param cut If cut based on '*' location.
+	 * @param origin Strings containing ShaniString data. Each one is treated as other version of represented sentence.
+	 * @deprecated Use {@link #ShaniString(ParseMode,String...)}
+	 */
+	@Deprecated
 	public ShaniString(boolean cut,String... origin) {
-		if(cut) {
-			ArrayList<String> buf=new ArrayList<String>();
-			for(String str:origin)processString(str,buf);
-			value=buf.toArray(new String[] {});
-		} else {
-			value=new String[origin.length];
-			for(int i=0;i<value.length;i++)
-				value[i]=origin[i].strip();
-		}
+		parseString(cut?ParseMode.split:ParseMode.raw,origin);
+	}
+	/**Create new ShaniString using given String's as parts and parsing them using provided parse mode.
+	 * @param mode Mode used to parse strings.
+	 * @param parts String's to use as parts.
+	 */
+	public ShaniString(ParseMode mode, String... parts){
+		parseString(mode,parts);
 	}
 	/**Load ShaniString from xml node. Any change done to this object will also be pushed to given node.
 	 * @param origin XML Node storing ShaniString data.
@@ -161,11 +181,24 @@ public class ShaniString implements IntendBase {
 			value=new String[] {"MISSING_SHANI_STRING"};
 		}
 		
-		Node nd=origin.getAttributes().getNamedItem("val");
-		if(nd!=null)
-			value=processString(nd.getNodeValue());
-		else
-			value=processString(origin.getTextContent());
+		if(origin.getNodeType()!=Node.ELEMENT_NODE){
+			assert false:"Origin node has to be XML Elements.";
+			value=new String[] {"MISSING_SHANI_STRING"};
+		}
+		
+		Element el=(Element)origin;
+		
+		String raw=el.getAttribute("val");
+		if(raw.isEmpty())
+			raw=el.getTextContent();
+		
+		String modeStr=el.getAttribute("mode");
+		ParseMode pMode;
+		if(!modeStr.isEmpty())
+			pMode=ParseMode.valueOf(modeStr);
+		else pMode=ParseMode.split;
+		
+		parseString(pMode,raw);
 		
 		this.origin=origin;
 	}
@@ -178,16 +211,102 @@ public class ShaniString implements IntendBase {
 		this(originNode);
 		add(origin);
 	}
-	private String[] processString(String str) {
-		return processString(str,new ArrayList<String>()).toArray(new String[] {});
-	}
-	private ArrayList<String> processString(String str, ArrayList<String> out) {
-		@SuppressWarnings("resource")
-		Scanner in=new Scanner(str).useDelimiter(stringDivider);
+	/**Parse given string array according to passed pares mode and append it to the value arrays.
+	 * @param mode What processing do on passed String's.
+	 * @param parts String's to add, each one is treated as alternative value for matching/printing purposes.
+	 */
+	private void parseString(ParseMode mode, String... parts){
+		ArrayList<String> valueRet=new ArrayList<>();
 		
-		while(in.hasNext())out.add(in.next().strip());
+		for(String str:parts){
+			if(str=="")
+				continue;
+			
+			switch(mode){
+			case raw -> valueRet.add(str);
+			case split -> Collections.addAll(valueRet, stringDivider.split(str));
+			case splitEscape -> {
+				StringBuilder builder=new StringBuilder();
+				int lastPushedIndex=0;
+				for(int i=0; i<str.length(); i++){
+					if(str.charAt(i)=='\\'){
+						i++;
+						
+						if(i>=str.length()){                //Assert false, and ignore.
+							assert false: "ShaniString should end with '\\' character.";
+							
+							builder.append(str, lastPushedIndex, i);
+							lastPushedIndex=i;
+							break;
+						}
+						
+						switch(str.charAt(i)){
+						case '\\' -> {
+							builder.append(str, lastPushedIndex, i-1);
+							lastPushedIndex=i;
+						}
+						case '*' -> {
+							builder.append(str, lastPushedIndex, i-1);
+							builder.append('*');
+							lastPushedIndex=i+1;
+						}
+						default -> {						//Assert false, and ignore.
+							assert false: "After '\\' character can only be preset '\\' or '*' character.";
+							builder.append(str, lastPushedIndex, i);
+							lastPushedIndex=i;
+						}}
+					} else if(str.charAt(i)=='*'){
+						builder.append(str,lastPushedIndex,i);
+						lastPushedIndex=i+1;
+						
+						valueRet.add(builder.toString());
+						builder.delete(0,builder.length());
+					}
+				}
+				
+				builder.append(str,lastPushedIndex,str.length());
+				valueRet.add(builder.toString());
+			}
+			default -> {
+				assert false: "New parse mode showed up but it's not handled properly during creation. Fix this.";
+				parseString(ParseMode.split, parts);
+				return;
+			}}
+		}
 		
-		return out;
+		if(valueRet.isEmpty())
+			return;
+		
+		if(value==null){
+			value=valueRet.toArray(new String[valueRet.size()]);
+		} else {
+			String[] wordArray=valueRet.toArray(new String[valueRet.size()]);
+			
+			String[] newValue=new String[value.length+wordArray.length];
+			System.arraycopy(value, 0, newValue, 0, value.length);
+			System.arraycopy(wordArray, 0, newValue, value.length, wordArray.length);
+			value=newValue;
+			
+			saveData();
+			
+			if(stemmedValue!=null) {
+				char[][][] newVal=new char[newValue.length][][];
+				System.arraycopy(stemmedValue, 0, newValue, 0, stemmedValue.length);
+				for(int i=0;i<wordArray.length;i++) {
+					newVal[stemmedValue.length+1]=stem(wordArray[i]);
+				}
+				stemmedValue=newVal;
+				
+				if(words!=null) {
+					String[][] newWords=new String[words.length+1][];
+					System.arraycopy(words, 0, newWords, 0, words.length);
+					newWords[words.length]=new String[stemmedValue[words.length].length];
+					for(int i=0;i<newWords[words.length].length;i++)
+						newWords[words.length][i]=new String(stemmedValue[words.length][i]);
+					words=newWords;
+				}
+			}
+		}
 	}
 	
 	/**Splits ShaniString to words group and each to single words.
@@ -268,31 +387,7 @@ public class ShaniString implements IntendBase {
 	 * @param cut If cut based on '*' location.
 	 */
 	public void add(String word,boolean cut) {
-		String[] wordArray=cut?processString(word):new String[] {word};
-		
-		String[] newValue=new String[value.length+wordArray.length];
-		System.arraycopy(value, 0, newValue, 0, value.length);
-		System.arraycopy(wordArray, 0, newValue, value.length, wordArray.length);
-		value=newValue;
-		
-		saveData();
-		
-		if(stemmedValue!=null) {
-			char[][][] newVal=new char[newValue.length][][];
-			System.arraycopy(stemmedValue, 0, newValue, 0, stemmedValue.length);
-			for(int i=0;i<wordArray.length;i++) {
-				newVal[stemmedValue.length+1]=stem(wordArray[i]);
-			}
-			stemmedValue=newVal;
-			if(words!=null) {
-				String[][] newWords=new String[words.length+1][];
-				System.arraycopy(words, 0, newWords, 0, words.length);
-				newWords[words.length]=new String[stemmedValue[words.length].length];
-				for(int i=0;i<newWords[words.length].length;i++)
-					newWords[words.length][i]=new String(stemmedValue[words.length][i]);
-				words=newWords;
-			}
-		}
+		parseString(cut?ParseMode.split:ParseMode.raw,word);
 	}
 	/**Adds new entries.
 	 * @param word ShaniString containing new entries
@@ -601,6 +696,7 @@ public class ShaniString implements IntendBase {
 	 * @return String representing this ShaniString.
 	 */
 	public String toFullString() {
+		if(value==null)return "NULL_SHANI_STRING";
 		if(value.length==0)return "EMPTY_SHANI_STRING";
 		StringBuffer str=new StringBuffer();
 		str.append(value[0]);
@@ -612,6 +708,7 @@ public class ShaniString implements IntendBase {
 	 */
 	@Override
 	public String toString() {
+		if(value==null)return "NULL_SHANI_STRING";
 		if(value.length<=0)return "EMPTY_SHANI_STRING";
 		return value[random.nextInt(value.length)];
 	}
