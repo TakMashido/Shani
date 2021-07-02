@@ -36,20 +36,20 @@ public class InnerTest {
 		
 		System.out.println("\nRunning ShaniString loading test");
 		errors=shaniStringLoadingTest();
-		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errors.":""));
+		System.out.println("Test finished"+(errors!=0?". Found "+errors+" errors.":" successfully."));
 		globalErrors+=errors;
 		
 		System.out.println("\nRunning ShaniString comparing test");
 		errors=shaniStringComparingTest();
-		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errors.":""));
+		System.out.println("Test finished"+(errors!=0?". Found "+errors+" errors.":" successfully."));
 		globalErrors+=errors;
 		
 		System.out.println("\nRunning SentenceMatcher test");
 		errors=sentenceMatcherTest();
-		System.out.println("Test finished."+(errors!=0?" Found "+errors+" errors.":""));
+		System.out.println("Test finished"+(errors!=0?". Found "+errors+" errors.":" successfully."));
 		globalErrors+=errors;
 		
-		System.out.println("\n\nAll tests finished"+(globalErrors!=0?". Found "+globalErrors+" errors.":" successfully - no errors found."));
+		System.out.println("\n\nAll inner tests finished"+(globalErrors!=0?". Found "+globalErrors+" errors.":" successfully - no errors found."));
 		
 		return globalErrors;
 	}
@@ -99,7 +99,6 @@ public class InnerTest {
 		return errors;
 	}
 	public static int shaniStringComparingTest() {
-		System.out.println("Testing single word ShaniString comparisons...");
 		int errors=0;
 		
 		
@@ -113,27 +112,43 @@ public class InnerTest {
 			Config.characterSwapCost
 		};
 		
-		System.out.println(str.toFullString()+':');
 		for(int i=0;i<data.length;i++) {
 			short cost=str.getCompareCost(data[i]);
 			
 			if(cost!=expected[i]) {
 				errors++;
+				System.out.printf("%s->%s comparison cost: %d, expected: %d\n", str.toFullString(), data[i], cost, expected[i]);
 			}
 			
-			System.out.printf("\t%s:%d\t%s%n", data[i], cost, cost==expected[i]?passed:notPassed);
 		}
 		
 		return errors;
 	}
 	
 	public static int sentenceMatcherTest(){
-		System.out.println("Testing sentence matcher...");
 		int errors=0;
+		
+		String docData="""
+				<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+				<sentenceMatcher>
+					<test>
+						<template name="1">*^regex ?data ^regex2</template>
+						<template name="or">$shani|^regex2 $string</template>
+						<template name="anyOrder">[$shaniString1 $shaniString2 ?data *^regex] *$string</template>
+				  
+						<shani>temporary*syntetic</shani>
+						<string>word*sentence*world</string>
+						<regex>[jm]?ust</regex>
+						<regex2>[dhl]og</regex2>
+						<shaniString1>witam*dzień dobry*hello</shaniString1>
+						<shaniString2>pana generała*kolegę</shaniString2>
+					</test>
+				</sentenceMatcher>
+				""";
 		
 		Document doc = null;
 		try {
-			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InnerTest.class.getResourceAsStream("/takMashido/shani/files/test/innerTest.xml"));
+			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(docData.getBytes()));
 		} catch (SAXException|IOException|ParserConfigurationException e) {
 			System.out.println("Failed to load SentenceMatcher tests");
 			e.printStackTrace();
@@ -141,7 +156,7 @@ public class InnerTest {
 		}
 		doc.getDocumentElement().normalize();
 		
-		var matcher=new SentenceMatcher(Storage.getNode(doc, "tests.sentenceMatcher.test"));
+		var matcher=new SentenceMatcher(Storage.getNode(doc, "sentenceMatcher.test"));
 		
 		String[] data=new String[] {
 				"just data log",
@@ -172,19 +187,19 @@ public class InnerTest {
 		int length=data.length;
 		if(cost.length!=length) {
 			System.out.println("Corrupted test, wrong amount of costs provided.");
-			return -1;
+			return 1;
 		}
 		if(importanceBias.length!=length) {
 			System.out.println("Corrupted test, wrong amount of importanceBias'es provided.");
-			return -1;
+			return 1;
 		}
 		if(name.length!=length) {
 			System.out.println("Corrupted test, wrong amount of names provided.");
-			return -1;
+			return 1;
 		}
 		if(dataReturn.length!=length) {
 			System.out.println("Corrupted test, wrong amount of dataReturn's provided.");
-			return -1;
+			return 1;
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -209,10 +224,12 @@ public class InnerTest {
 			}
 			
 			boolean good=result.getCost()==cost[i]&&result.getImportanceBias()==importanceBias[i]&&result.name.contentEquals(name[i])&&result.data.equals(dataReturnMap[i]);
-			if(!good)errors++;
 			
-			System.out.printf("\"%s\":\t\"%s\":%d:%d:%s\t%s%n", data[i], result.name, result.getCost(), result.getImportanceBias(), result.data, good?passed:notPassed);
-			System.out.printf("tests: %s %s %s %s%n",result.name.contentEquals(name[i]),result.getCost()==cost[i],result.getImportanceBias()==importanceBias[i],result.data.equals(dataReturnMap[i]));
+			if(!good){
+				errors++;
+				System.out.printf("\"%s\":\t\"%s\":%d:%d:%s\tfailed%n", data[i], result.name, result.getCost(), result.getImportanceBias(), result.data);
+				System.out.printf("tests: %s %s %s %s%n",result.name.contentEquals(name[i]),result.getCost()==cost[i],result.getImportanceBias()==importanceBias[i],result.data.equals(dataReturnMap[i]));
+			}
 		}
 		
 		return errors;
