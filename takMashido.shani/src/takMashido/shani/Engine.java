@@ -393,7 +393,9 @@ public class Engine {
 	}
 	public static void saveMainFile(){
 		for(var order:orders)order.save();									//Flush all orders save data
-		Storage.save();														//Save data file
+		
+		if(!Config.testMode)
+			Storage.save();														//Save data file
 	}
 	public static void saveDocument(Document document, File targetFile) {
 		try {

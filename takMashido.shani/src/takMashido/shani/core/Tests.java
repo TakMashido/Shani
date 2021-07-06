@@ -150,7 +150,7 @@ public class Tests {
 					System.out.println("\nError during running: \"" + currentTest.getAttribute("name") + '"');
 				}
 				
-				System.out.println("Extra key found: \""+key+'"');
+				System.out.printf("Extra key \"%s\" found with value \"%s\".\n",key,commandResults.values());
 				continue;
 			}
 			
