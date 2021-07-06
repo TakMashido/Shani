@@ -66,6 +66,8 @@ public class InnerTest {
 				<string mode="splitEscape" val="mixed*Shani\\*String"/>
 				<string mode="splitEscape" val="escaped\\\\*\\*string"/>
 				<string mode="splitEscape" val="\\\\border string\\*"/>
+				<string val="simple*Shani*String*but*quite*long*vertically"/>
+				<string>simple*Shani*String*but*quite*long*vertically</string>
 			</test>
 			""";
 		
@@ -75,7 +77,9 @@ public class InnerTest {
 				{"escaped*Shani\\String"},
 				{"mixed","Shani*String"},
 				{"escaped\\","*string"},
-				{"\\border string*"}
+				{"\\border string*"},
+				{"simple","Shani","String","but","quite","long","vertically"},
+				{"simple","Shani","String","but","quite","long","vertically"}
 		};
 		
 		try{

@@ -5,6 +5,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
+import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.SentenceMatcherOrder;
 import takMashido.shani.tools.parsers.TimeParser;
@@ -113,6 +114,8 @@ public class TimerOrder extends SentenceMatcherOrder{
 		
 		@Override
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
+			Tests.addResults("operation",sentenceName);
+			
 			switch (sentenceName) {
 			case "start":
 				start(true);
@@ -157,6 +160,8 @@ public class TimerOrder extends SentenceMatcherOrder{
 			System.out.println();
 		}
 		private void show() {
+			Tests.addResults("time",timeCounted);
+			
 			updateTime();
 			System.out.printf(printTimeMessage.toString(), TimeParser.parseTime(timeCounted));
 			System.out.println();
@@ -187,6 +192,10 @@ public class TimerOrder extends SentenceMatcherOrder{
 		@Override
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			String timerName=returnValues.get("name");
+			
+			Tests.addResults("operation",sentenceName);
+			Tests.addResults("timerName",timerName);
+			
 			switch(sentenceName) {
 			case "start":
 				System.out.printf(nonExistStartMessage.toString(),timerName);

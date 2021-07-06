@@ -38,7 +38,10 @@ public class TimeParser{
 		if((hours!=0||mins!=0)&&seconds!=0)ret.append(timeAndWord.toString()).append(' ');
 		if(seconds!=0)ret.append(s.parse(seconds)).append(' ');
 		
-		ret.deleteCharAt(ret.length()-1);
+		if(ret.isEmpty())
+			ret.append("0");
+		else
+			ret.deleteCharAt(ret.length()-1);
 		
 		return ret.toString();
 	}

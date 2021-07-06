@@ -166,21 +166,24 @@ public class Tests {
 			}
 		}
 		
+		
 		//Find any not provided result
-		NodeList templates=expectedResults.getChildNodes();
-		for(int i=0;i<templates.getLength();i++){
-			Node templateNode=templates.item(i);
-			if(templateNode.getNodeType()!=Node.ELEMENT_NODE)
-				continue;
-			
-			String key=templateNode.getNodeName();
-			if(!commandResults.containsKey(key)){
-				if(passed){
-					passed=false;
-					System.out.println("\nError during running: \"" + currentTest.getAttribute("name") + '"');
-				}
+		if(expectedResults!=null){
+			NodeList templates=expectedResults.getChildNodes();
+			for(int i=0; i<templates.getLength(); i++){
+				Node templateNode=templates.item(i);
+				if(templateNode.getNodeType()!=Node.ELEMENT_NODE)
+					continue;
 				
-				System.out.printf("Key \"%s\" not present in execution results.\n",key);
+				String key=templateNode.getNodeName();
+				if(!commandResults.containsKey(key)){
+					if(passed){
+						passed=false;
+						System.out.println("\nError during running: \""+currentTest.getAttribute("name")+'"');
+					}
+					
+					System.out.printf("Key \"%s\" not present in execution results.\n", key);
+				}
 			}
 		}
 		
@@ -204,7 +207,7 @@ public class Tests {
 			return new Pair<Boolean,Boolean>(
 					(Boolean)((value instanceof Boolean)&&expectedBool==value),
 					expectedBool);
-			
+		case "int":
 		case "integer":
 			Integer expectedInt=Integer.parseInt(val);
 			return new Pair<Boolean,Integer>(
