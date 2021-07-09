@@ -182,26 +182,28 @@
         <order classname="takMashido.shaniModules.orders.CalculateOrder">
             <calculationResoultMessage val="Wynik to %f.*%f*Po podliczeniu mamy %f."/>
             <calculationFailedMessage val="Nie mogłam policzyć wyrażenia.*Nie wiem jak to policzyć."/>
-            <sentence>
-                <template name="power">$power ?power1 $connect ?power2</template>
-                <template name="power">?power1 $power ?power2</template>
-                <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
-                <template name="multiply">$count ?multiply1 $multiply ?multiply2</template>
-                <template name="divide">$divide ?divide1 $connect ?divide2</template>
-                <template name="divide">$count ?divide1 $divide ?divide2</template>
-                <template name="add">$add ?add1 $connect ?add2</template>
-                <template name="add">$count ?add1 $add ?add2</template>
-                <template name="subtract">$substract ?subtract1 $connect ?subtract2</template>
-                <template name="subtract">$count ?subtract2 $substract ?subtract1</template>
-                <template name="count">$count ?count</template>
-                <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
-                <power>potęga*do*do potęgi</power>
-                <multiply>pomnórz*iloczyn*razy</multiply>
-                <divide>podziel*iloraz*przez*na</divide>
-                <add>dodaj*suma*plus</add>
-                <substract>odejmij*różnica*minus</substract>
-                <connect>przez*od*do*i*na</connect>
-            </sentence>
+            <parsers>
+                <sentence classname="takMashido.shani.intedParsers.text.SentenceMatcherIntendParser">
+                    <template name="power">$power ?power1 $connect ?power2</template>
+                    <template name="power">?power1 $power ?power2</template>
+                    <template name="multiply">$multiply ?multiply1 $connect ?multiply2</template>
+                    <template name="multiply">$count ?multiply1 $multiply ?multiply2</template>
+                    <template name="divide">$divide ?divide1 $connect ?divide2</template>
+                    <template name="divide">$count ?divide1 $divide ?divide2</template>
+                    <template name="add">$add ?add1 $connect ?add2</template>
+                    <template name="add">$count ?add1 $add ?add2</template>
+                    <template name="subtract">$substract ?subtract1 $connect ?subtract2</template>
+                    <template name="subtract">$count ?subtract2 $substract ?subtract1</template>
+                    <template name="count">$count ?count</template>
+                    <count>policz*ile wynosi*ile jest*podaj wynik równania</count>
+                    <power>potęga*do*do potęgi</power>
+                    <multiply>pomnórz*iloczyn*razy</multiply>
+                    <divide>podziel*iloraz*przez*na</divide>
+                    <add>dodaj*suma*plus</add>
+                    <substract>odejmij*różnica*minus</substract>
+                    <connect>przez*od*do*i*na</connect>
+                </sentence>
+            </parsers>
         </order>
         <order classname="takMashido.shaniModules.orders.CMDOrder">
             <keywords>cmd</keywords>

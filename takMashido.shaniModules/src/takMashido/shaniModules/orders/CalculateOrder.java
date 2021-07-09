@@ -5,12 +5,12 @@ import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.SentenceMatcherOrder;
+import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserOrder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class CalculateOrder extends SentenceMatcherOrder {
+public class CalculateOrder extends IntendParserOrder{
 	private static ShaniString calculationResoultMessage;
 	private static ShaniString calculationFailedMessage;
 	
@@ -22,26 +22,26 @@ public class CalculateOrder extends SentenceMatcherOrder {
 	}
 	
 	@Override
-	protected SentenceMatcherAction actionFactory(String sentenceName, HashMap<String, String> returnValues) {
+	public Action getAction() {
 		return new CalculateAction();
 	}
 	
-	public class CalculateAction extends SentenceMatcherAction{
+	public class CalculateAction extends Action{
 		@Override
 		@SuppressWarnings("ConstantConditions")							//Assert in case makes it not see success=false line and it thinks that it is always true
-		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
+		public boolean execute() {
 			try {
 				boolean success=true;
-				double result=switch (sentenceName){
-					case "count" -> calculate(returnValues.get("count"));
-					case "power" ->Math.pow(calculate(returnValues.get("power1")), calculate(returnValues.get("power2")));
-					case "multiply" -> calculate(returnValues.get("multiply1"))*calculate(returnValues.get("multiply2"));
-					case "divide" -> calculate(returnValues.get("divide1"))/calculate(returnValues.get("divide2"));
-					case "add" -> calculate(returnValues.get("add1"))+calculate(returnValues.get("add2"));
-					case "subtract" -> calculate(returnValues.get("subtract1"))-calculate(returnValues.get("subtract2"));
+				double result=switch (name){
+					case "count" -> calculate((String)parameters.get("count"));
+					case "power" ->Math.pow(calculate((String)parameters.get("power1")), calculate((String)parameters.get("power2")));
+					case "multiply" -> calculate((String)parameters.get("multiply1"))*calculate((String)parameters.get("multiply2"));
+					case "divide" -> calculate((String)parameters.get("divide1"))/calculate((String)parameters.get("divide2"));
+					case "add" -> calculate((String)parameters.get("add1"))+calculate((String)parameters.get("add2"));
+					case "subtract" -> calculate((String)parameters.get("subtract1"))-calculate((String)parameters.get("subtract2"));
 					default -> {
-						assert false : sentenceName + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";
-						System.err.println(sentenceName + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.");
+						assert false : name + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.";
+						System.err.println(name + " is unrecognized sentence name in CalculateOrder.SentenceMatcherAction.");
 						success = false;
 						yield 0;
 					}
@@ -49,7 +49,7 @@ public class CalculateOrder extends SentenceMatcherOrder {
 				
 				if(Config.testMode)
 					if(success){
-						Tests.addResults("operation", sentenceName);
+						Tests.addResults("operation", name);
 						Tests.addResults("result", result);
 					} else
 						Tests.addResults("calculationFailed",true);
@@ -66,6 +66,12 @@ public class CalculateOrder extends SentenceMatcherOrder {
 				e.printStackTrace();
 				return false;
 			}
+		}
+		
+		@Override
+		public boolean connectAction(String action){
+			assert false:"Rebuilding f action connecting is planned. So it's not implemented in CalculateOrder for now.";
+			return false;
 		}
 	}
 	
