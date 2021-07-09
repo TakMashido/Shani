@@ -60,23 +60,25 @@
             <unmatchingCityMessage val="Nie wiem które miasto wybrać.*Możesz powtórzyć?"/>
             <connectionFailedMessage>Nie mogłam połączyć się z serwerem.*Internet nie działa.*Nie mogłam się połączyć z netem.</connectionFailedMessage>
             <connectionTimeoutMessage>Nie mogłam połączyć się z serwerem.*Przekroczyłam limit czasu połączenia.</connectionTimeoutMessage>
-            <sentence>
-                <template name="weather">$ask *?when $weather *$where ?where</template>
-                <template name="weather">$ask ?where $weather</template>
-                <template name="temperature">$ask *?when $temperature *$where ?where</template>
-                <template name="windSpeed">$ask *?when $wind *$where ?where</template>
-                <template name="humidity">$ask *?when $humidity *$where ?where</template>
-                <template name="badWeather">$ask $where ?where $badWeather *$weather</template>
-                <template name="goodWeather">$ask $where ?where $goodWeather *$weather</template>
-                <where>w</where>
-                <temperature>temperaturę*temperatura*stopni</temperature>
-                <weather>pogoda*pogodę*</weather>
-                <wind>wiatr*prętkość wiatru*szybkość wiatru</wind>
-                <humidity>wilgotność</humidity>
-                <badWeather>będzie brzydko*jest brzydko</badWeather>
-                <goodWeather>będzie ładnie*jest ładnie</goodWeather>
-                <ask>czy*jaka jest*jak jest*jaka będzie*podaj*pokaż*ile jest*ile będzie</ask>
-            </sentence>
+            <parsers>
+                <sentence classname="takMashido.shani.intedParsers.text.SentenceMatcherIntendParser">
+                    <template name="weather">$ask *?when $weather *$where ?where</template>
+                    <template name="weather">$ask ?where $weather</template>
+                    <template name="temperature">$ask *?when $temperature *$where ?where</template>
+                    <template name="windSpeed">$ask *?when $wind *$where ?where</template>
+                    <template name="humidity">$ask *?when $humidity *$where ?where</template>
+                    <template name="badWeather">$ask $where ?where $badWeather *$weather</template>
+                    <template name="goodWeather">$ask $where ?where $goodWeather *$weather</template>
+                    <where>w</where>
+                    <temperature>temperaturę*temperatura*stopni</temperature>
+                    <weather>pogoda*pogodę</weather>
+                    <wind>wiatr*prętkość wiatru*szybkość wiatru</wind>
+                    <humidity>wilgotność</humidity>
+                    <badWeather>będzie brzydko*jest brzydko</badWeather>
+                    <goodWeather>będzie ładnie*jest ładnie</goodWeather>
+                    <ask>czy*jaka jest*jak jest*jaka będzie*podaj*pokaż*ile jest*ile będzie</ask>
+                </sentence>
+            </parsers>
             <daychooser>
                 <template name="0">$day0</template>
                 <template name="1">$day1</template>

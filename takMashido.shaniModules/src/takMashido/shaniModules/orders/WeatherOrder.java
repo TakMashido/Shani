@@ -8,7 +8,8 @@ import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.SentenceGenerator;
 import takMashido.shani.core.text.SentenceMatcher;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.SentenceMatcherOrder;
+import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserOrder;
 import takMashido.shani.tools.InputCleaners;
 import takMashido.shani.tools.SearchEngine;
 import takMashido.shani.tools.SearchEngine.SearchResoults.SearchResoult;
@@ -25,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
-public class WeatherOrder extends SentenceMatcherOrder {
+public class WeatherOrder extends IntendParserOrder{
 	private static ShaniString notKnowLocationMessage;
 	private static ShaniString cannotProcessDayMessage;
 	private static ShaniString cannotParseDayNumberMessage;
@@ -107,7 +108,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 	}
 	
 	@Override
-	protected SentenceMatcherAction actionFactory(String sentenceName, HashMap<String, String> returnValues) {
+	public Action getAction() {
 		return new WeatherAction();
 	}
 	
@@ -192,14 +193,14 @@ public class WeatherOrder extends SentenceMatcherOrder {
 		return (int)(speed*1.609344);
 	}
 	
-	private class WeatherAction extends SentenceMatcherAction{
+	private class WeatherAction extends Action{
 		@Override
-		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
+		public boolean execute() {
 			if(!ShaniCore.getLicenseConfirmation("weather.com")) {
 				return false;
 			}
 			
-			String where=returnValues.get("where");
+			String where=(String)parameters.get("where");
 			if(where==null) {									//Add getting location (by IP address??/user home location from mainFile+(add Class for getting user info))
 				notKnowLocationMessage.printOut();
 				return false;
@@ -216,7 +217,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				
 				int dayIndex=0;
 				String when;
-				if((when=returnValues.get("when"))!=null) {
+				if((when=(String)parameters.get("when"))!=null) {
 					var res=dayChooser.process(when);
 					if(res.length==0) {
 						System.out.println(cannotProcessDayMessage);
@@ -237,10 +238,10 @@ public class WeatherOrder extends SentenceMatcherOrder {
 				var dayWeather=weather.get(dayIndex);
 				var addParameters=dayWeather.getParamsMap();
 				
-				System.out.println(sentenceName);
+				System.out.println(name);
 				
 				boolean badWeather=false;
-				switch(sentenceName) {
+				switch(name) {
 				case "badWeather":
 					badWeather=true;
 				case "goodWeather":
@@ -256,7 +257,7 @@ public class WeatherOrder extends SentenceMatcherOrder {
 					else weatherSentence.printOut("positiveRespond",addParameters);
 					
 					break;
-				default:weatherSentence.printOut(sentenceName,addParameters);
+				default:weatherSentence.printOut(name,addParameters);
 				}
 				
 				return true;
@@ -266,6 +267,13 @@ public class WeatherOrder extends SentenceMatcherOrder {
 			}
 			
 			return true;
+		}
+		
+		@Override
+		public boolean connectAction(String action){
+			assert false:"Better Action connecting implementation soon, so this will stay unimplemented until then.";
+			System.err.print("Action connecting not supported.");
+			return false;
 		}
 	}
 	
