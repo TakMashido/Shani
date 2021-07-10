@@ -37,6 +37,19 @@ public abstract class Action{
 		this.parameters=parameters;
 	}
 	
+	/**Get additional cost of executing this Action calculated by Action itself, not IntendParsers.
+	 * @return Look above.
+	 */
+	public short getCost(){
+		return 0;
+	}
+	/**Get additional importanceBias of executing this Action calculated by Action itself, not IntendParsers.
+	 * @return Look above.
+	 */
+	public short getImportanceBias(){
+		return 0;
+	}
+	
 	/**Creates executable from this action. Equivalent to {@link Executable#Executable(Action, short) new Executable(thisAction,cost)}.
 	 * @param cost Cost of executing this action.
 	 * @return Executable connected to this action with given cost.

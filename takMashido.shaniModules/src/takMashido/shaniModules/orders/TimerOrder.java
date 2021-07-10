@@ -3,18 +3,20 @@ package takMashido.shaniModules.orders;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.SentenceMatcherOrder;
+import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserOrder;
 import takMashido.shani.tools.parsers.TimeParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
-public class TimerOrder extends SentenceMatcherOrder{
+public class TimerOrder extends IntendParserOrder{
 	private ShaniString startMessage;                                          
 	private ShaniString alreadyRunningMessage;
 	private ShaniString stopMessage;                                                                     
@@ -60,22 +62,8 @@ public class TimerOrder extends SentenceMatcherOrder{
 	}
 	
 	@Override
-	protected List<SentenceMatcherAction> actionFactoryList(String sentenceName, HashMap<String, String> returnValues) {
-		ArrayList<SentenceMatcherAction> ret=new ArrayList<>(timers.size());
-		
-		ShaniString keyword=new ShaniString(returnValues.get("name"));
-		
-		for(var timer:timers) {
-			timer.cost=timer.keyword.getCompareCost(keyword);
-			
-			if(timer.cost<ShaniCore.getWordCompareThreshold())
-				ret.add(timer);
-		}
-		
-		if(ret.isEmpty())
-			ret.add(new NoTimerAction());
-		
-		return ret;
+	public Action getAction(){
+		return new SelectTimerAction();
 	}
 	
 	@Override
@@ -85,7 +73,65 @@ public class TimerOrder extends SentenceMatcherOrder{
 		}
 	}
 	
-	private class TimerAction extends SentenceMatcherAction {
+	private class SelectTimerAction extends Action{
+		private TimerAction bestTimer;
+		private short bestTimerCost;
+		
+		@Override
+		public boolean execute(){
+			if(bestTimer!=null)
+				return bestTimer.execute(name, (HashMap<String,String>)parameters);
+			
+			return new NoTimerAction().execute(name, (HashMap<String,String>)parameters);
+		}
+		
+		@Override
+		public void init(String name, Map<String,? extends Object> params){
+			super.init(name,params);
+			
+			//Set best timer for this Action.
+			ShaniString keyword=new ShaniString((String)parameters.get("name"));
+			
+			if(timers.size()>0){
+				short minCost=timers.get(0).keyword.getCompareCost(keyword);
+				int minIndex=0;
+				for(int i=0; i<timers.size(); i++){
+					short cost=timers.get(i).keyword.getCompareCost(keyword);
+					
+					if(cost<minCost){
+						minCost=cost;
+						minIndex=i;
+					}
+				}
+				
+				bestTimer=timers.get(minIndex);
+				bestTimerCost=minCost;
+			}
+		}
+		
+		@Override
+		public short getImportanceBias(){
+			if(bestTimer!=null)
+				return bestTimerCost;
+			
+			return Config.wordInsertionCost;
+		}
+		@Override
+		public short getCost(){
+			if(bestTimer!=null)
+				return 0;
+			
+			return noTimerImportanceBias;
+		}
+		
+		@Override
+		public boolean connectAction(String action){
+			assert false:"Better Action connecting implementation soon, so this will stay unimplemented until then.";
+			System.err.print("Action connecting not supported.");
+			return false;
+		}
+	}
+	private class TimerAction{
 		protected Element targetFile;
 		protected ShaniString keyword;
 		
@@ -112,7 +158,6 @@ public class TimerOrder extends SentenceMatcherOrder{
 			this.keyword.setNode(e);
 		}
 		
-		@Override
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			Tests.addResults("operation",sentenceName);
 			
@@ -183,13 +228,7 @@ public class TimerOrder extends SentenceMatcherOrder{
 			timeNode.setTextContent(Integer.toString(timeCounted));
 		}
 	}
-	private class NoTimerAction extends SentenceMatcherAction{
-		
-		private NoTimerAction() {
-			importanceBias=noTimerImportanceBias;
-		}
-		
-		@Override
+	private class NoTimerAction{
 		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
 			String timerName=returnValues.get("name");
 			

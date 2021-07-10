@@ -141,22 +141,24 @@
             </badWeather>
         </order>
         <order classname="takMashido.shaniModules.orders.TimerOrder">
-            <sentence>
-                <template name="start">$start $timer ?name</template>
-                <template name="stop">$stop $timer ?name</template>
-                <template name="show">$show $timer ?name</template>
-                <template name="reset">$reset $timer ?name</template>
-                <timer>timer*zegar</timer>
-                <start>odpal*start*włącz</start>
-                <stop>stop*wyłącz*zatrzymaj</stop>
-                <show>wyświetl*show*pokaż ile zliczył*podaj ile zliczył*ile zliczył</show>
-                <reset>reset*zeruj*wyzeruj</reset>
-            </sentence>
+            <parsers>
+                <sentence classname="takMashido.shani.intedParsers.text.SentenceMatcherIntendParser">
+                    <template name="start">$start $timer ?name</template>
+                    <template name="stop">$stop $timer ?name</template>
+                    <template name="show">$show $timer ?name</template>
+                    <template name="reset">$reset $timer ?name</template>
+                    <timer>timer*zegar</timer>
+                    <start>odpal*start*włącz</start>
+                    <stop>stop*wyłącz*zatrzymaj</stop>
+                    <show>wyświetl*show*pokaż ile zliczył*podaj ile zliczył*ile zliczył</show>
+                    <reset>reset*zeruj*wyzeruj</reset>
+                </sentence>
+            </parsers>
             <startMessage>Timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</startMessage>
             <alreadyRunningMessage>Timer %s już działa*Zegar %s już chodzi.*Zegar %s cały czas działa.*Nie mogę włączyć timera %s. Już działa.</alreadyRunningMessage>
             <stopMessage>Zatrzymałam timer %s.*Timer %s został zatrzymany</stopMessage>
             <alreadyStoppedMessage>Timer %s już stoi.</alreadyStoppedMessage>
-            <resetMessage>Resetuję timer %s.*Już zeruję timer %s.Zegar %s ustawiony na 0.</resetMessage>
+            <resetMessage>Resetuję timer %s.*Już zeruję timer %s.*Zegar %s ustawiony na 0.</resetMessage>
             <printTimeMessage>Aktualny czas to %s.*Zliczono %s.*Timer pracował przez %s.</printTimeMessage>
             <nonExistStartMessage>Tworzę timer %s.*Nowy timer %s wystartował.*Zegar włączony.*Timer %s działa.*Włączyłam timer %s.</nonExistStartMessage>
             <nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>

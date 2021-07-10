@@ -34,7 +34,11 @@ public abstract class IntendParserOrder extends Order implements ActionGetter{
 	public IntendParserOrder(Element e){
 		super(e);
 		
-		NodeList nodes=Storage.getNode(e,"parsers").getChildNodes();
+		Node parsersNode=Storage.getNode(e,"parsers");
+		if(parsersNode==null)
+			throw new IllegalArgumentException("Passed Node do not contain \"parsers\" subnode.");
+		
+		NodeList nodes=parsersNode.getChildNodes();
 		for(int i=0;i<nodes.getLength();i++){
 			if(nodes.item(i).getNodeType()!=Node.ELEMENT_NODE)
 				continue;

@@ -27,8 +27,8 @@ public final class Executable{
 	 */
 	public Executable(Action action, short cost, short importanceBias) {
 		this.action=action;
-		this.cost=cost;
-		this.importanceBias=importanceBias;
+		this.cost=(short)(cost+action.getCost());
+		this.importanceBias=(short)(importanceBias+action.getImportanceBias());
 	}
 	
 	/**
