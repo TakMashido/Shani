@@ -16,7 +16,9 @@ public class ShaniCore {
     /**Default stream low level debug messages*/
     public static final PrintStream info= Logger.getStream("info");
     
-    /**Error message to print if something bad happened to inform user about it.*/
+    /**Error message to print if something bad happened to inform user about it.
+     * @deprecated use errorOccurred(String) for proper error handling, it's include printing this message.*/
+    @Deprecated
     public static final ShaniString errorMessage=Engine.errorMessage;
 
     /**Current value of SentenceCompareThreshold.*/
@@ -97,5 +99,13 @@ public class ShaniCore {
     /**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out*/
     public static void registerLoadException() {
         Engine.registerLoadException();
+    }
+    
+    /**Assert false, print debugMessage into System.err, and show user default error message.
+     * @param debugMessage What to use as assert message or put to System.err.*/
+    public static void errorOccurred(String debugMessage){
+       assert false:debugMessage;
+       System.err.println(debugMessage);
+       errorMessage.printOut();
     }
 }

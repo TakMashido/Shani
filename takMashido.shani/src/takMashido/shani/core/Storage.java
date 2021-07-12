@@ -83,7 +83,7 @@ public class Storage {
 	}
 	
 	public static NodeList getNodes(Node where, String path) {
-		return getNodes(where, path, false); 
+		return getNodes(where, path, false);
 	}
 	@SuppressWarnings("resource")
 	private static NodeList getNodes(Node where, String path, boolean createNodes) {
@@ -120,7 +120,10 @@ public class Storage {
 		return Return;
 	}
 	public static Node getNode(Node where, String path) {
-		NodeList list=getNodes(where, path);
+		return getNode(where,path,false);
+	}
+	private static Node getNode(Node where, String path, boolean createNodes) {
+		NodeList list=getNodes(where, path, createNodes);
 		if(list==null)
 			return null;
 		return list.item(0);
@@ -145,6 +148,42 @@ public class Storage {
 		String str=((Element)node).getAttribute("val");
 		if(!str.isEmpty())return str;
 		return node.getTextContent();
+	}
+	
+	/**Write string into pointed node.
+	 * @param where Root node of provided path.
+	 * @param path Path to node where string will be saved.
+	 * @param value Value to save.*/
+	public static void writeString(Node where, String path, String value){
+		Element location=(Element)getNode(where,path,true);
+		
+		location.setAttribute("val",value);
+	}
+	/**Write integer into pointed node.
+	 * @param where Root node of provided path.
+	 * @param path Path to node where integer will be saved.
+	 * @param value Value to save.*/
+	public static void writeInt(Node where, String path, int value){
+		writeString(where,path,Integer.toString(value));
+	}
+	/**Write boolean into pointed node.
+	 * @param where Root node of provided path.
+	 * @param path Path to node where boolean will be saved.
+	 * @param value Value to save.*/
+	public static void writeBool(Node where, String path, boolean value){
+		writeString(where, path, Boolean.toString(value));
+	}
+	
+	/**Delete node from given root pointed by given path. If node do not exist does nothing.
+	 * @param where Root node of search.
+	 * @param path Path to node to delete.
+	 */
+	public static void deleteNode(Node where, String path){
+		Node node=getNode(where, path);
+		if(node==null)
+			return;
+		
+		node.getParentNode().removeChild(node);
 	}
 	
 	public static void writeUserData(String path,int data) {

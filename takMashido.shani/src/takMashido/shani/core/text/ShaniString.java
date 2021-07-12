@@ -370,6 +370,12 @@ public class ShaniString implements IntendBase {
 		origin=node;
 		saveData();
 	}
+	/**Return if data are automatically saved into xml node. True if it's loaded from xml node, {@link #setNode(Node)} was called.
+	 * @return Look above.
+	 */
+	public boolean isSavable(){
+		return origin!=null;
+	}
 	private void saveData() {
 		if(origin!=null) {
 			origin.setTextContent(toFullString());
