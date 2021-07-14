@@ -50,7 +50,6 @@
     </intendFilters>
     <orders>
         <order classname="takMashido.shaniModules.orders.WeatherOrder">
-
             <notKnowLocationMessage val="Nie wiem dla jakiego miejsca podać pogodę"/>
             <cannotProcessDayMessage val="Nie wiem o jaki dzień ci chodzi.*Nie wiem kiedy to jest."/>
             <cannotParseDayNumberMessage val="Aktualnie potrafię zrozumieć tylko liczby podane liczebnie nie słownie."/>
@@ -164,9 +163,6 @@
             <nonExistStopMessage>Nie mogę zatrzymać timera %s. Nie istnieje.*Timer %s nie istnieje.*Brak timera %s</nonExistStopMessage>
             <nonExistResetMessage>Timer %s nie intnieje.*Nie mogę zresetować timera %s. Takowy nie istnieje.</nonExistResetMessage>
             <nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
-            <config>
-                <noTimerImportanceBias val="-20"/>
-            </config>
         </order>
         <order classname="takMashido.shaniModules.orders.ExecuteOrder">
             <keywords val="odpal*włącz*otwórz*pokaż*show*start*uruchom"/>

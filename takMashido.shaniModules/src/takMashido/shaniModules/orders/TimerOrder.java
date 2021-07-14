@@ -2,38 +2,34 @@ package takMashido.shaniModules.orders;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.Action;
 import takMashido.shani.orders.IntendParserOrder;
+import takMashido.shani.orders.targetAction.KeywordTarget;
+import takMashido.shani.orders.targetAction.Target;
+import takMashido.shani.orders.targetAction.TargetAction;
+import takMashido.shani.orders.targetAction.TargetActionManager;
 import takMashido.shani.tools.parsers.TimeParser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class TimerOrder extends IntendParserOrder{
-	private ShaniString startMessage;                                          
+	private ShaniString startMessage;
 	private ShaniString alreadyRunningMessage;
-	private ShaniString stopMessage;                                                                     
-	private ShaniString alreadyStoppedMessage;                                                                                         
-	private ShaniString resetMessage;                                                     
-	private ShaniString printTimeMessage;                                                      
-	                                                                                                                                                                         
-	private ShaniString nonExistStartMessage;            
-	private ShaniString nonExistStopMessage;                            
-	private ShaniString nonExistResetMessage;                                  
-	private ShaniString nonExistPrintTimeMessage;                                       
+	private ShaniString stopMessage;
+	private ShaniString alreadyStoppedMessage;
+	private ShaniString resetMessage;
+	private ShaniString printTimeMessage;
 	
-	private short noTimerImportanceBias;
+	private ShaniString nonExistStartMessage;
+	private ShaniString nonExistStopMessage;
+	private ShaniString nonExistResetMessage;
+	private ShaniString nonExistPrintTimeMessage;
+	
+	private TargetActionManager manager;
 	
 	private Node dataElement;			//node inside ordersData in shaniData
-	
-	private ArrayList<TimerAction> timers=new ArrayList<>();
 	
 	public TimerOrder(Element e) {
 		super(e);
@@ -52,76 +48,87 @@ public class TimerOrder extends IntendParserOrder{
 		
 		dataElement=Storage.getOrderData(this);
 		
-		noTimerImportanceBias=(short)Storage.getInt(e, "config.noTimerImportanceBias");
-		
-		NodeList subnodes=dataElement.getChildNodes();
-		for(int i=0;i<subnodes.getLength();i++) {
-			if(subnodes.item(i) instanceof Element)
-				new TimerAction((Element)subnodes.item(i));
+		Node timersNode=Storage.getNode(dataElement, "timers");
+		if(timersNode==null){
+			timersNode=dataElement.getOwnerDocument().createElement("timers");
+			dataElement.appendChild(timersNode);
 		}
+		
+		manager=new TargetActionManager((Element)timersNode, TimerAction::new, Timer::new);
 	}
 	
 	@Override
 	public Action getAction(){
-		return new SelectTimerAction();
+		return manager.getAction();
 	}
 	
-	@Override
-	public void save() {
-		for(var timer:timers) {
-			timer.save();
-		}
-	}
-	
-	private class SelectTimerAction extends Action{
-		private TimerAction bestTimer;
-		private short bestTimerCost;
-		
+	private class TimerAction extends TargetAction{
 		@Override
-		public boolean execute(){
-			if(bestTimer!=null)
-				return bestTimer.execute(name, (HashMap<String,String>)parameters);
-			
-			return new NoTimerAction().execute(name, (HashMap<String,String>)parameters);
-		}
-		
-		@Override
-		public void init(String name, Map<String,? extends Object> params){
-			super.init(name,params);
-			
-			//Set best timer for this Action.
-			ShaniString keyword=new ShaniString((String)parameters.get("name"));
-			
-			if(timers.size()>0){
-				short minCost=timers.get(0).keyword.getCompareCost(keyword);
-				int minIndex=0;
-				for(int i=0; i<timers.size(); i++){
-					short cost=timers.get(i).keyword.getCompareCost(keyword);
-					
-					if(cost<minCost){
-						minCost=cost;
-						minIndex=i;
-					}
-				}
-				
-				bestTimer=timers.get(minIndex);
-				bestTimerCost=minCost;
+		protected boolean execute(Target target){
+			if(!(target instanceof Timer)){
+				ShaniCore.errorOccurred("Invalid target class detected in TimerAction.execute(Target). It has to be Timer instance.");
+				return false;
 			}
-		}
-		
-		@Override
-		public short getImportanceBias(){
-			if(bestTimer!=null)
-				return bestTimerCost;
+			Timer timer=(Timer)target;
 			
-			return Config.wordInsertionCost;
+			Tests.addResults("operation",name);
+			Tests.addResults("timerName",timer.keyword.toString());
+			
+			switch (name) {
+				case "start":
+					timer.start(true);
+					break;
+				case "stop":
+					timer.stop();
+					break;
+				case "show":
+					timer.show();
+					break;
+				case "reset":
+					timer.reset();
+					break;
+				default:
+					ShaniCore.errorOccurred("Invalid action name in TimerAction: "+name);
+					return false;
+			}
+			return true;
 		}
 		@Override
-		public short getCost(){
-			if(bestTimer!=null)
-				return 0;
+		protected boolean executeNoTarget(){
+			Tests.addResults("newTimer",true);
 			
-			return noTimerImportanceBias;
+			String timerName=(String)parameters.get("name");
+			
+			Tests.addResults("operation",name);
+			Tests.addResults("timerName",timerName);
+			
+			switch(name) {
+				case "start":
+					System.out.printf(nonExistStartMessage.toString(),timerName);
+					System.out.println();
+					
+					Timer timer=new Timer(timerName);
+					manager.registerNewTarget(timer);
+					
+					timer.start(false);
+					break;
+				case "stop":
+					System.out.printf(nonExistStopMessage.toString(),timerName);
+					System.out.println();
+					break;
+				case "show":
+					System.out.printf(nonExistPrintTimeMessage.toString(),timerName);
+					System.out.println();
+					break;
+				case "reset":
+					System.out.printf(nonExistResetMessage.toString(),timerName);
+					System.out.println();
+					break;
+				default:
+					ShaniCore.errorOccurred("Invalid action name in TimerAction: "+name);
+					return false;
+			}
+			return true;
 		}
 		
 		@Override
@@ -131,55 +138,19 @@ public class TimerOrder extends IntendParserOrder{
 			return false;
 		}
 	}
-	private class TimerAction{
-		protected Element targetFile;
-		protected ShaniString keyword;
+	private class Timer extends KeywordTarget{
 		
 		private int timeCounted;						//In sec
 		private boolean isRunning;
 		private long lastTimeMeasure;					//currentTimeMillis
 		
-		private TimerAction(Element e) {
-			targetFile=e;
-			keyword=new ShaniString(targetFile.getElementsByTagName("key").item(0));
-			
-			timeCounted=Integer.parseInt(targetFile.getElementsByTagName("time").item(0).getTextContent());
-			
-			timers.add(this);
+		public Timer(String keyword){
+			super("name",new ShaniString(ShaniString.ParseMode.raw,keyword));
 		}
-		private TimerAction(String keyword) {
-			this.keyword=new ShaniString(keyword);
-			targetFile=dataElement.getOwnerDocument().createElement("target");
-			dataElement.appendChild(targetFile);
+		private Timer(Element e) {
+			super("name",e);
 			
-			Element e=targetFile.getOwnerDocument().createElement("key");
-			targetFile.appendChild(e);
-			timers.add(this);
-			this.keyword.setNode(e);
-		}
-		
-		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
-			Tests.addResults("operation",sentenceName);
-			
-			switch (sentenceName) {
-			case "start":
-				start(true);
-				break;
-			case "stop":
-				stop();
-				break;
-			case "show":
-				show();
-				break;
-			case "reset":
-				reset();
-				break;
-			default:
-				ShaniCore.errorMessage.printOut();
-				System.err.println();
-				return false;
-			}
-			return true;
+			timeCounted=Storage.getInt(saveLocation,"time");
 		}
 		
 		private void start(boolean echo) {
@@ -205,9 +176,9 @@ public class TimerOrder extends IntendParserOrder{
 			System.out.println();
 		}
 		private void show() {
-			Tests.addResults("time",timeCounted);
-			
 			updateTime();
+			
+			Tests.addResults("time",timeCounted);
 			System.out.printf(printTimeMessage.toString(), TimeParser.parseTime(timeCounted));
 			System.out.println();
 		}
@@ -218,48 +189,25 @@ public class TimerOrder extends IntendParserOrder{
 			timeCounted+=(time- lastTimeMeasure)/1000;
 			lastTimeMeasure =time;
 		}
-		private void save() {
+		
+		@Override
+		public void save() {
+			super.save();
+			
 			updateTime();
-			var timeNode=targetFile.getElementsByTagName("time").item(0);
+			var timeNode=saveLocation.getElementsByTagName("time").item(0);
 			if(timeNode==null) {
-				timeNode=targetFile.getOwnerDocument().createElement("time");
-				targetFile.appendChild(timeNode);
+				timeNode=saveLocation.getOwnerDocument().createElement("time");
+				saveLocation.appendChild(timeNode);
 			}
 			timeNode.setTextContent(Integer.toString(timeCounted));
 		}
 	}
-	private class NoTimerAction{
-		protected boolean execute(String sentenceName, HashMap<String, String> returnValues) {
-			String timerName=returnValues.get("name");
-			
-			Tests.addResults("operation",sentenceName);
-			Tests.addResults("timerName",timerName);
-			
-			switch(sentenceName) {
-			case "start":
-				System.out.printf(nonExistStartMessage.toString(),timerName);
-				System.out.println();
-				TimerAction timer=new TimerAction(timerName);
-				timer.start(false);
-				break;
-			case "stop":
-				System.out.printf(nonExistStopMessage.toString(),timerName);
-				System.out.println();
-				break;
-			case "show":
-				System.out.printf(nonExistPrintTimeMessage.toString(),timerName);
-				System.out.println();
-				break;
-			case "reset":
-				System.out.printf(nonExistResetMessage.toString(),timerName);
-				System.out.println();
-				break;
-			default:
-				System.err.println("Unknown sentence name in NoTimerAction: "+sentenceName);
-				ShaniCore.errorMessage.printOut();
-				return false;
-			}
-			return true;
-		}
+	
+	@Override
+	public void save(){
+		super.save();
+		
+		manager.saveTargets();
 	}
 }

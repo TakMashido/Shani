@@ -54,31 +54,44 @@
         <test name="TimerOrder.1">
             <intend classname="takMashido.shani.core.text.ShaniString" mode="raw" val="włącz timer test"/>
             <responses>
-                <actionClass val="takMashido.shaniModules.orders.TimerOrder.SelectTimerAction"/>
+                <actionClass val="takMashido.shaniModules.orders.TimerOrder.TimerAction"/>
                 <operation val="start"/>
+                <newTimer type="boolean" val="true"/>
                 <timerName val="test"/>
             </responses>
         </test>
         <test name="TimerOrder.2">
             <intend classname="takMashido.shani.core.text.ShaniString" mode="raw" val="zatrzymaj zegar test"/>
             <responses>
-                <actionClass val="takMashido.shaniModules.orders.TimerOrder.SelectTimerAction"/>
+                <actionClass val="takMashido.shaniModules.orders.TimerOrder.TimerAction"/>
                 <operation val="stop"/>
+                <timerName val="test"/>
             </responses>
         </test>
         <test name="TimerOrder.3">
             <intend classname="takMashido.shani.core.text.ShaniString" mode="raw" val="wyzeruj timer test"/>
             <responses>
-                <actionClass val="takMashido.shaniModules.orders.TimerOrder.SelectTimerAction"/>
+                <actionClass val="takMashido.shaniModules.orders.TimerOrder.TimerAction"/>
                 <operation val="reset"/>
+                <timerName val="test"/>
             </responses>
         </test>
         <test name="TimerOrder.4">
             <intend classname="takMashido.shani.core.text.ShaniString" mode="raw" val="ile zliczył timer test"/>
             <responses>
-                <actionClass val="takMashido.shaniModules.orders.TimerOrder.SelectTimerAction"/>
+                <actionClass val="takMashido.shaniModules.orders.TimerOrder.TimerAction"/>
                 <operation val="show"/>
                 <time type="int" val="0"/>
+                <timerName val="test"/>
+            </responses>
+        </test>
+        <test name="TimerOrder.load.1">
+            <intend classname="takMashido.shani.core.text.ShaniString" mode="raw" val="wyświetl timer saved"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.TimerOrder.TimerAction"/>
+                <operation val="show"/>
+                <time type="int" val="1337"/>
+                <timerName val="saved"/>
             </responses>
         </test>
     </end2end>

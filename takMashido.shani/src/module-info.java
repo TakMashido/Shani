@@ -9,4 +9,5 @@ module takMashido.shani {
     exports takMashido.shani.tools.parsers;
     exports takMashido.shani.filters;
     exports takMashido.shani.orders;
+	exports takMashido.shani.orders.targetAction;
 }

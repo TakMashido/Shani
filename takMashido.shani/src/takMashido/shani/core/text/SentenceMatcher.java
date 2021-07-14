@@ -899,18 +899,4 @@ public class SentenceMatcher {
 				printTokens(token.subTokens, depth+1);
 		}
 	}
-
-	/*public static void main(String[]args) throws SAXException, IOException, ParserConfigurationException {
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("test.xml"));
-		doc.getDocumentElement().normalize();
-		
-		var matcher=new SentenceMatcher(DOMWalker.walk(doc, "tests/sentenceMatcher/test"));
-		
-//		var reses=matcher.process("witam pana gneera�a pu�kownika");
-		var reses=matcher.process("must mork hog");
-		System.out.println("\nfinal resoults:");
-		for(var res:reses)
-			System.out.println(res);
-		System.out.println("End");
-	}*/
 }

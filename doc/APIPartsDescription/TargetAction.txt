@@ -1,0 +1,15 @@
+TargetAction is Action using set of targets. It's suitable e.g. for timers. Every timer is Target and Action manipulates it.
+
+This API essential classes are:
+Target interface -> Provides basic methods allowing it's usage. Esspessialy getSimilarity(String,Map<String,?>) returning cost and importanceBias of usage of this target.
+	You can use KeywordTarget abstract class to get ShaniString keywords mathcing implementation.
+TargetAction abstract class -> Action used to be executed on Targets. It contain execute(Target) and executeNoTarget() abstract methods to implement functionality.
+TargetActionMenager -> Because Target and TargetAction has to work closely together and creating instance of TargetAction is often needed this class was provided serving as Manager and factory for them.
+	It also contain some "static" data shared beetwen Action's inistance belonging to given Manager instance
+
+Usage of API is following:
+Override TargetAction and Target/KeywordTarget and add your functionality in Action with data stored in Target.
+Store TargetActionManager your Order subclass. Use it's getAction method to provide new Actions. Either in getExecutables or IntendParserOrder getAction.
+
+When you want to add new Target create it regular way and use menagers registerTarget method. You do not need to provide save location XML Element, manager does it.
+Saving Targets manually is also not necessary, use manager's saveTargets to do it.

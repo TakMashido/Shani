@@ -70,6 +70,8 @@ public class Config {
 		sentenceMatcherWordReturnImportanceBias=(short)getIntProperty(props, "sentenceMatcherWordReturnImportanceBias");
 		sentenceMatcherRegexImportanceBias=(short)getIntProperty(props, "sentenceMatcherRegexImportanceBias");
 		
+		targetActionNoTargetImportanceBias=(short)getIntProperty(props,"targetActionNoTargetImportanceBias");
+		
 		importanceBiasMultiplier=getFloatProperty(props,"importanceBiasMultiplier");
 		
 		ignoreMissingPropertyErrors=true;
@@ -312,6 +314,8 @@ public class Config {
 	/*SentenceMatcher*/
 	public static final short sentenceMatcherWordReturnImportanceBias; 
 	public static final short sentenceMatcherRegexImportanceBias;
+	
+	public static final short targetActionNoTargetImportanceBias;
 	
 	public static final float importanceBiasMultiplier;
 	

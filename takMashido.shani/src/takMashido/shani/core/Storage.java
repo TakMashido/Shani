@@ -239,18 +239,26 @@ public class Storage {
 		return getNodes(ordersData, order.getClass().getCanonicalName(),true).item(0);
 	}
 	
-	public static int getInt(Node where,String path) {
-		return Integer.parseInt(getString(where,path));
+	/**Get Boolean stored under userData node, or null if not found.
+	 * @param where Root node of search.
+	 * @param path Where to search for boolean.
+	 * @return Stored value or null if not found.
+	 */
+	public static Integer getInt(Node where,String path) {
+		String val=getString(where,path);
+		
+		if(val==null)return null;
+		return Integer.valueOf(val);
 	}
 	/**Get Boolean stored under userData node, or null if not found.
+	 * @param where Root node of search.
 	 * @param path Where to search for boolean.
 	 * @return Stored value or null if not found.
 	 */
 	public static Boolean getBool(Node where, String path) {
 		var ret=getString(where,path);
 		
-		if(ret==null)
-			return null;
+		if(ret==null)return null;
 		return Boolean.parseBoolean(ret);
 	}
 	
