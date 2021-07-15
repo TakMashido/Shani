@@ -66,6 +66,7 @@ public class Config {
 		sentenceCompareThreshold =(short)getIntProperty(props,"sentenceCompareThreshold");
 		wordInsertionCost=(short)getIntProperty(props,"wordInsertionCost");
 		wordDeletionCost=(short)getIntProperty(props,"wordDeletionCost");
+		wordSemimatchCost=(short)getIntProperty(props,"wordSemimatchCost");
 		
 		sentenceMatcherWordReturnImportanceBias=(short)getIntProperty(props, "sentenceMatcherWordReturnImportanceBias");
 		sentenceMatcherRegexImportanceBias=(short)getIntProperty(props, "sentenceMatcherRegexImportanceBias");
@@ -310,6 +311,7 @@ public class Config {
 	public static final short sentenceCompareThreshold;
 	public static final short wordInsertionCost;
 	public static final short wordDeletionCost;
+	public static final short wordSemimatchCost;									//Cost of word's matched as wildcard, e.g. unmatched part of KeywordIntend parser
 	
 	/*SentenceMatcher*/
 	public static final short sentenceMatcherWordReturnImportanceBias; 

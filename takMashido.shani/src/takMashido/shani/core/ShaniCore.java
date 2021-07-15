@@ -96,8 +96,18 @@ public class ShaniCore {
         return null;
     }
     
-    /**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out*/
+    /**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out
+     * @deprecated Use {@link #errorOccurred(String)} to provide error message.*/
+    @Deprecated
     public static void registerLoadException() {
+        Engine.registerLoadException();
+    }
+    /**Call if any error encountered during loading shani. Sets up LOADING_ERROR flag. If true at the end of loading message informing user about loading errors become send to System.out
+     * @param logMessage Message to use in assertion/System.err*/
+    public static void registerLoadException(String logMessage) {
+        assert false:logMessage;
+        System.err.println("Loading error: "+logMessage);
+        
         Engine.registerLoadException();
     }
     

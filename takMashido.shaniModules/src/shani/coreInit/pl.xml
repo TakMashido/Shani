@@ -165,7 +165,11 @@
             <nonExistPrintTimeMessage>Brak timera %s.*Jak mam wyświetlić czas z nieistniejącego timera?</nonExistPrintTimeMessage>
         </order>
         <order classname="takMashido.shaniModules.orders.ExecuteOrder">
-            <keywords val="odpal*włącz*otwórz*pokaż*show*start*uruchom"/>
+            <parsers>
+                <keyword classname="takMashido.shani.intedParsers.text.KeywordIntendParser">
+                    <keyword val="odpal*włącz*otwórz*pokaż*show*start*uruchom"/>
+                </keyword>
+            </parsers>
             <successfulMessage val="Gotowe*Włączyłam*Zadanie wykonane*Miłego użytkownia"/>
             <notKnowMessage val="Proszę podaj dokładnie co mam włączyć*Co mam włączyć?*Co odpalić?"/>
             <unrecognizedMessage val="Przykro mi nie potrafię tego włączyć.*Nie wiem gdzie to znaleźć.*nie mam pojęcia jak to włączyć."/>

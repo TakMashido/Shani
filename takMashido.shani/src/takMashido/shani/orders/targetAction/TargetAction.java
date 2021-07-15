@@ -9,7 +9,7 @@ import java.util.Map;
 /**Action designed to be invoked on one of inner targets.
  * Performs automatic target selection and cost, importanceBias calculation based on distance and existence of target matching user input.*/
 public abstract class TargetAction extends Action{
-	private TargetActionManager maneger;
+	private TargetActionManager manager;
 	
 	private Target bestTarget;
 	private Pair<Short,Short> bestCost;
@@ -18,39 +18,21 @@ public abstract class TargetAction extends Action{
 	 * @param manager Look above.
 	 */
 	void setManager(TargetActionManager manager){
-		this.maneger=manager;
+		this.manager=manager;
 	}
 	
 	@Override
 	public void init(String name, Map<String,?> parameters){
 		super.init(name,parameters);
 		
-		if(!maneger.targets.isEmpty()){
-			int minIndex=0;
-			Pair<Short,Short> minCost=maneger.targets.get(0).getSimilarity(name,parameters);
-			short minCompoundCost=(short)(minCost.first+Config.importanceBiasMultiplier*minCost.second);
-			
-			for(int i=0; i<maneger.targets.size(); i++){
-				Pair<Short,Short> cost=maneger.targets.get(i).getSimilarity(name,parameters);
-				short compoundCost=(short)(cost.first+Config.importanceBiasMultiplier*cost.second);
-				
-				if(compoundCost<minCompoundCost){
-					minIndex=i;
-					minCost=cost;
-					minCompoundCost=compoundCost;
-				}
-			}
-			
-			if(minCost.first<Config.sentenceCompareThreshold){
-				bestTarget=maneger.targets.get(minIndex);
-				bestCost=minCost;
-				
-				return;
-			}
+		Pair<Pair<Short,Short>,Target> best=manager.getTarget(name,parameters);
+		if(best==null){
+			bestCost=null;
+			bestTarget=null;
+		} else {
+			bestCost=best.first;
+			bestTarget=best.second;
 		}
-		
-		bestTarget=null;
-		bestCost=null;
 	}
 	
 	@Override

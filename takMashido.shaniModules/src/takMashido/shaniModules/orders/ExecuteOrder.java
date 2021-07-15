@@ -1,19 +1,31 @@
 package takMashido.shaniModules.orders;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import takMashido.shani.core.ShaniCore;
+import takMashido.shani.core.Storage;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.KeywordOrder;
+import takMashido.shani.libraries.Pair;
+import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserOrder;
+import takMashido.shani.orders.targetAction.KeywordTarget;
+import takMashido.shani.orders.targetAction.Target;
+import takMashido.shani.orders.targetAction.TargetAction;
+import takMashido.shani.orders.targetAction.TargetActionManager;
 import takMashido.shani.tools.InputCleaners;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExecuteOrder extends KeywordOrder {
+public final class ExecuteOrder extends IntendParserOrder{
 	private static ShaniString successfulMessage;
 	private static ShaniString notKnowMessage;
 	private static ShaniString unrecognizedMessage;
+	
+	private TargetActionManager manager;
 	
 	public ExecuteOrder(Element e) {
 		super(e);
@@ -21,20 +33,21 @@ public class ExecuteOrder extends KeywordOrder {
 		successfulMessage=ShaniString.loadString(e, "successfulMessage");
 		notKnowMessage=ShaniString.loadString(e, "notKnowMessage");
 		unrecognizedMessage=ShaniString.loadString(e, "unrecognizedMessage");
+		
+		Node dataNode=Storage.getOrderData(this);
+		
+		Element executableElement=(Element)Storage.getNode(dataNode,"executables");
+		if(executableElement==null){
+			executableElement=dataNode.getOwnerDocument().createElement("executables");
+			dataNode.appendChild(executableElement);
+		}
+		
+		manager=new TargetActionManager(executableElement, ExecuteAction::new,ExecuteTarget::new);
 	}
 	
 	@Override
-	protected String getDataLocation() {
-		return "fileSystem.executables";
-	}
-	
-	@Override
-	public KeywordAction actionFactory(Element element) {
-		return new ExecuteAction(element);
-	}
-	@Override
-	public UnmatchedAction getUnmatchedAction() {
-		return new AddExecuteAction();
+	public Action getAction(){
+		return manager.getAction();
 	}
 	
 	private static final Pattern UriPattern=Pattern.compile("\"?[\\w\\.]+://[\\w/\\\\\\?=& ]+\"?");
@@ -51,136 +64,144 @@ public class ExecuteOrder extends KeywordOrder {
 	protected boolean isPath(String com) {
 		return PathPattern.matcher(InputCleaners.removeNational(com)).matches();
 	}
- 	
-	protected class ExecuteAction extends KeywordAction {
-		private String targetType;
-		private String[] target;
-		
-		protected ExecuteAction(Element e) {
-			super(e);
-			actionFile=e;
-			targetType=e.getElementsByTagName("type").item(0).getTextContent();
-			target=new ShaniString(e.getElementsByTagName("todo").item(0).getTextContent()).getArray();
-		}
-		protected ExecuteAction(ShaniString key,String targetType,String[] target) {
-			super(key);
-			
-			var doc=targetDataNode.getOwnerDocument();
-			Element e2=doc.createElement("type");
-			e2.appendChild(doc.createTextNode(targetType));
-			actionFile.appendChild(e2);
-			this.targetType=targetType;
-			
-			e2=doc.createElement("todo");
-			e2.appendChild(doc.createTextNode(new ShaniString(target).toFullString()));
-			actionFile.appendChild(e2);
-			this.target=target;
-		}
-		
+	
+	private class ExecuteAction extends TargetAction{
 		@Override
-		public boolean keywordExecute() {
-			boolean Return=false;
-			switch(targetType) {
-			case "print":
-				System.out.println(target[0]);
-				Return=true;
-				break;
-			case "call":
-				Return=execute("cmd /c call \""+target[0]+'"',0);
-				break;
-			case "start":
-				Return=execute("cmd /c start \"\" \""+target[0]+'"',0);
-				break;
-			case "startdir":
-				if(target.length==2) {
-					Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+'"',0);
-				} else if(target.length==3) {
-					Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+"\" "+target[2],0);
-				} else {
-					Return=false;
-					System.out.println("Failed to execute: You've just found shani bug so congrats and report on github.com/takmashido/shani.");
-					assert false:"Execute order suports executing only startdir targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!";
-					System.err.println("Execute order suports executing only startdir targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!");
-				}
-				break;
-			case "dir":
-				Return=execute("cmd /c explorer "+target[0],1);
-				break;
-			default:
-				System.err.println(targetType+" is not supported execute type");
-				System.out.println(targetType+" is not supported execute type");
-				Return=false;
-			}
-			if(Return)System.out.println(successfulMessage);
-			return Return;
+		protected boolean execute(Target target){
+			return ((ExecuteTarget)target).execute();
 		}
-		private boolean execute(String command, int succesfullExitVal) {
-			try {
-				Process proc=Runtime.getRuntime().exec(command);
-				proc.waitFor();
-				ShaniCore.debug.println(command+": "+proc.exitValue());
-				return proc.exitValue()==succesfullExitVal;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			} catch (InterruptedException e) {
-				return true;
-			}
-		}
-	}
-	protected class AddExecuteAction extends UnmatchedAction {
-		private KeywordAction readyAction;
-		
 		@Override
-		public boolean execute() {
+		protected boolean executeNoTarget(){
 			System.out.println(notKnowMessage);
 			
 			String newCom=ShaniCore.getIntend(ShaniString.class).value.toString();
-			Boolean positive=ShaniCore.isInputPositive(new ShaniString(newCom,false));
+			ShaniCore.debug.println("ExecuteOrderAddTargetInput: \""+newCom+'"');
+			
+			ShaniString unmatched=(ShaniString)parameters.get("unmatched");
+			
+			Boolean positive=ShaniCore.isInputPositive(new ShaniString(ShaniString.ParseMode.raw,newCom));
 			if(positive!=null&&!positive)
 				return false;
-
+			
 			if(isPath(newCom)) {
-				return createAction(unmatched,"dir",new String[] {InputCleaners.clear(newCom)});
+				return createTarget(unmatched,"dir",new String[] {InputCleaners.clear(newCom)});
 			}
 			if(isUri(newCom)) {
-				return createAction(unmatched,"start",new String[] {InputCleaners.clear(newCom)});
+				return createTarget(unmatched,"start",new String[] {InputCleaners.clear(newCom)});
 			}
 			if(isExecutable(newCom)) {
 				Matcher mat=StartDirPattern.matcher(InputCleaners.clear(newCom));
 				if(!mat.matches()) {
 					mat=StartDirPattern2.matcher(newCom);
 					mat.matches();
-					return createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2),mat.group(3)});
+					return createTarget(unmatched,"startdir",new String[] {mat.group(1),mat.group(2),mat.group(3)});
 				}
 				mat.group();
 				
-				return createAction(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
+				return createTarget(unmatched,"startdir",new String[] {mat.group(1),mat.group(2)});
 			}
 			
-			KeywordAction exec=getAction(new ShaniString(newCom,false));				//Input is not valid program/file/URL. Check if it's one of already existing keys.
+			Pair<Pair<Short,Short>,Target> exec=manager.getTarget("execute", Map.of("unmatched",newCom));				//Input is not valid program/file/URL. Check if it's one of already existing keys.
 			if(exec!=null) {
-				exec.addKey(unmatched);
-				exec.execute();
-				readyAction=exec;
-				return true;
+				((KeywordTarget)exec.second).keyword.add(unmatched);
+				return execute(exec.second);
 			}
 			unrecognizedMessage.printOut();
 			return false;
 		}
-		private boolean createAction(ShaniString key, String targetType, String[] target) {
-			KeywordAction action=new ExecuteAction(key,targetType,target);
-			action.execute();
-			readyAction=action;
+		private boolean createTarget(ShaniString key, String targetType, String[] target) {
+			ExecuteTarget newTarget=new ExecuteTarget(key,targetType,target);
+			manager.registerNewTarget(newTarget);
+			
+			execute(newTarget);
 			return true;
 		}
+		
 		@Override
-		public boolean connectAction(String action) {
-			if(readyAction!=null) {
-				return readyAction.connectAction(action);
-			}
-			System.err.println("Can't connect ExecuteOrder.AddExecuteAction action to another if it wasn't created KeywordAction");
+		public boolean connectAction(String action){
+			ShaniCore.errorOccurred("Connecting not available now.");
 			return false;
+		}
+	}
+	private class ExecuteTarget extends KeywordTarget{
+		private String targetType;
+		private String[] target;
+		
+		ExecuteTarget(Element e){
+			super(e);
+			
+			targetType=e.getElementsByTagName("type").item(0).getTextContent();
+			target=new ShaniString(e.getElementsByTagName("todo").item(0).getTextContent()).getArray();
+		}
+		ExecuteTarget(ShaniString key,String targetType,String[] target) {
+			super(key);
+			
+			this.targetType=targetType;
+			this.target=target;
+		}
+		
+		@Override
+		public void setSaveElement(Element e){
+			super.setSaveElement(e);
+			
+			Document doc=e.getOwnerDocument();
+			Element e2=doc.createElement("type");
+			e2.appendChild(doc.createTextNode(targetType));
+			e.appendChild(e2);
+			
+			e2=doc.createElement("todo");
+			e2.appendChild(doc.createTextNode(new ShaniString(target).toFullString()));
+			e.appendChild(e2);
+		}
+		
+		boolean execute() {
+			boolean Return=false;
+			switch(targetType) {
+				case "print":
+					System.out.println(target[0]);
+					Return=true;
+					break;
+				case "call":
+					Return=execute("cmd /c call \""+target[0]+'"',0);
+					break;
+				case "start":
+					Return=execute("cmd /c start \"\" \""+target[0]+'"',0);
+					break;
+				case "startdir":
+					if(target.length==2) {
+						Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+'"',0);
+					} else if(target.length==3) {
+						Return=execute("cmd /c start \"\" /D \""+target[0]+"\" \""+target[1]+"\" "+target[2],0);
+					} else {
+						Return=false;
+						System.out.println("Failed to execute: You've just found shani bug so congrats and report on github.com/takmashido/shani.");
+						assert false:"Execute order suports executing only startdir targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!";
+						System.err.println("Execute order suports executing only startdir targets with length 2 or 3. Length "+target.length+" sneaked somehow. FIXIT!!!!!!!!!");
+					}
+					break;
+				case "dir":
+					Return=execute("cmd /c explorer "+target[0],1);
+					break;
+				default:
+					System.err.println(targetType+" is not supported execute type");
+					System.out.println(targetType+" is not supported execute type");
+					Return=false;
+			}
+			if(Return)System.out.println(successfulMessage);
+			return Return;
+		}
+		private boolean execute(String command, int successExitVal) {
+			try {
+				Process proc=Runtime.getRuntime().exec(command);
+				proc.waitFor();
+				ShaniCore.debug.println(command+": "+proc.exitValue());
+				return proc.exitValue()==successExitVal;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			} catch (InterruptedException e) {
+				return true;
+			}
 		}
 	}
 }

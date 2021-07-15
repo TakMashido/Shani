@@ -3,9 +3,12 @@ package takMashido.shani.orders.targetAction;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import takMashido.shani.core.Config;
+import takMashido.shani.libraries.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -63,6 +66,36 @@ public final class TargetActionManager{
 		ret.setManager(this);
 		
 		return ret;
+	}
+	
+	/**Get target best matching given parameters.
+	 * @param name Name of Intend match
+	 * @param parameters Parameters returned by intend match.
+	 * @return Pair(Pair(cost,importanceBias),Target) of best match
+	 */
+	public Pair<Pair<Short,Short>,Target> getTarget(String name, Map<String,?> parameters){
+		if(!targets.isEmpty()){
+			int minIndex=0;
+			Pair<Short,Short> minCost=targets.get(0).getSimilarity(name,parameters);
+			short minCompoundCost=(short)(minCost.first-Config.importanceBiasMultiplier*minCost.second);
+			
+			for(int i=1; i<targets.size(); i++){
+				Pair<Short,Short> cost=targets.get(i).getSimilarity(name,parameters);
+				short compoundCost=(short)(cost.first+Config.importanceBiasMultiplier*cost.second);
+				
+				if(compoundCost<minCompoundCost){
+					minIndex=i;
+					minCost=cost;
+					minCompoundCost=compoundCost;
+				}
+			}
+			
+			if(minCost.first<Config.sentenceCompareThreshold){
+				return new Pair<>(minCost,targets.get(minIndex));
+			}
+		}
+		
+		return null;
 	}
 	
 	/**Invoke save method on all targets*/
