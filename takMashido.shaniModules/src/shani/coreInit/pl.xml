@@ -210,7 +210,11 @@
             </parsers>
         </order>
         <order classname="takMashido.shaniModules.orders.CMDOrder">
-            <keywords>cmd</keywords>
+            <parsers>
+                <keyword classname="takMashido.shani.intedParsers.text.KeywordIntendParser">
+                    <keyword val="cmd*terminal"/>
+                </keyword>
+            </parsers>
             <executeMessage>Wykonuję polecenie.*Przetwarzam komendę</executeMessage>
             <runCMDSessionMessage>CMD odpalone.*Włączam konsolę.</runCMDSessionMessage>
             <endCMDSessionMessage>Koniec sesji.*CMD zakończyło pracę</endCMDSessionMessage>

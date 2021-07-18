@@ -94,5 +94,19 @@
                 <timerName val="saved"/>
             </responses>
         </test>
+        <test name="CMDOrder.1">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="cmd ping 192.168.1.1"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CMDOrder.CMDAction"/>
+                <operation val="ping 192.168.1.1 "/>
+            </responses>
+        </test>
+        <test name="CMDOrder.2">
+            <intend classname="takMashido.shani.core.text.ShaniString" val="terminal"/>
+            <responses>
+                <actionClass val="takMashido.shaniModules.orders.CMDOrder.CMDAction"/>
+                <openCMD type="boolean" val="true"/>
+            </responses>
+        </test>
     </end2end>
 </shaniTests>

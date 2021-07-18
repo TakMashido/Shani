@@ -1,14 +1,17 @@
 package takMashido.shaniModules.orders;
 
 import org.w3c.dom.Element;
+import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
+import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.KeywordOrder;
+import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserOrder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class CMDOrder extends KeywordOrder{
+public class CMDOrder extends IntendParserOrder{
 	private ShaniString executeMessage;
 	private ShaniString runCMDSessionMessage;
 	private ShaniString endCMDSessionMessage;
@@ -19,16 +22,10 @@ public class CMDOrder extends KeywordOrder{
 		executeMessage=ShaniString.loadString(e,"executeMessage");
 		runCMDSessionMessage=ShaniString.loadString(e,"runCMDSessionMessage");
 		endCMDSessionMessage=ShaniString.loadString(e,"endCMDSessionMessage");
-		
-		targetExactMatch=true;
 	}
 	
 	@Override
-	public KeywordAction actionFactory(Element element) {
-		return new MergedCMDAction(element);
-	}
-	@Override
-	public UnmatchedAction getUnmatchedAction() {
+	public Action getAction(){
 		return new CMDAction();
 	}
 	
@@ -40,6 +37,11 @@ public class CMDOrder extends KeywordOrder{
 		}
 	}
 	private void executeCommand(String command) {
+		if(Config.testMode){
+			Tests.addResults("operation",command);
+			return;
+		}
+		
 		executeMessage.printOut();
 		try {
 			ArrayList<String> com=new ArrayList<>();
@@ -62,6 +64,11 @@ public class CMDOrder extends KeywordOrder{
 		}
 	}
 	private void launchCMD() {
+		if(Config.testMode){
+			Tests.addResults("openCMD",true);
+			return;
+		}
+		
 		runCMDSessionMessage.printOut();
 		try {
 			ProcessBuilder builder=new ProcessBuilder("cmd");
@@ -78,47 +85,17 @@ public class CMDOrder extends KeywordOrder{
 		} catch (InterruptedException e) {}
 	}
 	
-	private class MergedCMDAction extends KeywordAction {
-		private final String command;
-		
-		protected MergedCMDAction(Element elem) {
-			super(elem);
-			command=elem.getElementsByTagName("command").item(0).getTextContent();
-		}
-		protected MergedCMDAction(ShaniString command) {
-			super(command);									//Delete fuzzy string matching from this somehow
-			this.command=command.toFullString();
+	private class CMDAction extends Action {
+		@Override
+		public boolean execute(){
+			ShaniString unmatched=(ShaniString)parameters.get("unmatched");
 			
-			Element elem=actionFile.getOwnerDocument().createElement("command");
-			elem.setTextContent(this.command);
-			actionFile.appendChild(elem);
-		}
-		
-		@Override
-		public boolean keywordExecute() {
-			processCommand(command);
+			if(unmatched.isEmpty())
+				launchCMD();
+			else
+				executeCommand(unmatched.toString());
+			
 			return true;
 		}
-	}
-	private class CMDAction extends UnmatchedAction {
-		private MergedCMDAction mergedAction=null;  
-		
-		@Override
-		public boolean execute() {
-			processCommand(unmatched.toFullString());
-			return true;
-		}
-		@Override
-		public boolean connectAction(String action) {
-			if(mergedAction==null) {
-				mergedAction=new MergedCMDAction(unmatched);
-			}
-			return mergedAction.connectAction(action);
-		}
-	}
-	
-	@Override
-	protected String getDataLocation() {
-		return null;
 	}
 }
