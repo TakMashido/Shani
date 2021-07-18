@@ -1,6 +1,7 @@
 package takMashido.shani.orders;
 
 import org.w3c.dom.Element;
+import takMashido.shani.core.ShaniCore;
 
 import java.util.Map;
 
@@ -22,7 +23,10 @@ public abstract class Action{
 	 * @param action String representing action being connected.
 	 * @return If merge was succesfull.
 	 */
-	public abstract boolean connectAction(String action);
+	public boolean connectAction(String action){
+		ShaniCore.errorOccurred("New action connecting is coming so this is not implemented.");
+		return false;
+	}
 	/**Execute this action.
 	 * @return If succesfully executed
 	 */

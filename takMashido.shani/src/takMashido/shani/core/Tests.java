@@ -150,7 +150,7 @@ public class Tests {
 					System.out.println("\nError during running: \"" + currentTest.getAttribute("name") + '"');
 				}
 				
-				System.out.printf("Extra key \"%s\" found with value \"%s\".\n",key,commandResults.values());
+				System.out.printf("Extra key \"%s\" found with value \"%s\".\n",key,commandResults.get(key));
 				continue;
 			}
 			
@@ -202,6 +202,7 @@ public class Tests {
 		String val=template.getAttribute("val");
 		
 		switch (type){
+		case "bool":
 		case "boolean":
 			Boolean expectedBool=Boolean.parseBoolean(val);
 			return new Pair<Boolean,Boolean>(

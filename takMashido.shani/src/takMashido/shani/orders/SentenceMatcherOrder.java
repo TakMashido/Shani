@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**@deprecated Use IntendParserOrder with SentenceIntendParser instead.*/
+@Deprecated
 public abstract class SentenceMatcherOrder extends TextOrder{
 	/**{@link SentenceMatcher} used by this SentenceMatcherOrder for matching input sentences.
 	 */

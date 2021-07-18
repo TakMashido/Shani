@@ -21,7 +21,9 @@ import java.util.List;
  * Loading of targets stored in MainFile is done in {@link #actionFactory(Element)}.
  * 
  * @author TakMashido
+ * @deprecated Use IntendParserOrder with KeywordIntendParser instead.
  */
+@Deprecated
 public abstract class KeywordOrder extends TextOrder {
 	/**Keyword indicating user intent is for this Order instance.*/
 	protected ShaniString keyword;

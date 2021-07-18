@@ -45,4 +45,9 @@ public final class Executable{
 	public boolean isSuccesful() {
 		return succesful;
 	}
+	
+	@Override
+	public String toString(){
+		return action.toString()+" costs:"+cost+":"+importanceBias;
+	}
 }

@@ -730,7 +730,7 @@ public class ShaniString implements IntendBase {
 	 * @return If this Shani String contain no data.
 	 */
 	public boolean isEmpty() {
-		if(value.length==0)return true;
+		if(value==null||value.length==0)return true;
 		for(var str:value) {
 			if(!str.trim().isEmpty())return false;
 		}
