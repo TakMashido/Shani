@@ -8,8 +8,8 @@ import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.core.text.ShaniString.ShaniMatcher;
 import takMashido.shani.intedParsers.ActionGetter;
 import takMashido.shani.intedParsers.IntendParser;
-import takMashido.shani.orders.Action;
 import takMashido.shani.orders.Executable;
+import takMashido.shani.orders.IntendParserAction;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Map;
 /**Uses simple keyword search as intend parsing method.
  * It's stored as XML subnode named "keyword" being normal ShaniString node.
  */
-public final class KeywordIntendParser extends IntendParser{
+public final class KeywordIntendParser extends IntendParser<ShaniString>{
 	/**Name of this keyword matcher.*/
 	private String name;
 	/**Keyword to search for.*/
@@ -27,7 +27,7 @@ public final class KeywordIntendParser extends IntendParser{
 	 * @param element Xml Node used to create this parser.
 	 * @param getter  ActionGetter used to get actions for Executables creation.
 	 */
-	public KeywordIntendParser(Element element, ActionGetter getter){
+	public KeywordIntendParser(Element element, ActionGetter<? extends IntendParserAction<ShaniString>> getter){
 		super(element, getter);
 		
 		keyword=ShaniString.loadString(element,"keyword");
@@ -45,8 +45,8 @@ public final class KeywordIntendParser extends IntendParser{
 		ShaniMatcher matcher=((ShaniString)intend.value).getMatcher().apply(keyword);
 		if(!matcher.isSemiEqual())
 			return null;
-		
-		Action action=actionGetter.getAction();
+
+		IntendParserAction<ShaniString> action=actionGetter.getAction();
 		ShaniString unmatched=matcher.getUnmatched();
 		action.init(name,Map.of("unmatched",unmatched));
 		

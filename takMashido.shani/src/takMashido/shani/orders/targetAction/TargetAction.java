@@ -2,13 +2,13 @@ package takMashido.shani.orders.targetAction;
 
 import takMashido.shani.core.Config;
 import takMashido.shani.libraries.Pair;
-import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserAction;
 
 import java.util.Map;
 
 /**Action designed to be invoked on one of inner targets.
  * Performs automatic target selection and cost, importanceBias calculation based on distance and existence of target matching user input.*/
-public abstract class TargetAction extends Action{
+public abstract class TargetAction<T> extends IntendParserAction<T> {
 	private TargetActionManager manager;
 	
 	private Target bestTarget;
@@ -22,7 +22,7 @@ public abstract class TargetAction extends Action{
 	}
 	
 	@Override
-	public void init(String name, Map<String,?> parameters){
+	public void init(String name, Map<String,? extends T> parameters){
 		super.init(name,parameters);
 		
 		Pair<Pair<Short,Short>,Target> best=manager.getTarget(name,parameters);

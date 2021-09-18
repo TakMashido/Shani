@@ -5,13 +5,13 @@ import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserAction;
 import takMashido.shani.orders.IntendParserOrder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class CMDOrder extends IntendParserOrder{
+public class CMDOrder extends IntendParserOrder<ShaniString>{
 	private ShaniString executeMessage;
 	private ShaniString runCMDSessionMessage;
 	private ShaniString endCMDSessionMessage;
@@ -25,7 +25,7 @@ public class CMDOrder extends IntendParserOrder{
 	}
 	
 	@Override
-	public Action getAction(){
+	public IntendParserAction<ShaniString> getAction(){
 		return new CMDAction();
 	}
 	
@@ -85,7 +85,7 @@ public class CMDOrder extends IntendParserOrder{
 		} catch (InterruptedException e) {}
 	}
 	
-	private class CMDAction extends Action {
+	private class CMDAction extends IntendParserAction<ShaniString> {
 		@Override
 		public boolean execute(){
 			ShaniString unmatched=(ShaniString)parameters.get("unmatched");

@@ -5,12 +5,12 @@ import takMashido.shani.core.Config;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Tests;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserAction;
 import takMashido.shani.orders.IntendParserOrder;
 
 import java.util.ArrayList;
 
-public class CalculateOrder extends IntendParserOrder{
+public class CalculateOrder extends IntendParserOrder<String>{
 	private static ShaniString calculationResoultMessage;
 	private static ShaniString calculationFailedMessage;
 	
@@ -22,11 +22,11 @@ public class CalculateOrder extends IntendParserOrder{
 	}
 	
 	@Override
-	public Action getAction() {
+	public IntendParserAction<String> getAction() {
 		return new CalculateAction();
 	}
 	
-	public class CalculateAction extends Action{
+	public class CalculateAction extends IntendParserAction<String> {
 		@Override
 		@SuppressWarnings("ConstantConditions")							//Assert in case makes it not see success=false line and it thinks that it is always true
 		public boolean execute() {

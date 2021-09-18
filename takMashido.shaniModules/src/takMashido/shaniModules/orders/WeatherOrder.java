@@ -8,7 +8,7 @@ import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.text.SentenceGenerator;
 import takMashido.shani.core.text.SentenceMatcher;
 import takMashido.shani.core.text.ShaniString;
-import takMashido.shani.orders.Action;
+import takMashido.shani.orders.IntendParserAction;
 import takMashido.shani.orders.IntendParserOrder;
 import takMashido.shani.tools.InputCleaners;
 import takMashido.shani.tools.SearchEngine;
@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
-public class WeatherOrder extends IntendParserOrder{
+public class WeatherOrder extends IntendParserOrder<String>{
 	private static ShaniString notKnowLocationMessage;
 	private static ShaniString cannotProcessDayMessage;
 	private static ShaniString cannotParseDayNumberMessage;
@@ -108,7 +108,7 @@ public class WeatherOrder extends IntendParserOrder{
 	}
 	
 	@Override
-	public Action getAction() {
+	public IntendParserAction<String> getAction() {
 		return new WeatherAction();
 	}
 	
@@ -193,7 +193,7 @@ public class WeatherOrder extends IntendParserOrder{
 		return (int)(speed*1.609344);
 	}
 	
-	private class WeatherAction extends Action{
+	private class WeatherAction extends IntendParserAction<String>{
 		@Override
 		public boolean execute() {
 			if(!ShaniCore.getLicenseConfirmation("weather.com")) {

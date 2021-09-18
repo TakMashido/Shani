@@ -27,9 +27,10 @@ import java.util.List;
  * </name>
  * }
  * </pre>
+ * @param <T> Type of data returned by {@link IntendParser intendParsers} and used {@link IntendParserAction actions} cooperating with this order.
  */
-public abstract class IntendParserOrder extends Order implements ActionGetter{
-	protected List<IntendParser> parsers=new ArrayList<>();
+public abstract class IntendParserOrder<T> extends Order implements ActionGetter<IntendParserAction<T>>{
+	protected List<IntendParser<T>> parsers=new ArrayList<>();
 	
 	public IntendParserOrder(Element e){
 		super(e);
@@ -47,7 +48,7 @@ public abstract class IntendParserOrder extends Order implements ActionGetter{
 			
 			String className=parserElement.getAttribute("classname");
 			try{
-				IntendParser parser=(IntendParser)Class.forName(className).getDeclaredConstructor(Element.class,ActionGetter.class).newInstance(parserElement,this);
+				IntendParser<T> parser=(IntendParser<T>) Class.forName(className).getDeclaredConstructor(Element.class,ActionGetter.class).newInstance(parserElement,this);
 				
 				parsers.add(parser);
 			}catch(InstantiationException|IllegalAccessException|InvocationTargetException|NoSuchMethodException|ClassNotFoundException ex){
@@ -62,7 +63,7 @@ public abstract class IntendParserOrder extends Order implements ActionGetter{
 	public List<Executable> getExecutables(Intend intend){
 		List<Executable> ret=null;
 		
-		for(IntendParser parser:parsers){
+		for(IntendParser<T> parser:parsers){
 			List<Executable> newExecutables=parser.getExecutables(intend);
 			
 			if(ret==null)

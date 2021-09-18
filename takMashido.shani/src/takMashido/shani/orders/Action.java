@@ -3,8 +3,6 @@ package takMashido.shani.orders;
 import org.w3c.dom.Element;
 import takMashido.shani.core.ShaniCore;
 
-import java.util.Map;
-
 /**
  *Contain specyfic action to execute.
  * @author TakMashido
@@ -12,12 +10,7 @@ import java.util.Map;
 public abstract class Action{
 	@Deprecated			//Used only in KeywordOrder, find better way to store and parse target based Actions
 	protected Element actionFile;
-	
-	/**Name of Intend match, used to determine what exactly has to be done.*/
-	protected String name;
-	/**Contain parameters for execution isolated by ExecutableGetter or it's underlying interpreter.*/
-	protected Map<String,? extends Object> parameters;
-	
+
 	/**Connects this Action to another.
 	 * Connected actions will be invoced after invocing master one.
 	 * @param action String representing action being connected.
@@ -31,15 +24,6 @@ public abstract class Action{
 	 * @return If succesfully executed
 	 */
 	public abstract boolean execute();
-	
-	/**Used by ExecutableGetters to inject information provided by user in Intend.
-	 * @param name Name of Intend match, used to determine what exactly has to be done.
-	 * @param parameters Parameters with additional information about what to execute.
-	 */
-	public void init(String name, Map<String,? extends Object> parameters){
-		this.name=name;
-		this.parameters=parameters;
-	}
 	
 	/**Get additional cost of executing this Action calculated by Action itself, not IntendParsers.
 	 * @return Look above.
