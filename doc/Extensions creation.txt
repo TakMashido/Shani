@@ -35,4 +35,4 @@ You also have to have main method invocing "Launcher.run(args);". It's going to 
 Please do not refer into any of core files before calling this becouse it can and is going to mess up with static initalization of clases.
 Best to have main in separate class used only to this propouse to avoid it. All your code has to load by default shani pipeline, load instructions in init file invocing all your initalizations, and shani modules creation.
 
-When releasing extension you don't have to export any of core shani files or main method. Not runnable jar with code and init file after placing in extensions directory will be loaded dynamically on runtime.
+When releasing extension you don't have to export any of core shani files or main method. Not runnable jar with your code and init file after placing in extensions directory will be loaded dynamically on runtime.

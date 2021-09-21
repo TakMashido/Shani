@@ -1,6 +1,7 @@
 package takMashido.shani.orders;
 
 import org.w3c.dom.Element;
+import takMashido.shani.core.Cost;
 import takMashido.shani.core.ShaniCore;
 
 /**
@@ -67,5 +68,13 @@ public abstract class Action{
 	 */
 	public final Executable getExecutable(int cost, int importanceBias) {
 		return new Executable(this,(short)cost,(short)importanceBias);
+	}
+
+	 /**Creates executable from this action. Equivalent to {@link Executable#Executable(Action, Cost) new Executable(thisAction,Cost)}.
+	 * @param cost Cost of this Action.
+	 * @return Executable connected to this action with given cost.
+	 */
+	public final Executable getExecutable(Cost cost){
+		return new Executable(this, cost);
 	}
 }

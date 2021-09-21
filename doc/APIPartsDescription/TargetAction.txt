@@ -9,7 +9,7 @@ TargetActionMenager -> Because Target and TargetAction has to work closely toget
 
 Usage of API is following:
 Override TargetAction and Target/KeywordTarget and add your functionality in Action with data stored in Target.
-Store TargetActionManager your Order subclass. Use it's getAction method to provide new Actions. Either in getExecutables or IntendParserOrder getAction.
+Store TargetActionManager in your Order subclass. Use it's getAction method to provide new Actions. Either in getExecutables or IntendParserOrder getAction.
 
 When you want to add new Target create it regular way and use menagers registerTarget method. You do not need to provide save location XML Element, manager does it.
 Saving Targets manually is also not necessary, use manager's saveTargets to do it.

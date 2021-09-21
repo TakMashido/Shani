@@ -3,6 +3,7 @@ package takMashido.shani.orders.core;
 import org.w3c.dom.Element;
 import takMashido.shani.core.Config;
 import takMashido.shani.Engine;
+import takMashido.shani.core.Cost;
 import takMashido.shani.core.Intend;
 import takMashido.shani.core.text.ShaniString;
 import takMashido.shani.orders.Action;
@@ -37,7 +38,7 @@ public class MergeOrder extends TextOrder {
 			var executable=Engine.getExecutable(new Intend(unMatched));
 			if(Engine.getLastExecuted()!=null&&executable!=null) {
 				var list=new ArrayList<Executable>();
-				list.add(new MergeAction(unMatched,executable,Engine.getLastExecuted()).getExecutable((short)(cost+executable.cost)));
+				list.add(new MergeAction(unMatched,executable,Engine.getLastExecuted()).getExecutable(new Cost(cost).add(executable.cost)));
 				return list;
 			}
 		}
