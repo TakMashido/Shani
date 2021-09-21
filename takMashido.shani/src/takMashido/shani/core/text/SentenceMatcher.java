@@ -4,11 +4,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import takMashido.shani.core.Config;
 import takMashido.shani.Engine;
+import takMashido.shani.core.Cost;
 import takMashido.shani.core.text.SentenceMatcher.Tokenizer.SentenceToken;
 import takMashido.shani.core.text.SentenceMatcher.Tokenizer.SentenceToken.Type;
 import takMashido.shani.libraries.Pair;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -124,7 +127,7 @@ public class SentenceMatcher {
 		ArrayList<SentenceResult> Return=new ArrayList<>();
 		for(Sentence sen:sentences) {
 			SentenceResult sr=sen.process(str);
-			if(sr!=null&&sr.cost<Config.sentenceCompareThreshold)Return.add(sr);
+			if(sr!=null&&sr.cost.isMatched())Return.add(sr);
 		}
 		
 		return Return.toArray(new SentenceResult[Return.size()]);
@@ -136,11 +139,11 @@ public class SentenceMatcher {
 	 */
 	public static SentenceResult getBestMatch(SentenceResult[] results) {
 		SentenceResult ret=null;
-		short minCost=Short.MAX_VALUE;
-		
+		float minCost=Short.MAX_VALUE;
+
 		for(var res:results) {
-			if(res!=null&&res.cost<Config.sentenceCompareThreshold) {
-				short tmpCost=res.getCombinedCost();
+			if(res!=null&&res.cost.isMatched()) {
+				float tmpCost=res.cost.value();
 				if(tmpCost<minCost) {
 					minCost=tmpCost;
 					ret=res;
@@ -152,23 +155,12 @@ public class SentenceMatcher {
 	}
 	/**Get best {@link SentenceResult} from given set, taking into account comparison cost and importance bias.
 	 * @param results Set of result to choose from.
-	 * @return {@link SentenceResult} which is most accurate from ones in the set. 
+	 * @return {@link SentenceResult} which is most accurate from ones in the set.
+	 * @deprecated Directly use Collections instead of this old function.
 	 */
+	@Deprecated
 	public static SentenceResult getBestMatch(List<SentenceResult> results) {
-		SentenceResult ret=null;
-		short minCost=Short.MAX_VALUE;
-		
-		for(var res:results) {
-			if(res!=null&&res.cost<Config.sentenceCompareThreshold) {
-				short tmpCost=res.getCombinedCost();
-				if(tmpCost<minCost) {
-					minCost=tmpCost;
-					ret=res;
-				}
-			}
-		}
-		
-		return ret;
+		return Collections.min(results, Comparator.comparing(rs -> rs.cost));
 	}
 	
 	/**Tokenizer for parsing sentence templates.
@@ -386,20 +378,8 @@ public class SentenceMatcher {
 			
 			for(int i=0;i<str.length;i++)
 				root.process((Return[i]=new SentenceResult(sentenceName)),str[i],0);
-			
-			int minIndex=-1;
-			short minCost=Short.MAX_VALUE;
-			for(int i=0;i<str.length;i++) {
-				if(Return[i].cost<Config.sentenceCompareThreshold) {
-					short tmpCost=Return[i].getCombinedCost();
-					if(tmpCost<minCost) {
-						minCost=tmpCost;
-						minIndex=i;
-					}
-				}
-			}
-			
-			return minIndex!=-1?Return[minIndex]:null;
+
+			return getBestMatch(Return);
 		}
 		
 		protected static abstract class SentenceElement{
@@ -422,12 +402,12 @@ public class SentenceMatcher {
 					}
 				} else {
 					if(strIndex<str.length)
-						result.cost+=Config.wordDeletionCost*(str.length-strIndex);
+						result.cost.addDistance((short)(Config.wordDeletionCost*(str.length-strIndex)));
 				}
 			}
 			
 			protected void getInsertionCost(SentenceResult result) {
-				result.cost+=Config.wordInsertionCost;
+				result.cost.addDistance(Config.wordInsertionCost);
 				if(nextElement!=null)
 					nextElement.getInsertionCost(result);
 			}
@@ -487,13 +467,13 @@ public class SentenceMatcher {
 					minIndex=str.length;
 					retresult=result;
 				} else {
-					short minCost=Short.MAX_VALUE;
+					float minCost=Short.MAX_VALUE;
 					for(int i=strIndex+1;i<=str.length;i++) {
 						var tempresult=result.makeCopy();
 						processNext(tempresult,str,i);
 						
-						if(tempresult.cost>=Config.sentenceCompareThreshold)continue;
-						short tempCost=tempresult.getCombinedCost();
+						if(!tempresult.cost.isMatched())continue;
+						float tempCost=tempresult.cost.value();
 						
 						if(tempCost<minCost) {
 							minCost=tempCost;
@@ -511,14 +491,14 @@ public class SentenceMatcher {
 					}
 					result.set(retresult);
 					result.data.put(returnKey, strBuf.toString());
-					result.importanceBias+=Config.sentenceMatcherWordReturnImportanceBias*(minIndex-strIndex);
+					result.cost.addImportanceBias((short)(Config.sentenceMatcherWordReturnImportanceBias*(minIndex-strIndex)));
 				} else
-					result.cost+=Config.sentenceCompareThreshold;				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later
+					result.cost.addDistance(Config.sentenceCompareThreshold);				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later
 			}
 			
 			@Override
 			protected void getInsertionCost(SentenceResult result) {
-				result.cost+=Config.sentenceCompareThreshold;
+				result.cost.addDistance(Config.sentenceCompareThreshold);
 			}
 			
 			@Override
@@ -555,36 +535,26 @@ public class SentenceMatcher {
 					var ret=ShaniString.getMatchingIndex(str, strIndex, value[i]);
 					if(ret.cost<Config.wordCompareThreshold) {
 						sr[i]=result.makeCopy();
-						sr[i].cost+=ret.cost;
+						sr[i].cost.addDistance(ret.cost);
 						processNext(sr[i],str,ret.endIndex);						//TODO do not check same sentenceIndex and String index multiple times. Store it somewhere.
 					}
 				}
-				
-				int minIndex=-1;
-				short minCost=Short.MAX_VALUE;
-				for(int i=0;i<value.length;i++) {
-					if(sr[i]!=null&&sr[i].cost<Config.sentenceCompareThreshold) {
-						short tmpCost=sr[i].getCombinedCost();
-						if(tmpCost<minCost) {
-							minCost=tmpCost;
-							minIndex=i;
-						}
-					}
-				}
-				
-				if(minIndex==-1) {
-					result.cost+=Config.wordInsertionCost;
-					if(result.cost<Config.sentenceCompareThreshold)
+
+				SentenceResult best=getBestMatch(sr);
+
+				if(best==null) {
+					result.cost.addDistance(Config.wordInsertionCost);
+					if(result.cost.isMatched())
 						processNext(result, str, strIndex);
 					return;
 				}
 				
-				result.set(sr[minIndex]);
+				result.set(best);
 			}
 			
 			@Override
 			protected void getInsertionCost(SentenceResult result) {
-				result.cost+=insertionCost;
+				result.cost.addDistance(insertionCost);
 				if(nextElement!=null)
 					nextElement.getInsertionCost(result);
 			}
@@ -626,8 +596,8 @@ public class SentenceMatcher {
 				short deleteCost=0;
 				for(tempStrIndex=strIndex;tempStrIndex<str.length;tempStrIndex++) {
 					if(str[tempStrIndex].isEquals(pattern)) {
-						result.cost+=deleteCost;
-						result.importanceBias+=Config.sentenceMatcherRegexImportanceBias;
+						result.cost.addDistance(deleteCost);
+						result.cost.addImportanceBias(Config.sentenceMatcherRegexImportanceBias);
 						result.data.put(returnKey, str[tempStrIndex].toString());
 						processNext(result, str, tempStrIndex+1);
 						return;
@@ -638,7 +608,7 @@ public class SentenceMatcher {
 						break;
 				}
 				
-				result.cost+=Config.wordInsertionCost;
+				result.cost.addDistance(Config.wordInsertionCost);
 				processNext(result, str, strIndex);
 			}
 			
@@ -674,7 +644,7 @@ public class SentenceMatcher {
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
 				if(strIndex>=str.length) {
-					result.cost+=Config.wordDeletionCost;
+					result.cost.addDistance(Config.wordDeletionCost);
 					return;
 				}
 				
@@ -719,7 +689,7 @@ public class SentenceMatcher {
 			
 			@Override
 			protected void process(SentenceResult result, ShaniString[] str, int strIndex) {
-				if(result.cost>Config.sentenceCompareThreshold)
+				if(!result.cost.isMatched())
 					return;
 				
 				if(treeLevel<optionalElements.length) {
@@ -735,7 +705,7 @@ public class SentenceMatcher {
 							
 							if(Config.wordInsertionCost<Config.sentenceCompareThreshold) {
 								srInsertion[i]=result.makeCopy();
-								srInsertion[i].cost+=Config.wordInsertionCost;
+								srInsertion[i].cost.addDistance(Config.wordInsertionCost);
 								process(srInsertion[i], str, strIndex);
 							}
 							optionalElements[i].process((sr[i]=result.makeCopy()), str, strIndex);
@@ -748,7 +718,7 @@ public class SentenceMatcher {
 					SentenceResult best=getBestMatch(sr);
 					if(Config.wordInsertionCost<Config.sentenceCompareThreshold) {
 						SentenceResult best2=getBestMatch(srInsertion);
-						if(best2!=null&&best2.cost<Config.sentenceCompareThreshold &&best2.getCombinedCost()<best.getCombinedCost())
+						if(best2!=null&&best2.cost.isMatched()&&best2.cost.compareTo(best.cost)<-1)
 							best=best2;
 					}
 					
@@ -792,10 +762,10 @@ public class SentenceMatcher {
 	public static class SentenceResult{
 		/**Map containing words matched into sentence elements.*/
 		public final HashMap<String,String> data=new HashMap<String,String>();
-		protected short cost;
-		protected short importanceBias;
-		/**Name of matched sentence. Specified by name attribute in representing xml node.
-		 */
+
+		protected Cost cost=new Cost();
+
+		/**Name of matched sentence. Specified by name attribute in representing xml node.*/
 		public final String name;
 		
 		protected SentenceResult() {name=null;}
@@ -809,9 +779,8 @@ public class SentenceMatcher {
 		public SentenceResult makeCopy() {
 			var copy=new SentenceResult(name);
 			copy.data.putAll(data);
-			copy.cost=cost;
-			copy.importanceBias=importanceBias;
-			
+			copy.cost=cost.makeCopy();
+
 			return copy;
 		}
 		protected void set(SentenceResult sr) {
@@ -820,28 +789,17 @@ public class SentenceMatcher {
 			if(sr==this)return;
 			
 			cost=sr.cost;
-			importanceBias=sr.importanceBias;
 			data.clear();
 			data.putAll(sr.data);
 		}
 		protected void setIfBetter(SentenceResult sr) {
-			if(sr.cost>=Config.sentenceCompareThreshold) {
-				if(cost<Config.sentenceCompareThreshold) {
-					return;
-				}
-			} else if(cost>=Config.sentenceCompareThreshold) {
+			if(sr.cost.compareTo(cost)>0)
 				set(sr);
-				return;
-			}
-			if(sr.getCombinedCost()<getCombinedCost()) {
-				set(sr);
-			}
 		}
 		
 		protected void add(SentenceResult sr) {
 			assert name==null?sr.name==null:name.equals(sr.name):"Probably trying to set values from very diffrend element";
-			this.cost+=sr.cost;
-			this.importanceBias+=sr.importanceBias;
+			cost.add(sr.cost);
 			data.putAll(sr.data);
 		}
 		
@@ -858,19 +816,15 @@ public class SentenceMatcher {
 			return name;
 		}
 		public short getCost() {
-			return cost;
+			return cost.getDistance();
 		}
 		public short getImportanceBias() {
-			return importanceBias;
+			return cost.getImportanceBias();
 		}
-		/**Get cost combined with importance bias*/
-		public short getCombinedCost() {
-			return (short)(cost-importanceBias*Config.importanceBiasMultiplier);
-		}
-		
+
 		@Override
 		public String toString() {
-			return "SentenceResult: "+name+':'+cost+':'+importanceBias+" "+data;
+			return "SentenceResult: "+name+": "+cost;
 		}
 	}
 	protected static class ParseException extends RuntimeException{

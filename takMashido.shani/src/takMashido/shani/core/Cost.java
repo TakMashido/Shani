@@ -13,6 +13,9 @@ public class Cost implements Comparable<Cost>{
 	/**Importance bias of operation. The bigger the smaller final cost value.*/
 	private short importanceBias;
 
+	public Cost(){
+		this((short)0,(short)0);
+	}
 	public Cost(short distance){
 		this(distance, (short)0);
 	}
@@ -63,12 +66,12 @@ public class Cost implements Comparable<Cost>{
 		boolean valid2=isMatched();
 
 		if(valid&&valid2)
-			return mergedCostCheck(cost);
+			return Float.compare(value(), cost.value());
 		if(valid)
 			return 1;
 		if(valid2)
 			return -1;
-		return mergedCostCheck(cost);
+		return Float.compare(value(), cost.value());
 	}
 	/**Works like compareTo(Cost), but do not check if bought cost object represents valid distance.
 	 * @param cost Cost object to compare this with.
@@ -119,6 +122,27 @@ public class Cost implements Comparable<Cost>{
 	 */
 	public static Cost subtract(Cost first, Cost second){
 		return new Cost((short)(first.distance-second.distance), (short)(first.importanceBias-second.importanceBias));
+	}
+
+	/**Add value to distance parameter.
+	 * @param distance Value to add.*/
+	public void addDistance(short distance){
+		this.distance+=distance;
+	}
+	/**Add value to importanceBias parameter.
+	 * @param importanceBias Value to add.*/
+	public void addImportanceBias(short importanceBias){
+		this.importanceBias+=importanceBias;
+	}
+	/**Subtract value from distance parameter.
+	 * @param distance Value to subtract.*/
+	public void subtractDistance(short distance){
+		this.distance-=distance;
+	}
+	/**Subtract value from importanceBias parameter.
+	 * @param importanceBias Value to subtract.*/
+	public void subtractImportanceBias(short importanceBias){
+		this.importanceBias-=importanceBias;
 	}
 
 	/**Create copy of this object.
