@@ -38,6 +38,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -180,7 +182,7 @@ public class Engine {
 				try {
 					while (true) {
 						Intend intend = filteredIntends.take();
-
+						
 						long time = System.nanoTime();
 						try {
 							Executable exec = interpret(intend);
@@ -194,11 +196,11 @@ public class Engine {
 							} else {
 								commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms");
 
-								if (exec.isSuccesful()) lastExecuted = exec;
+								if (exec.isSuccessful()) lastExecuted = exec;
 							}
 						} catch (Exception ex) {
 							ex.printStackTrace();
-
+							
 							commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms. Error occurred.");
 
 							errorMessage.printOut();
@@ -217,7 +219,8 @@ public class Engine {
 		shaniInterpreter.setName("shaniInterpreter");
 		shaniInterpreter.setDaemon(false);
 		shaniInterpreter.start();
-		
+
+		System.out.println(Config.testMode);
 		if(Config.testMode) {
 			InnerTest.run();
 			
@@ -447,7 +450,7 @@ public class Engine {
 
 		Executable toExec=getExecutable(intend);
 
-		if(toExec!=null&&toExec.cost<=Config.sentenceCompareThreshold) {
+		if(toExec!=null&&toExec.cost.isMatched()) {
 			info.println("<Execution><Execution><Execution><Execution>");
 			toExec.execute();
 			info.println("<End><End><End><End><End><End><End><End><End>");
@@ -467,28 +470,23 @@ public class Engine {
 		float minCost=Short.MAX_VALUE;
 		
 		long time=System.nanoTime();
-		
+
 		info.println(intend+":");
 		for (Order order : orders) {
 			List<Executable> execs=order.getExecutables(intend);
-			if(execs==null)continue;
-			for(Executable exec:execs) {
-				info.println("\t"+exec.action.getClass().toString()+" "+exec.cost+":"+exec.importanceBias);
-				
-				if(exec.cost> Config.sentenceCompareThreshold)
-					continue;
-				
-				short cost=(short)(exec.cost-exec.importanceBias*Config.importanceBiasMultiplier);
-				if(cost<minCost) {
-					minCost=cost;
-					Return=exec;
-				}
-			}
+
+			if(execs==null||execs.isEmpty())continue;
+			for(Executable exec:execs)
+				info.println("\t"+exec.action.getClass().toString()+" "+exec.cost.toString());
+
+			Executable best=Collections.min(execs, Comparator.comparing(a -> a.cost));
+			if(Return==null||best.cost.compareTo(Return.cost)<0)
+				Return=best;
 		}
 		
 		commands.printf("Search time: %.3f ms%n",(System.nanoTime()-time)/1000000f);
 		if(Return!=null) {
-			commands.println("Executing "+Return.action.getClass().toString()+" "+Return.cost+":"+Return.importanceBias);
+			commands.println("Executing "+Return.action.getClass().toString()+" "+Return.cost);
 		}
 		
 		return Return;
@@ -522,7 +520,7 @@ public class Engine {
 	 */
 	public static boolean getLicenseConfirmation(String name,boolean displayConfirmation) {
 		String nameToSearch=name.replace('.', '-').toLowerCase();
-		boolean confirmed=Storage.getUserBoolean("acceptedLicences."+nameToSearch);
+		boolean confirmed=Storage.getBool(Storage.userData,"acceptedLicences."+nameToSearch);
 		if(confirmed)return true;
 		if(!displayConfirmation)return false;
 		
@@ -530,7 +528,7 @@ public class Engine {
 
 		Boolean confirmed2=isInputPositive((ShaniString) ShaniCore.getIntend(ShaniString.class).value);
 		if(confirmed2==null)return false;
-		if(confirmed2)Storage.writeUserData("acceptedLicences."+nameToSearch, true);
+		if(confirmed2)Storage.writeBool(Storage.userData, "acceptedLicences."+nameToSearch, true);
 		return confirmed2;
 	}
 	/**Checks if input is positive response.

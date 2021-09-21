@@ -42,46 +42,6 @@ public class Storage {
 		return getShaniString(storage, stringPath);
 	}
 	
-	/**Get nodes under given path in UserData part of file.
-	 * @param path Path to super node.
-	 * @return NodeList pointed by given path.
-	 */
-	public static NodeList getUserNodes(String path) {
-		return getNodes(userData,path);
-	}
-	/**Get ShaniString under given path in UserData part of file.
-	 * @param stringPath Path to Node containing wanted ShaniString.
-	 * @return ShaniString pointed by path.
-	 */
-	public static ShaniString getUserShaniString(String stringPath) {
-		return getShaniString(userData,stringPath);
-	}
-	/**Get Boolean stored under userData node.
-	 * @param path Where to search for boolean.
-	 * @return Stored value or false if not found.
-	 */
-	public static boolean getUserBoolean(String path) {
-		var ret=getUserBool(path);
-		
-		if(ret==null)
-			return false;
-		return ret;
-	}
-	/**Get Boolean stored under userData node, or null if not found.
-	 * @param path Where to search for boolean.
-	 * @return Stored value or null if not found.
-	 */
-	public static Boolean getUserBool(String path) {
-		var ret=getString(userData,path);
-		
-		if(ret==null)
-			return null;
-		return Boolean.parseBoolean(ret);
-	}
-	public static int getUserInt(String path) {
-		return Integer.parseInt(getString(userData,path));
-	}
-	
 	public static NodeList getNodes(Node where, String path) {
 		return getNodes(where, path, false);
 	}
@@ -186,28 +146,6 @@ public class Storage {
 		node.getParentNode().removeChild(node);
 	}
 	
-	public static void writeUserData(String path,int data) {
-		writeUserData(path,Integer.toString(data));
-	}
-	public static void writeUserData(String path,boolean data) {
-		writeUserData(path,Boolean.toString(data));
-	}
-	/**Writes given ShaniString under path in UserData part of file.
-	 * @param path Path pointing to location in which data will be stored.
-	 * @param data Data to store.
-	 */
-	public static void writeUserData(String path,ShaniString data) {
-		writeUserData(path, data.toFullString());
-	}
-	/**Writes given String under path in UserData part of file.
-	 * @param path Path pointing to location in which data will be stored.
-	 * @param data Data to store.
-	 */
-	public static void writeUserData(String path,String data) {
-		Element stor=(Element)createDirectory(shaniDataDoc,userData,path);
-		stor.setAttribute("val", data);
-	}
-	
 	@SuppressWarnings("resource")
 	private static Node createDirectory(Document doc, Node where, String path) {
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
@@ -238,7 +176,7 @@ public class Storage {
 	public static Node getOrderData(Order order) {
 		return getNodes(ordersData, order.getClass().getCanonicalName(),true).item(0);
 	}
-	
+
 	/**Get Boolean stored under userData node, or null if not found.
 	 * @param where Root node of search.
 	 * @param path Where to search for boolean.
