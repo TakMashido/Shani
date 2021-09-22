@@ -19,43 +19,41 @@ import java.util.regex.Pattern;
  * 
  * Access to data is done by String containing path to it.
  * It's form is standard java path. Names of nodes/elements divided with '.' Character.
+ * E.g "takMashido.shaniModules.orders.TimerOrder.timers.target" is going to search takMashido XML element in root node.
+ * If more than one is present the first one is taken an "shaniModules" is searched under it,
+ * and continues in same fashion until if fails to find element with given name, or path is fully processed and returns the last node/NodeList found.
+ * Effectively it works similar to command line cd command by directories are separated with "." instead of "/" and there can be multiple directories with same name(as stated by XML standard)
  * 
  * @author TakMashido
  */
 public class Storage {
 	private static final Pattern divider=Pattern.compile("(?:\\s*\\.\\s*)+");
-	
-	/**Get nodes under given path in Storage part of data file.
-	 * Creates new nodes if node pointed by path not exists and returns it.
-	 * @param path Path to super node.
-	 * @return NodeList pointed by given path.
+
+	/**Get xml nodes under given node pointed by path.
+	 * @param where Root node of search
+	 * @param path Path to search for.
+	 * @return List of nodes pointed by given path.
 	 */
-	public static NodeList getNodes(String path) {
-		return getNodes(storage,path,true);
-	}
-	
-	/**Get ShaniString under given path in Storage part of file.
-	 * @param stringPath Path to Node containing wanted ShaniString.
-	 * @return ShaniString pointed by path.
-	 */
-	public static ShaniString getString(String stringPath) {
-		return getShaniString(storage, stringPath);
-	}
-	
 	public static NodeList getNodes(Node where, String path) {
 		return getNodes(where, path, false);
 	}
+	/**Get xml nodes under given node pointed by path. Can also create nodes if necessary.
+	 * @param where Root node of search.
+	 * @param path Path to search for.
+	 * @param createNodes If create new nodes if no matching the path was found during search.
+	 * @return List of nodes pointed by given path.
+	 */
 	@SuppressWarnings("resource")
-	private static NodeList getNodes(Node where, String path, boolean createNodes) {
+	public static NodeList getNodes(Node where, String path, boolean createNodes) {
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
-		
+
 		Element previousNode;
 		if(where instanceof Document) {
 			previousNode = ((Document) where).getDocumentElement();
 			if(!previousNode.getNodeName().equals(scanner.next())){
 				if(createNodes)
-					System.err.println("Creation of another root node in Document is not permitted.");
-				return null;
+					throw new NodeNotPresentException(where, path, "Creation of another root node in Document is not permitted.");
+				throw new NodeNotPresentException(where, path);
 			}
 		}else
 			previousNode=(Element) where;
@@ -73,37 +71,52 @@ public class Storage {
 					
 					Return=previousNode.getElementsByTagName(nextNodeName);
 					previousNode=newNode;
-				} else return null;
+				} else {
+					throw new NodeNotPresentException(where,path);
+				}
 			} else
 				previousNode=(Element)Return.item(0);
 		}
 		return Return;
 	}
+	/**Get xml node under given node pointed by path.
+	 * @param where Root node of search.
+	 * @param path Path to search for.
+	 * @return List of nodes pointed by given path.
+	 */
 	public static Node getNode(Node where, String path) {
 		return getNode(where,path,false);
 	}
+	/**Get xml node under given node pointed by path. Can also create nodes if necessary.
+	 * @param where Root node of search.
+	 * @param path Path to search for.
+	 * @param createNodes If create new nodes if no matching the path was found during search.
+	 * @return List of nodes pointed by given path.
+	 */
 	private static Node getNode(Node where, String path, boolean createNodes) {
 		NodeList list=getNodes(where, path, createNodes);
-		if(list==null)
-			return null;
+
 		return list.item(0);
 	}
+
+	/**Load shaniString from node pointed by path under where root node.
+	 * @param where Root node of search.
+	 * @param stringPath Path of node to initialize ShaniString from.
+	 * @return {@link ShaniString} object described by pointed xml node.
+	 */
 	public static ShaniString getShaniString(Node where, String stringPath) {			//All changes here have to be made also in getString(Node,String). This methods do the same but output is different.
 		var nodes=getNodes(where,stringPath);
-		if(nodes==null||nodes.item(0)==null) {
-			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where.getNodeName());
-			Engine.registerLoadException();
-			return null;
-		}
+
 		return new ShaniString(nodes.item(0));
 	}
+	/**Load string from node pointed by path under where root node.
+	 * @param where Root node of search.
+	 * @param stringPath Path of node to initialize ShaniString from.
+	 * @return {@link ShaniString} object stored in pointed xml node.
+	 */
 	public static String getString(Node where, String stringPath) {					//All changes here have to be made also in getShaniString(Node,String). This methods do the same but output is different.
 		var nodes=getNodes(where,stringPath);
-		if(nodes==null||nodes.item(0)==null) {
-			System.err.printf("Can't find \"%s\" in %s.%n",stringPath,where.getNodeName());
-			Engine.registerLoadException();
-			return null;
-		}
+
 		var node=nodes.item(0);
 		String str=((Element)node).getAttribute("val");
 		if(!str.isEmpty())return str;
@@ -140,37 +153,8 @@ public class Storage {
 	 */
 	public static void deleteNode(Node where, String path){
 		Node node=getNode(where, path);
-		if(node==null)
-			return;
-		
+
 		node.getParentNode().removeChild(node);
-	}
-	
-	@SuppressWarnings("resource")
-	private static Node createDirectory(Document doc, Node where, String path) {
-		Scanner scanner=new Scanner(path).useDelimiter(divider);
-		String nodeName;
-		Node parentNode=where;
-		Node Return = null;
-		while(scanner.hasNext()) {
-			nodeName=scanner.next();
-			Return=((Element)where).getElementsByTagName(nodeName).item(0);
-			if(Return==null) {
-				Return=doc.createElement(nodeName);
-				parentNode.appendChild(Return);
-				parentNode=Return;
-				while(scanner.hasNext()) {
-					nodeName=scanner.next();
-					Return=doc.createElement(nodeName);
-					parentNode.appendChild(Return);
-					parentNode=Return;
-				}
-				return Return;
-			} else {
-				parentNode=Return;
-			}
-		}
-		return Return;
 	}
 	
 	public static Node getOrderData(Order order) {
@@ -232,14 +216,30 @@ public class Storage {
 		userData=userDataNode;
 		ordersData=ordersDataNode;
 	}
-	
+
+	/**Document object of shaniData file.*/
 	private static final Document shaniDataDoc;
+	/**Main node of shaniData file.*/
 	public static final Node shaniData;
+	/**Root of general storage nodes containing other data nodes.*/
 	public static final Node storage;
+	/**Node containing data describing user.*/
 	public static final Node userData;
+	/**Node containing orders data.*/
 	public static final Node ordersData;
-	
+
+	/**Save dataFile changes to file.*/
 	public static final void save() {
 		Engine.saveDocument(shaniDataDoc, Config.dataFile);
+	}
+
+	/**Exception indicating that requested node was not found.*/
+	public static class NodeNotPresentException extends RuntimeException{
+		private NodeNotPresentException(Node where, String path){
+			super(String.format("Can't find \"%s\" in node %s.",path,where.getNodeName()));
+		}
+		private NodeNotPresentException(Node where, String path, String anotherMessage){
+			super(String.format("Can't find \"%s\" in node %s. %s",path,where.getNodeName(),anotherMessage));
+		}
 	}
 }

@@ -46,7 +46,7 @@ public abstract class KeywordOrder extends TextOrder {
 		
 		String dataLocation=getDataLocation();
 		if(dataLocation!=null) {
-			NodeList list=Storage.getNodes(getDataLocation());
+			NodeList list=Storage.getNodes(Storage.storage,getDataLocation());
 			targetDataNode=list.item(0);
 			list=targetDataNode.getChildNodes();
 			

@@ -128,13 +128,18 @@ public class Tests {
 			
 			return;
 		}
-		
-		if(Storage.getNode(currentTest,"noExecution")!=null){
+
+		//If noExecution node is present executable shouldn't be created.
+		try{
+			Storage.getNode(currentTest,"noExecution");			//source of exception
+
 			failedTests++;
 			System.out.println("Test: \"" + currentTest.getAttribute("name")+" created Executable but shouldn't.");
 			return;
+		} catch(Storage.NodeNotPresentException ex){
+			//Empty, just continue normal check.
 		}
-		
+
 		commandResults.put("actionClass",executed.action.getClass().getCanonicalName());
 		
 		boolean passed=true;
