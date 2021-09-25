@@ -1,0 +1,29 @@
+SHANI
+
+Internally it's modular interpreter of Intend objects.
+Intends(or actually IntendBase interface it's wrapper to) is raw descriptor of action user is willing to take.
+For now it's only ShaniString object, but others(e.g. gesture descriptor fetched with work in progress
+module from camera).
+
+Every part shani except framework core is modular, everything is just dynamically loaded object doing it's job.
+This includes:
+IntendGetter's - objects getting input data, creating Intend object and feeding it to shani.
+IntendFilter's - responsible for pre filtering input.
+                 E.g NumberFilter changes "add two and two" into "add 2 and 2" to ease further processing.
+Order's - Actual interpreters of Intents. There are responsible for parsing intend and giving Action object.
+Action's - Orders create them and return packed in Executable object. Their are ready action's to take.
+           It can be e.g. translating world given by user, or solving mathematical expression.
+IntendParser's - Objects easing parsing of intends.
+                 E.g. SentenceMatcherIntendParser takes text(ShaniString) intend and extract
+                 information from it based on predefined sentence templates.
+
+Whole pipeline of Intend object creation, processing and solving is shown in "Intend flow.svg" file.
+
+Creation of this modules is done using xml files containing list of modules,
+their classpath, and other descriptors required to instantiate them.
+More informations about it's structure in file "Init file.txt".
+
+Everything is designed for extensibility.
+Init xml file pointed above and it's classes are supposed to be single jar file in extensions directory.
+There are loaded from there at runtime.
+It's described in file "Extensions creation.txt"
