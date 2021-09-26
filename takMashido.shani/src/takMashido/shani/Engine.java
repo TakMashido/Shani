@@ -149,73 +149,12 @@ public class Engine {
 		
 		helloMessage.printOut();
 
-		Thread shaniFiltering=new Thread(){
-			@Override
-			public void run(){
-				try{
-					while(true){
-						Intend intend=intends.take();
-
-						info.println("Filtering \""+intend.rawValue+'"');
-						long time=System.currentTimeMillis();
-
-						for(IntendFilter filter:inputFilters) {
-							Intend newIntend = filter.filter(intend);
-							if(newIntend !=null) {
-								intend = newIntend;
-							}
-						}
-
-						filteredIntends.put(intend);
-						info.printf("\"%s\" filtered in %.2f ms.%n",intend.toString(),(System.currentTimeMillis()-time)/1000f);
-					}
-				} catch(InterruptedException ignored){}
-			}
-		};
+		Thread shaniFiltering=new Thread(Engine::shaniFiltering);
 		shaniFiltering.setName("shaniFiltering");
 		shaniFiltering.setDaemon(true);
 		shaniFiltering.start();
 
-		Thread shaniInterpreter=new Thread() {
-			@Override
-			public void run() {
-				try {
-					while (true) {
-						Intend intend = filteredIntends.take();
-						
-						long time = System.nanoTime();
-						try {
-							Executable exec = interpret(intend);
-							
-							if(Config.testMode)
-								Tests.testEnded(exec);
-							
-							if (exec == null) {
-								System.out.println(notUnderstandMessage);
-								commands.println("Can't execute");
-							} else {
-								commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms");
-
-								if (exec.isSuccessful()) lastExecuted = exec;
-							}
-						} catch (Exception ex) {
-							ex.printStackTrace();
-							
-							commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms. Error occurred.");
-
-							errorMessage.printOut();
-						}
-						
-						if(Config.testMode) {
-							if(!Tests.nextTest()){
-								Tests.printSummary();
-								Engine.exit();
-							}
-						}
-					}
-				} catch (InterruptedException ignored) {}
-			}
-		};
+		Thread shaniInterpreter=new Thread(Engine::shaniInterpreter);
 		shaniInterpreter.setName("shaniInterpreter");
 		shaniInterpreter.setDaemon(false);
 		shaniInterpreter.start();
@@ -232,7 +171,70 @@ public class Engine {
 			}
 		}
 	}
-	
+	/**Method for shaniFiltering thread.
+	 * It's responsible for filtering raw {@link Intend} objects using {@link IntendFilter} preparing them for execution.
+	 */
+	private static void shaniFiltering(){
+		try{
+			while(true){
+				Intend intend=intends.take();
+
+				info.println("Filtering \""+intend.rawValue+'"');
+				long time=System.currentTimeMillis();
+
+				for(IntendFilter filter:inputFilters) {
+					Intend newIntend = filter.filter(intend);
+					if(newIntend !=null) {
+						intend = newIntend;
+					}
+				}
+
+				filteredIntends.put(intend);
+				info.printf("\"%s\" filtered in %.2f ms.%n",intend.toString(),(System.currentTimeMillis()-time)/1000f);
+			}
+		} catch(InterruptedException ignored){}
+	}
+	/**Method for shaniInterpreter thread.
+	 * It's responsible for finding Executables and executing their Actions.
+	 */
+	private static void shaniInterpreter(){
+		try {
+			while (true) {
+				Intend intend = filteredIntends.take();
+
+				long time = System.nanoTime();
+				try {
+					Executable exec = interpret(intend);
+
+					if(Config.testMode)
+						Tests.testEnded(exec);
+
+					if (exec == null) {
+						System.out.println(notUnderstandMessage);
+						commands.println("Can't execute");
+					} else {
+						commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms");
+
+						if (exec.isSuccessful()) lastExecuted = exec;
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+
+					commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms. Error occurred.");
+
+					errorMessage.printOut();
+				}
+
+				if(Config.testMode) {
+					if(!Tests.nextTest()){
+						Tests.printSummary();
+						Engine.exit();
+					}
+				}
+			}
+		} catch (InterruptedException ignored) {}
+	}
+
 	/**
 	 * Parse modules from given file. If it's directory every .jar file in it will be treated as extension to load.
 	 * @param file .jar file or directory from which load modules.
