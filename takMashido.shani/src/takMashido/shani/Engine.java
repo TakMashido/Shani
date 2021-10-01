@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import takMashido.shani.core.Config;
 import takMashido.shani.core.Intend;
+import takMashido.shani.core.IntendBase;
 import takMashido.shani.core.IntendGetter;
 import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
@@ -42,9 +43,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**Main class of shani. Responsible for all data loading and intends flow.
@@ -63,6 +67,7 @@ public class Engine {
 	
 	public static ShaniString licensesNotConfirmedMessage;
 	public static ShaniString errorMessage;
+	public static ShaniString loadingErrorMessage;
 	
 	//Contain loaders of all loaded extensions.
 	private static ArrayList<ClassLoader> extensionLoaders =new ArrayList<>();
@@ -74,6 +79,7 @@ public class Engine {
 		errorMessage = ShaniString.loadString(e, "errorMessage");
 		licenseConfirmationMessage = ShaniString.loadString(e, "licenseConfirmationMessage");
 		licensesNotConfirmedMessage = ShaniString.loadString(e, "licensesNotConfirmedMessage");
+		loadingErrorMessage=ShaniString.loadString(e,"loadingErrorMessage");
 	}
 	
 	/**Freshly registered intends.*/
@@ -86,12 +92,19 @@ public class Engine {
 	private static ThreadGroup inputGetters=new ThreadGroup("inputGetters");
 	private static ArrayList<Order> orders = new ArrayList<Order>();
 	private static ArrayList<IntendFilter> inputFilters = new ArrayList<>();
-	
+
+	/**@deprecated Use executeEndListeners instead and track for yourself.*/
+	@Deprecated
 	private static Executable lastExecuted;
-	
+
 	/**When last command was executed in ms.*/
-	public static long lastExecutionTime=System.currentTimeMillis();				
-	
+	public static long lastExecutionTime=System.currentTimeMillis();
+
+	/**Consumers observing end of Executable execution.
+	 * Intend: executed intend.
+	 * Executable: executed Executable.*/
+	private static List<BiConsumer<Intend, Executable>> executeEndListeners=new ArrayList<>();
+
 	private static boolean initialized=false;
 	private static boolean LOADING_ERROR=false;
 	
@@ -127,7 +140,6 @@ public class Engine {
 		loadExtensions(Config.extensionsDirectory);
 		
 		if(LOADING_ERROR) {
-			ShaniString loadingErrorMessage=ShaniString.loadString(doc,"engine.loadingErrorMessage");
 			if(loadingErrorMessage!=null)loadingErrorMessage.printOut();
 			else System.out.println("Error encountered during loading shani. Further info in errors.log file");
 		}
@@ -215,7 +227,13 @@ public class Engine {
 					} else {
 						commands.println("execution time = " + (System.nanoTime() - time) / 1000 / 1000f + " ms");
 
-						if (exec.isSuccessful()) lastExecuted = exec;
+						if (exec.isSuccessful()){
+							lastExecuted = exec;
+
+							for(var listener:executeEndListeners){
+								listener.accept(intend, exec);
+							}
+						}
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -441,26 +459,30 @@ public class Engine {
 	 * @param intend Intend to interpret.
 	 * @return executed Executable matching this Intend.
 	 */
-	private static Executable interpret(Intend intend){
-//		if(intend.isEmpty())return null;
-
-		commands.println("\n"+ intend.rawValue+':');
-		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+ intend.rawValue+':');
-
-		commands.println("\t"+ intend);
-		info.println("\t"+ intend);
-
+	public static Executable interpret(Intend intend){
 		Executable toExec=getExecutable(intend);
+		if(toExec!=null&&toExec.cost.isMatched())
+			execute(toExec);
+		else
+			Engine.debug.println("cannot execute: "+ intend.value);
 
-		if(toExec!=null&&toExec.cost.isMatched()) {
+		return toExec;
+	}
+
+	/**Execute given executable, handle possible errors and print logs.
+	 * @param toExec Executable to execute.
+	 * @return If execution of Executable inner action was successful.
+	 * @throws IllegalArgumentException If executable is not matched.
+	 */
+	public static boolean execute(Executable toExec){
+		if(toExec.cost.isMatched()) {
 			info.println("<Execution><Execution><Execution><Execution>");
 			toExec.execute();
 			info.println("<End><End><End><End><End><End><End><End><End>");
 			lastExecutionTime=System.currentTimeMillis();
-			return toExec;
+			return toExec.isSuccessful();
 		} else {
-			Engine.debug.println("cannot execute: "+ intend.value);
-			return null;
+			throw new IllegalArgumentException("Invalid executable. It can't be null and it's cost.isMatched() has to be true.");
 		}
 	}
 	/**Get executable matching given Intend.
@@ -468,6 +490,12 @@ public class Engine {
 	 * @return Executable with best match to given Intend.
 	 */
 	public static Executable getExecutable(Intend intend) {
+		commands.println("\n"+ intend.rawValue+':');
+		info.println("\n<Parsing><Parsing><Parsing><Parsing><Parsing><Parsing>"+ intend.rawValue+':');
+
+		commands.println("\t"+ intend);
+		info.println("\t"+ intend);
+
 		Executable Return=null;
 		float minCost=Short.MAX_VALUE;
 		
@@ -513,6 +541,23 @@ public class Engine {
 	 */
 	public static Executable getLastExecuted() {
 		return lastExecuted;
+	}
+
+	/**Add new listener of successful Executable execution.
+	 * @param listener BiConsumer to call after execution.
+	 */
+	public static void registerExecuteEndListener(BiConsumer<Intend, Executable> listener){
+		assert !executeEndListeners.contains(listener): "Can't add listener. It's already present.";
+
+		executeEndListeners.add(Objects.requireNonNull(listener));
+	}
+	/**Remove listener of successful Executable execution.
+	 * @param listener BiConsumer to remove.
+	 */
+	public static void unregisterExecuteEndListener(BiConsumer<Intend, Executable> listener){
+		assert executeEndListeners.contains(listener): "Can't remove listener. It's not present.";
+
+		executeEndListeners.remove(listener);
 	}
 
 	/**Checks if user confirmed given license.
