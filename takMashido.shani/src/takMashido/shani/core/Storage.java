@@ -12,6 +12,7 @@ import takMashido.shani.orders.Order;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -93,10 +94,25 @@ public class Storage {
 	 * @param createNodes If create new nodes if no matching the path was found during search.
 	 * @return List of nodes pointed by given path.
 	 */
-	private static Node getNode(Node where, String path, boolean createNodes) {
+	public static Node getNode(Node where, String path, boolean createNodes) {
 		NodeList list=getNodes(where, path, createNodes);
 
 		return list.item(0);
+	}
+
+	/**Create new xml element.
+	 * It's not accepting path like most functions. Only name of Element.
+	 * @param where Where to create new Element.
+	 * @param name Name of new XML Element. Note that is not path and can't contain '.' character.
+	 * @return New Element.
+	 */
+	public static Element createElement(Node where, String name){
+		if(name.contains("."))
+				throw new IllegalArgumentException("Name parameter value is \"%s\". It contain invalid '.'.");
+
+		Element ret=where.getOwnerDocument().createElement(name);
+		where.appendChild(ret);
+		return ret;
 	}
 
 	/**Load shaniString from node pointed by path under where root node.
@@ -109,7 +125,7 @@ public class Storage {
 
 		return new ShaniString(nodes.item(0));
 	}
-	/**Load string from node pointed by path under where root node.
+	/**Load ShaniString from node pointed by path under where root node.
 	 * @param where Root node of search.
 	 * @param stringPath Path of node to initialize ShaniString from.
 	 * @return {@link ShaniString} object stored in pointed xml node.
@@ -122,7 +138,24 @@ public class Storage {
 		if(!str.isEmpty())return str;
 		return node.getTextContent();
 	}
-	
+	/**Load IntendBase from node pointed by path under where root node.
+	 * @param where Root node of search.
+	 * @param stringPath Path of node to initialize ShaniString from.
+	 * @return {@link IntendBase} object stored in pointed xml node.
+	 */
+	public static IntendBase getIntendBase(Node where, String stringPath) throws ReflectionLoadException {
+		Element elem=(Element)getNode(where, stringPath);
+
+		IntendBase loader= null;
+		try {
+			loader = (IntendBase)(Class.forName(elem.getAttribute("classname")).getDeclaredConstructor().newInstance());
+		} catch (InstantiationException|IllegalAccessException|InvocationTargetException|
+				NoSuchMethodException|ClassNotFoundException e) {
+			throw new ReflectionLoadException("Refrecion exception occured during loading",e);
+		}
+		return loader.loadNew(elem);
+	}
+
 	/**Write string into pointed node.
 	 * @param where Root node of provided path.
 	 * @param path Path to node where string will be saved.
@@ -146,7 +179,17 @@ public class Storage {
 	public static void writeBool(Node where, String path, boolean value){
 		writeString(where, path, Boolean.toString(value));
 	}
-	
+	/**Write IntendBase object under specified path.
+	 * @param where Node under which start search.
+	 * @param stringPath Where to write intendBase.
+	 * @param intend IntendBase to write.
+	 */
+	public static void writeIntendBase(Node where, String stringPath, IntendBase intend){
+		Element target=(Element)getNode(where, stringPath, true);
+		target.setAttribute("classpath", intend.getClass().getCanonicalName());
+		intend.save(target);
+	}
+
 	/**Delete node from given root pointed by given path. If node do not exist does nothing.
 	 * @param where Root node of search.
 	 * @param path Path to node to delete.
@@ -240,6 +283,14 @@ public class Storage {
 		}
 		private NodeNotPresentException(Node where, String path, String anotherMessage){
 			super(String.format("Can't find \"%s\" in node %s. %s",path,where.getNodeName(),anotherMessage));
+		}
+	}
+	/**Exception indicating that something bad happened in reflection code responsible for loading.
+	 * It's more a wrapper for exception so only single instance will be thrown to client code instead of possibility of full set of reflection related Exception.
+	 */
+	public static class ReflectionLoadException extends RuntimeException{
+		private ReflectionLoadException(String message, Exception cause){
+			super(message,cause);
 		}
 	}
 }
