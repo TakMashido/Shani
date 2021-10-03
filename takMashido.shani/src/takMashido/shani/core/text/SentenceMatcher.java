@@ -491,7 +491,7 @@ public class SentenceMatcher {
 					}
 					result.set(retresult);
 					result.data.put(returnKey, strBuf.toString());
-					result.cost.addImportanceBias((short)(Config.sentenceMatcherWordReturnImportanceBias*(minIndex-strIndex)));
+					result.cost.addImportanceBias((short)(Config.wordReturnImportanceBias*(minIndex-strIndex)));
 				} else
 					result.cost.addDistance(Config.sentenceCompareThreshold);				//Nothing matched, technically should be wordInsertionCost but dataReturn element is for gathering data, making it able to not gather it have no sense and every data gathered by it will have to be checked for existence later
 			}

@@ -171,12 +171,12 @@ public class InnerTest {
 				"must kolege piotra rybę hello world"};
 		short[] cost=new short[] {0,0,Config.characterSwapCost,Config.differentCharacterCost,0,(short)(Config.nationalSimilarityCost)};
 		short[] importanceBias=new short[] {
-				(short) (Config.sentenceMatcherWordReturnImportanceBias+2* Config.sentenceMatcherRegexImportanceBias),
-				(short) (Config.sentenceMatcherWordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
+				(short) (Config.wordReturnImportanceBias+2* Config.sentenceMatcherRegexImportanceBias),
+				(short) (Config.wordReturnImportanceBias+2*Config.sentenceMatcherRegexImportanceBias),
 				0,
 				Config.sentenceMatcherRegexImportanceBias,
-				Config.sentenceMatcherWordReturnImportanceBias,
-				(short) (2*Config.sentenceMatcherWordReturnImportanceBias+Config.sentenceMatcherRegexImportanceBias),
+				Config.wordReturnImportanceBias,
+				(short) (2*Config.wordReturnImportanceBias+Config.sentenceMatcherRegexImportanceBias),
 				};
 		String[] name=new String[] {"1","1","or","or","anyOrder","anyOrder"};
 		String[][][] dataReturn=new String[][][] {

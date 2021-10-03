@@ -63,7 +63,7 @@ public final class KeywordIntendParser extends IntendParser<ShaniString>{
 			}
 		}
 		
-		short cost=(short)(matcher.getMatchedCost()+unmatchedWords*Config.wordSemimatchCost);
-		return List.of(action.getExecutable(cost<Config.sentenceCompareThreshold?cost:Config.sentenceCompareThreshold-1));
+		short bias=(short)(unmatchedWords*Config.wordReturnImportanceBias);
+		return List.of(action.getExecutable(matcher.getMatchedCost(),bias));
 	}
 }
