@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import takMashido.shani.core.Config;
 import takMashido.shani.core.IntendBase;
+import takMashido.shani.core.ShaniCore;
 import takMashido.shani.core.Storage;
 
 import java.util.ArrayList;
@@ -308,7 +309,12 @@ public class ShaniString implements IntendBase {
 			}
 		}
 	}
-	
+
+	@Override
+	public IntendBase loadNew(Element e) {
+		return new ShaniString(e);
+	}
+
 	/**Splits ShaniString to words group and each to single words.
 	 * @return Array[][] of words. Each entry is single word.
 	 */
@@ -353,7 +359,14 @@ public class ShaniString implements IntendBase {
 	 * @param doc Document to inside which search is performed.
 	 * @param path Path to ShaniString inside node.*/
 	public static ShaniString loadString(Document doc,String path) {
-		return Storage.getShaniString(doc.getDocumentElement(), path);
+		try {
+			return Storage.getShaniString(doc.getDocumentElement(), path);
+		} catch(Storage.NodeNotPresentException ex){
+			ex.printStackTrace();
+			ShaniCore.registerLoadException();
+
+			return new ShaniString(ParseMode.raw,"missing string: "+path);
+		}
 	}
 	/**Load ShaniString from xml node.
 	 * Equivalent to {@link Storage#getShaniString(Node, String)}.
@@ -378,8 +391,12 @@ public class ShaniString implements IntendBase {
 	}
 	private void saveData() {
 		if(origin!=null) {
-			origin.setTextContent(toFullString());
+			save((Element) origin);
 		}
+	}
+	@Override
+	public void save(Element e){
+		e.setAttribute("val",toFullString());
 	}
 	
 	/**Adds new entries.
