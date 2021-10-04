@@ -186,7 +186,7 @@ public class Storage {
 	 */
 	public static void writeIntendBase(Node where, String stringPath, IntendBase intend){
 		Element target=(Element)getNode(where, stringPath, true);
-		target.setAttribute("classpath", intend.getClass().getCanonicalName());
+		target.setAttribute("classname", intend.getClass().getCanonicalName());
 		intend.save(target);
 	}
 
