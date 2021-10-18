@@ -67,14 +67,13 @@ public class CalculateOrder extends IntendParserOrder<String>{
 				return false;
 			}
 		}
-		
+
 		@Override
-		public boolean connectAction(String action){
-			assert false:"Rebuilding f action connecting is planned. So it's not implemented in CalculateOrder for now.";
-			return false;
+		public String hashString(){
+			return getBaseStringHash();
 		}
 	}
-	
+
 	private static double calculate(String expresion) throws Exception {
 		ShaniCore.debug.println("CalculateOrder: "+expresion);
 		

@@ -461,30 +461,11 @@ public class Engine {
 	 */
 	public static Executable interpret(Intend intend){
 		Executable toExec=getExecutable(intend);
-		if(toExec!=null&&toExec.cost.isMatched())
-			execute(toExec);
-		else
-			Engine.debug.println("cannot execute: "+ intend.value);
+		execute(toExec);
 
 		return toExec;
 	}
 
-	/**Execute given executable, handle possible errors and print logs.
-	 * @param toExec Executable to execute.
-	 * @return If execution of Executable inner action was successful.
-	 * @throws IllegalArgumentException If executable is not matched.
-	 */
-	public static boolean execute(Executable toExec){
-		if(toExec.cost.isMatched()) {
-			info.println("<Execution><Execution><Execution><Execution>");
-			toExec.execute();
-			info.println("<End><End><End><End><End><End><End><End><End>");
-			lastExecutionTime=System.currentTimeMillis();
-			return toExec.isSuccessful();
-		} else {
-			throw new IllegalArgumentException("Invalid executable. It can't be null and it's cost.isMatched() has to be true.");
-		}
-	}
 	/**Get executable matching given Intend.
 	 * @param intend Intend used to search for executable.
 	 * @return Executable with best match to given Intend.
@@ -520,6 +501,23 @@ public class Engine {
 		}
 		
 		return Return;
+	}
+	/**Execute given executable, handle possible errors and print logs.
+	 * @param toExec Executable to execute.
+	 * @return If execution of Executable inner action was successful.
+	 * @throws IllegalArgumentException If executable is not matched.
+	 */
+	public static boolean execute(Executable toExec){
+		if(toExec.cost.isMatched()) {
+			info.println("<Execution><Execution><Execution><Execution>");
+			toExec.execute();
+			info.println("<End><End><End><End><End><End><End><End><End>");
+			lastExecutionTime=System.currentTimeMillis();
+			return toExec.isSuccessful();
+		} else {
+			//Engine.debug.println("cannot execute: "+ intend.value);
+			throw new IllegalArgumentException("Invalid executable. It can't be null and it's cost.isMatched() has to be true.");
+		}
 	}
 
 	/**Registers new intend.

@@ -20,4 +20,13 @@ public abstract class IntendParserAction<T> extends Action{
 		this.name=name;
 		this.parameters=parameters;
 	}
+
+	/**Create stringHash of this Action.
+	 * It's default way of creating string hash for IntendParserAction.
+	 * You can return it directly in {@link #hashString()} unless there are other fields storing Action state.
+	 * @return Default hash of this action.
+	 */
+	protected String getBaseStringHash(){
+		return name+":"+parameters.toString();
+	}
 }

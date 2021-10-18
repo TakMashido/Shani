@@ -16,11 +16,14 @@ public abstract class Action{
 	 * Connected actions will be invoced after invocing master one.
 	 * @param action String representing action being connected.
 	 * @return If merge was succesfull.
+	 * @deprecated Merging now uses {@link #hashCode()} to recognize action. It's not necessary to do connecting in Action code.
 	 */
+	@Deprecated
 	public boolean connectAction(String action){
 		ShaniCore.errorOccurred("New action connecting is coming so this is not implemented.");
 		return false;
 	}
+
 	/**Execute this action.
 	 * @return If succesfully executed
 	 */
@@ -28,17 +31,58 @@ public abstract class Action{
 	
 	/**Get additional cost of executing this Action calculated by Action itself, not IntendParsers.
 	 * @return Look above.
+	 * @deprecated Use getCostBias instead.
 	 */
+	@Deprecated
 	public short getCost(){
 		return 0;
 	}
 	/**Get additional importanceBias of executing this Action calculated by Action itself, not IntendParsers.
 	 * @return Look above.
+	 * @deprecated Use getCostBias instead.
 	 */
+	@Deprecated
 	public short getImportanceBias(){
 		return 0;
 	}
-	
+
+	/**Get additional cost of executing this Action.
+	 * @return Cost bias of execution calculated by Action itself, not being part of IntendBase matching cost.
+	 */
+	public Cost getCostBias(){
+		return Cost.FREE;
+	}
+
+	/**Return if Action can participate in MergeOrder create chains.
+	 * By defaults it's returning true. Merge order uses {@link #hashString()} value to check merges, and if it returns default value it assumes merging is not supported.
+	 * @return If this Action can connect to another.
+	 */
+	public boolean canMerge(){
+		return true;
+	}
+
+	/**Create string representing this Action.
+	 * Should contain all important parameters of Action.
+	 * By default it returns empty string.
+	 * Do not use it as regular hash. Use {@link #hashStringCode()} instead, it handles default value of this function.
+	 * @return String based hash of Action.
+	 */
+	public String hashString(){
+		return "";
+	}
+	/**HashString of this Action.
+	 * It returns {@link #hashString()} or String representation og {@link #hashCode()} if first one is empty.
+	 * @return Look above.
+	 */
+	public String hashStringCode(){
+		String hash=hashString();
+
+		if(hash.isEmpty())
+			return Integer.toString(hashCode());
+
+		return hash;
+	}
+
 	/**Creates executable from this action. Equivalent to {@link Executable#Executable(Action, short) new Executable(thisAction,cost)}.
 	 * @param cost Cost of executing this action.
 	 * @return Executable connected to this action with given cost.

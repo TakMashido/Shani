@@ -9,7 +9,11 @@
 			<save>save*zapisz*zabezpiecz się*zapisz pliki*flush buffers</save>
 		</order>
 		<order classname="takMashido.shani.orders.core.MergeOrder">
-			<key>i</key>
+			<parsers>
+				<keyword classname="takMashido.shani.intedParsers.text.KeywordIntendParser">
+					<keyword>i</keyword>
+				</keyword>
+			</parsers>
 			<connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
 			<cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
 		</order>
@@ -53,7 +57,7 @@
 		</TimeParser>
 		<InputCleaners classname="takMashido.shani.tools.InputCleaners">
 			<stem>
-				<!-- Suffix indentical to suf attribute will be changed to value from rep attribute.-->
+				<!-- Suffix identical to suf attribute will be changed to value from rep attribute.-->
 				<tag suf="ie" rep=""/>
 				<tag suf="u" rep=""/>
 				<tag suf="ach" rep="e"/>
