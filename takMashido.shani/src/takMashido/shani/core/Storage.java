@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 /**Class for getting and saving data in Shani data files.
  * 
  * Access to data is done by String containing path to it.
- * It's form is standard java path. Names of nodes/elements divided with '.' Character.
+ * It's form is standard java path. Names of nodes/elements divided with '.' Character. Empty String is marking same as current node.
  * E.g "takMashido.shaniModules.orders.TimerOrder.timers.target" is going to search takMashido XML element in root node.
  * If more than one is present the first one is taken an "shaniModules" is searched under it,
  * and continues in same fashion until if fails to find element with given name, or path is fully processed and returns the last node/NodeList found.
@@ -47,6 +47,22 @@ public class Storage {
 	@SuppressWarnings("resource")
 	public static NodeList getNodes(Node where, String path, boolean createNodes) {
 		Scanner scanner=new Scanner(path).useDelimiter(divider);
+
+		if(path.isEmpty())
+			return new NodeList() {
+				@Override
+				public Node item(int i) {
+					if(i==0)
+						return where;
+					else
+						return null;
+				}
+
+				@Override
+				public int getLength() {
+					return 1;
+				}
+			};
 
 		Element previousNode;
 		if(where instanceof Document) {
