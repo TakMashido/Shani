@@ -18,8 +18,11 @@ import takMashido.shani.orders.IntendParserOrder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**Order responsible for merging actions into executable chains.
  * It's done almost independently of Action implementations. The requirement is to implement {@link Action#hashString()} function.
@@ -29,7 +32,7 @@ public class MergeOrder extends IntendParserOrder<ShaniString> {
 	private final ShaniString cantConnectMessage;
 	private final ShaniString connectSuccessfulMessage;
 
-	private Map<String, List<IntendBase>> merged = new HashMap<>();
+	private Map<String, List<MergeEntry>> merged = new HashMap<>();
 
 	private Action lastExecuted = null;
 
@@ -50,34 +53,44 @@ public class MergeOrder extends IntendParserOrder<ShaniString> {
 
 				Element merge = (Element) nodes.item(i);
 
-				String connectionHash = merge.getAttribute("hash");
+				String connectionHash = merge.getAttribute("lastHash");
+				String expectedHash=merge.getAttribute("nextHash");
 				IntendBase intend = Storage.getIntendBase(merge, "intend");
 
-				List<IntendBase> mergedList=merged.get(connectionHash);
+				List<MergeEntry> mergedList=merged.get(connectionHash);
 				if(mergedList==null){
-					mergedList=new ArrayList<IntendBase>();
+					mergedList=new ArrayList<MergeEntry>();
 					merged.put(connectionHash,mergedList);
 				}
-				mergedList.add(intend);
+				mergedList.add(new MergeEntry(intend,expectedHash));
 			}
 		} catch (Storage.NodeNotPresentException unused) {}                    //No merges to load, not nee to handle.
 
 		Engine.registerExecuteEndListener(this::executionEndListener);
 	}
 
-	private int mergedCalls=0;								//Amount of merged calls in progress. Used to properly set lsatExecute variable.
+	private Set<String> toIgnore=new HashSet<>();				//Do not set lastExecuted on merged calls.
 	private void executionEndListener(Intend intend, Executable executable) {
 		String hash = getHashCode(executable.action);
 
 		if (merged.containsKey(hash)){
-			mergedCalls+=merged.get(hash).size();
-			merged.get(hash).forEach(ShaniCore::interpret);                //No need for nested calling, it's done Engine, it's calling this function after successful execution
+			for(var entry:merged.get(hash)){					//No need for nested calling, it's done Engine, it's calling this function after successful execution
+					Intend newIntend=Engine.filter(new Intend(entry.intendBase));
+					Executable exec=Engine.getExecutable(newIntend);
+
+				if(exec==null||!exec.cost.isMatched())
+					continue;
+
+				toIgnore.add(getHashCode(exec.action));
+
+				Engine.execute(exec);
+			}
 		}
-		mergedCalls--;
-		if(mergedCalls<0){
-			mergedCalls=0;
+
+		if(toIgnore.contains(hash))
+			toIgnore.remove(hash);
+		else
 			lastExecuted = executable.action;
-		}
 	}
 
 	@Override
@@ -91,22 +104,27 @@ public class MergeOrder extends IntendParserOrder<ShaniString> {
 	 *
 	 * @param lastHash  Hash of previous Action.
 	 * @param toConnect Intend to connect to.
+	 * @param newHash Hash of Action expected for given IntendBase.
 	 */
-	private void registerNewConnection(String lastHash, IntendBase toConnect) {
-		List<IntendBase> intends=merged.get(lastHash);
+	private void registerNewConnection(String lastHash, IntendBase toConnect, String newHash) {
+		List<MergeEntry> intends=merged.get(lastHash);
 		if(intends==null){
 			intends=new ArrayList<>();
 			merged.put(lastHash, intends);
 		}
-		intends.add(toConnect);
+		intends.add(new MergeEntry(toConnect, newHash));
 
 		Element data = (Element) Storage.getOrderData(this);
 		data = (Element) Storage.getNode(data, "merged", true);
 
 		Element merge = Storage.createElement(data, "merge");
-		merge.setAttribute("hash", lastHash);
+		merge.setAttribute("lastHash", lastHash);
+		if(!newHash.isEmpty())
+			merge.setAttribute("nextHash", newHash);
 
 		Storage.writeIntendBase(merge, "intend", toConnect);
+
+		connectSuccessfulMessage.printOut();
 	}
 
 	private class MergeAction extends IntendParserAction<ShaniString> {
@@ -117,7 +135,7 @@ public class MergeOrder extends IntendParserOrder<ShaniString> {
 		public void init(String name, Map<String, ? extends ShaniString> parameters) {
 			super.init(name, parameters);
 
-			toMerge = Engine.getExecutable(new Intend(parameters.get("unmatched")));
+			toMerge = Engine.getExecutable(Engine.filter(new Intend(parameters.get("unmatched"))));
 
 			Cost toMergeCost=toMerge!=null?toMerge.cost:Cost.FREE;
 
@@ -153,7 +171,7 @@ public class MergeOrder extends IntendParserOrder<ShaniString> {
 					cantConnectMessage.printOut();
 					return false;
 				}
-				registerNewConnection(connectionHash, parameters.get("unmatched"));
+				registerNewConnection(connectionHash, parameters.get("unmatched"), getHashCode(toMerge.action));
 			}
 
 			return ret;
@@ -174,5 +192,21 @@ public class MergeOrder extends IntendParserOrder<ShaniString> {
 		if(hash.isEmpty())
 			return hash;
 		return action.getClass().getCanonicalName()+":"+hash;
+	}
+
+	/**Placeholder for merge markers.*/
+	private static class MergeEntry{
+		/**IntendBase of merged Action.*/
+		IntendBase intendBase;
+		/**Results of {@link #getHashCode(Action) of expected Intend.}*/
+		Optional<String> expectedHash;
+
+		private MergeEntry(IntendBase intendBase, String expectedHash){
+			this.intendBase=intendBase;
+			if(expectedHash==null || expectedHash.isEmpty())
+				this.expectedHash=Optional.empty();
+			else
+				this.expectedHash=Optional.of(expectedHash);
+		}
 	}
 }

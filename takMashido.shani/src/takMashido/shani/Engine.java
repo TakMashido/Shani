@@ -194,14 +194,7 @@ public class Engine {
 				info.println("Filtering \""+intend.rawValue+'"');
 				long time=System.currentTimeMillis();
 
-				for(IntendFilter filter:inputFilters) {
-					Intend newIntend = filter.filter(intend);
-					if(newIntend !=null) {
-						intend = newIntend;
-					}
-				}
-
-				filteredIntends.put(intend);
+				filteredIntends.put(filter(intend));
 				info.printf("\"%s\" filtered in %.2f ms.%n",intend.toString(),(System.currentTimeMillis()-time)/1000f);
 			}
 		} catch(InterruptedException ignored){}
@@ -464,6 +457,21 @@ public class Engine {
 		execute(toExec);
 
 		return toExec;
+	}
+
+	/**Apply filters to intend.
+	 * @param intend Intend to apply filters to.
+	 * @return Filtered intend.
+	 */
+	public static Intend filter(Intend intend){
+        for(IntendFilter filter:inputFilters) {
+			Intend newIntend = filter.filter(intend);
+			if (newIntend != null) {
+				intend = newIntend;
+			}
+		}
+
+        return intend;
 	}
 
 	/**Get executable matching given Intend.
