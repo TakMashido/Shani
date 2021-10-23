@@ -1,0 +1,1 @@
+These directory provide basic shani framework overview, you should use it alongside with javaDoc of noted classes.

@@ -1,0 +1,25 @@
+To ease intends parsing and separate that code from main order code
+shani uses IntendParser objects alongside with IntendParserOrder.
+Instead of manually writing code for parsing you only need to
+fill necessary data for parsing in XML init file section describing your Order.
+E.g. if you want to parse input using sentences templates you can write:
+<order classname="your.order.Classpath">
+    <parsers>
+        <sentence classname="takMashido.shani.intendParsers.text.SentenceMatcherIntendParser">
+            <?--there you fill in normal SentenceMatcher configuration>
+        </sentence>
+    </parsers>
+    <?--Fill in rest of your Order required data>
+</order>
+
+Note that will work only if your order class extends IntendParserOrder, it contain all necessary overloading.
+It uses IntendParserAction<T> where T is type of required data(it has to match to returned IntendParser data).
+All information fetched from intend are stored in action "parameters" map.
+It also contain "name" allowing to do multiple similar things in single Order/Action class without complicated subclass choosing, single one is going to be able to do all work.
+E.g. CalculateOrder uses it to determine what kind of operation is requested,
+it is "add" for "count 2 plus 2", "subtract" for "subtract 3 and 4" and so on.
+Without it there would be necessary 6 subclasses, and more complicated system of choosing one,
+instead of "just use switch over "name" variable".".
+In SentenceMatcherIntendParser it's equal to SentenceMatcher sentence template "name" parameter.
+Generally IntendParsers allows to match multiple similar things with single one,
+and use "name" to allow Action code to do different things based on it.

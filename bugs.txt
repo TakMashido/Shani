@@ -1,5 +1,0 @@
-Weather order crushes if it can't find city.
-Handle errors of executing app/opening file in ExecuteOrder.
-in execute order during adding new entry, space in file name make query unregognized
-Move positive/negative responses from config file to mainFile.
-Fix error caused by diffrend character encoding in cmd and java. Refer only to national characters like "¿". (Handled by using -Dfile.encoding=IBM852 in run bat file)

@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<shani>
+	<version>v1</version>
+	<orders>
+		<order classname="takMashido.shani.orders.core.MasterOrder">
+			<notGoodTimeMessage>Proszę podaj prawidłową liczbę minut.</notGoodTimeMessage>
+			<exit>exit*żegnam*do widzenia*wyłącz się</exit>
+			<autosave>autosavetime</autosave>
+			<save>save*zapisz*zabezpiecz się*zapisz pliki*flush buffers</save>
+		</order>
+		<order classname="takMashido.shani.orders.core.MergeOrder">
+			<parsers>
+				<keyword classname="takMashido.shani.intedParsers.text.KeywordIntendParser">
+					<keyword>i</keyword>
+				</keyword>
+			</parsers>
+			<connectSuccessfulMessage>Wykonałam połączenie*Połączone*Zrobione</connectSuccessfulMessage>
+			<cantConnectMessage>Wybacz nie mogę połączyć poleceń*Nie udało mi się połączyć operacji</cantConnectMessage>
+		</order>
+	</orders>
+	<static>
+		<TimeParser classname="takMashido.shani.tools.parsers.TimeParser">
+			<andWord>i*oraz*i*i</andWord>
+			<h>
+				<strict>
+					<_1>godzina</_1>
+					<_12-14>godzin</_12-14>
+				</strict>
+				<lastDigit>
+					<_0-1>godzin</_0-1>
+					<_2-4>godziny</_2-4>
+					<_5-9>godzin</_5-9>
+				</lastDigit>
+			</h>
+			<m>
+				<strict>
+					<_1>minuta</_1>
+					<_12-14>minut</_12-14>
+				</strict>
+				<lastDigit>
+					<_0-1>minut</_0-1>
+					<_2-4>minuty</_2-4>
+					<_5-9>minut</_5-9>
+				</lastDigit>
+			</m>
+			<s>
+				<strict>
+					<_1>sekunda</_1>
+					<_12-14>sekund</_12-14>
+				</strict>
+				<lastDigit>
+					<_0-1>sekund</_0-1>
+					<_2-4>sekundy</_2-4>
+					<_5-9>sekund</_5-9>
+				</lastDigit>
+			</s>
+		</TimeParser>
+		<InputCleaners classname="takMashido.shani.tools.InputCleaners">
+			<stem>
+				<!-- Suffix identical to suf attribute will be changed to value from rep attribute.-->
+				<tag suf="ie" rep=""/>
+				<tag suf="u" rep=""/>
+				<tag suf="ach" rep="e"/>
+			</stem>
+			<nationalReplacement>
+				<!-- Pairs of char and it's replacement.-->
+				<tag let="ą" rep="a"/>
+				<tag let="ć" rep="c"/>
+				<tag let="ę" rep="e"/>
+				<tag let="ł" rep="l"/>
+				<tag let="ń" rep="n"/>
+				<tag let="ó" rep="o"/>
+				<tag let="ś" rep="s"/>
+				<tag let="ż" rep="z"/>
+				<tag let="ź" rep="z"/>
+			</nationalReplacement>
+		</InputCleaners>
+		<ShaniString classname="takMashido.shani.core.text.ShaniString">
+			<nationalSimilar>
+				<!-- Pairs of char and it's replacement.-->
+				<tag let="ą" rep="a"/>
+				<tag let="ć" rep="c"/>
+				<tag let="ę" rep="e"/>
+				<tag let="ł" rep="l"/>
+				<tag let="ń" rep="n"/>
+				<tag let="ó" rep="o"/>
+				<tag let="ś" rep="s"/>
+				<tag let="ż" rep="z"/>
+				<tag let="ź" rep="z"/>
+			</nationalSimilar>
+		</ShaniString>
+		<Engine classname="takMashido.shani.Engine">
+			<helloMessage>Shani started*Witam*Cześć jestem SHANI. W czym mogę pomóc?</helloMessage>
+			<notUnderstandMessage>Wybacz nie wiem co zrobić*Nie rozumiem*Nie mam pojęcia co z tym zrobić</notUnderstandMessage>
+			<errorMessage>Wystąpił błąd podczas przetwarzania polecenia*Zgłoś developerovi że coś jest ze mną nie tak.</errorMessage>
+			<loadingErrorMessage>Wystąpił błąd podczas wczytywania. Zajrzyj do pliku Errors.log po więcej informacji.</loadingErrorMessage>
+			<licenseConfirmationMessage>Czy zgadzasz się na warunki umowy usługi %s?</licenseConfirmationMessage>
+			<licensesNotConfirmedMessage>Niestety nie mogę wykonać operacji. Nie zgodziłeś się na warunki wszytkich używanych serwisów.</licensesNotConfirmedMessage>
+			<closeMessage>Do widzienia*Do zobaczenia*Cześć*Idę spać.</closeMessage>
+		</Engine>
+	</static>
+</shani>

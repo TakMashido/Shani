@@ -1,5 +1,5 @@
-By using this software you also accept licenses and privacy policy of given project/websides:
+By using this software you also accept licenses and privacy policy of given project/websites:
 translatica.pl - word translations provider for translation module,
-JSOUP(https://github.com/jhy/jsoup/) - used for webcsraping data in tranlation and weatcher module.
+JSOUP(https://github.com/jhy/jsoup/) - used for webscraping data in tranlation and weatcher module.
 weather.com - weatcher forecast provider.
 duckduckgo.com - search engine used to exact address for further info obtaining. Now only to find weather forecast for given city.

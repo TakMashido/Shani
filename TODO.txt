@@ -1,29 +1,17 @@
-Add JavaDoc to Engine class!!!!!!!!!!!!!!!!
-Add option of creating main file without restarting whole app(or automate restart).
-Move TimerOrder to SentenceMatcher
+<refactor>
+    <MergeOrder>
+        make it automatic, not depended on implementation in every order.
+        Add loops detection system for MergeOrder
+    </MergeOrder>
+</refactor>
+
+<major>
+rebuild permission system, each order has permissions and ensure correct usage by java Security
+initialize shani from general and specific language file + second language??
+filters for sentence generator?? Better parsers interface
+Make sentence matcher push values matched by ShaniStringElement, RegexElement etc. into return map
+</major>
+
+<old>
 Add module changing date description words (number of day, month, week day) to one form(exact date).
-Add option to choose beetwen multiple matched Orders not choose one witch smallest cost.
-Add option of choosing propability of ShaniString part to print.
-Override xml parser to add doc changed flag for saving. (Not overwrite file each time save is invoced even if it's unchaged)
-Intern long-life String (keywords/responses) during some SHANI inactivity time.
-Add loops detection system for MergeOrder
-Make project name a shortcut (Simple Heurestic n a Interpreter)
-Move respones keys from config file to main file. And perform other data movements. (store data of each Order in one xml node, except some data which be changen(user/computer dependet)(this should be in another file))
-Add option of compressing data files.
-
-
-SentenceMatcher:
-If two or more return blocks presents near each other return all posible cofigurations of matched sentence, not report error like now.
-Add option of matching sub sentence
-Add return value optional checking by regex/ShaniString.
-Add 'or' option to two or more elements.
-
-Orders to add:
-StorageOrder
-ConverterOrder-> convert GB,currency.
-AliasOrder: Set up aliases for other commands
-WikipediaOrder: Downloads wikipedia page and prints its content(Base description + Contests and allows also to print their content)
-
-To update:
-Finish weather order.
-Let NumberFilter parse queries like "dwatysi¹ce" (no " " beetwen number parts)
+</old>

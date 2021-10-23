@@ -8,7 +8,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="SentenceMatcherElements.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
    id="svg8"
    version="1.1"
    viewBox="0 0 275.52051 183.97073"
@@ -604,6 +604,20 @@
          d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
          transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
     </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker2030-6-4-7"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path2028-5-2-5"
+         style="fill:#000080;fill-opacity:1;fill-rule:evenodd;stroke:#000080;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
   </defs>
   <sodipodi:namedview
      inkscape:window-maximized="1"
@@ -615,8 +629,8 @@
      inkscape:document-rotation="0"
      inkscape:current-layer="layer1"
      inkscape:document-units="mm"
-     inkscape:cy="455.46845"
-     inkscape:cx="660.58286"
+     inkscape:cy="247.22613"
+     inkscape:cx="728.76697"
      inkscape:zoom="1.1686825"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
@@ -1111,7 +1125,7 @@
          id="tspan2018"
          sodipodi:role="line">Key:</tspan></text>
     <g
-       transform="translate(-1.6028587,-1.6043752)"
+       transform="translate(-1.1500696,1.3387538)"
        id="g2335">
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker2030)"
@@ -1135,7 +1149,8 @@
            id="tspan2315">(variable in SentenceElement class)</tspan></text>
     </g>
     <g
-       id="g2793">
+       id="g2793"
+       transform="translate(0.45278907,2.943129)">
       <path
          id="path2026-6"
          d="m 143.68714,34.681069 18.70886,0.0088"
@@ -1156,25 +1171,6 @@
            y="38.374901"
            style="fill:#000000;stroke:none;stroke-width:0.264583px"
            id="tspan2317">behavior determined by SentenceElement subclass.</tspan></text>
-    </g>
-    <g
-       id="g2707"
-       transform="translate(-12.186415,-1.1369092)">
-      <path
-         style="fill:#000080;fill-rule:evenodd;stroke:#000080;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker2030-6-4)"
-         d="m 155.85955,44.862818 18.70886,0.0088"
-         id="path2026-6-9" />
-      <text
-         id="text2690"
-         y="46.194843"
-         x="178.75815"
-         style="font-size:3.88056px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         xml:space="preserve"><tspan
-           id="tspan2819"
-           style="fill:#000000;stroke:none;stroke-width:0.264583px"
-           y="46.194843"
-           x="178.75815"
-           sodipodi:role="line">Member of SentenceToken subTokens list.</tspan></text>
     </g>
     <text
        id="text2511"
@@ -1447,7 +1443,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="path4038"
-       d="m 148.60154,151.08783 -8.90009,8.37741"
+       d="m 148.60154,151.08783 -8.90009,8.3774"
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4042)" />
     <text
        id="text4436"
@@ -1785,7 +1781,7 @@
        inkscape:path-effect="#path-effect3210"
        inkscape:original-d="m 184.73794,161.6457 c -0.58459,-3.22586 -1.16943,-6.45191 -1.75456,-9.67837 2.92459,-1.5468 5.84879,-3.0938 8.77279,-4.64109"
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker3214)"
-       d="m 184.73794,161.6457 c -0.5848,-3.22582 -1.16964,-6.45187 1.1e-4,-8.83868 1.16975,-2.3868 4.09396,-3.9338 7.01812,-5.48078"
+       d="m 184.73794,161.6457 c -0.5848,-3.22582 -1.16964,-6.45187 1.1e-4,-8.83868 1.16975,-2.3868 4.09395,-3.9338 7.01812,-5.48078"
        id="path3208"
        sodipodi:nodetypes="ccc" />
     <path
@@ -1806,5 +1802,45 @@
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4148)"
        d="m 219.35662,161.68596 c -1.08042,-2.30758 -2.161,-4.61547 -4.28874,-6.6433 -2.12775,-2.02784 -5.30271,-3.7754 -8.47805,-5.52317"
        id="path4142" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.58611px;line-height:1.25;font-family:sans;-inkscape-font-specification:sans;stroke-width:0.264583"
+       x="9.6146793"
+       y="18.815914"
+       id="text1321"><tspan
+         sodipodi:role="line"
+         id="tspan1319"
+         x="9.6146793"
+         y="18.815914"
+         style="font-size:4.58611px;stroke-width:0.264583">Note: this file is more representation</tspan><tspan
+         sodipodi:role="line"
+         x="9.6146793"
+         y="24.548553"
+         style="font-size:4.58611px;stroke-width:0.264583"
+         id="tspan1323">of SentenceMatcher internal structure</tspan><tspan
+         sodipodi:role="line"
+         x="9.6146793"
+         y="30.281191"
+         style="font-size:4.58611px;stroke-width:0.264583"
+         id="tspan1325">than it's usage documentation.</tspan></text>
+    <g
+       id="g2707"
+       transform="translate(-12.589435,-27.517008)">
+      <path
+         style="fill:#000080;fill-rule:evenodd;stroke:#000080;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker2030-6-4-7)"
+         d="m 155.85955,44.862818 18.70886,0.0088"
+         id="path2026-6-9" />
+      <text
+         id="text2690"
+         y="46.194843"
+         x="178.75815"
+         style="font-size:3.88056px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           id="tspan2819"
+           style="fill:#000000;stroke:none;stroke-width:0.264583px"
+           y="46.194843"
+           x="178.75815"
+           sodipodi:role="line">Member of SentenceToken subTokens list.</tspan></text>
+    </g>
   </g>
 </svg>
